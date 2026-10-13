@@ -1,0 +1,147 @@
+---
+interface Member {
+  name: string;
+  login: string;
+  avatar: string;
+  github: string;
+}
+
+const members: Member[] = [
+  {
+    name: "Dimas Dwi Ariyanto",
+    login: "pavelc4",
+    avatar: "https://avatars.githubusercontent.com/u/94319420?v=4",
+    github: "https://github.com/pavelc4"
+  },
+  {
+    name: "Morenno Rafael",
+    login: "MorennoRafael",
+    avatar: "https://avatars.githubusercontent.com/u/171573783?v=4",
+    github: "https://github.com/MorennoRafael"
+  },
+  {
+    name: "Dyaksa",
+    login: "xdyaksa",
+    avatar: "https://avatars.githubusercontent.com/u/118631438?v=4",
+    github: "https://github.com/xdyaksa"
+  },
+  {
+    name: "Fauzi",
+    login: "fauzi113-maker",
+    avatar: "https://avatars.githubusercontent.com/u/335473632?v=4",
+    github: "https://github.com/fauzi113-maker"
+  },
+  {
+    name: "Haidar",
+    login: "Haidar126",
+    avatar: "https://avatars.githubusercontent.com/u/335463357?v=4",
+    github: "https://github.com/Haidar126"
+  },
+  {
+    name: "Sesna Obet",
+    login: "sesnaobet-code",
+    avatar: "https://avatars.githubusercontent.com/u/335468617?v=4",
+    github: "https://github.com/sesnaobet-code"
+  }
+];
+---
+
+<section id="tim" class="w-full bg-near-black text-[#f5f4ed] py-24 sm:py-32 rounded-soft relative z-20 mb-8 shadow-2xl">
+  <div class="max-w-screen-2xl mx-auto px-6 sm:px-8 md:px-12">
+    
+    <!-- Title Header The Architects Saku -->
+    <div class="flex flex-col mb-16 md:mb-24">
+      <h2 class="text-6xl md:text-8xl font-headline font-medium mb-6 tracking-tight text-[#f5f4ed]">
+        The Architects
+      </h2>
+      <p class="text-2xl md:text-3xl text-surface-variant font-headline italic font-light leading-relaxed max-w-4xl border-l-4 border-primary pl-8 mt-4">
+        The team crafting the campus computer vision parking monitoring experience.
+      </p>
+    </div>
+
+    <!-- MAIN SPOTLIGHT: Foto Gede Bersih di Kiri, Teks Rapih di Kanan (Tanpa Tabrakan Layout) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
+      
+      <!-- Sisi Kiri: Foto Profil Full Cover Bersih -->
+      <div class="lg:col-span-7 w-full h-[450px] sm:h-[550px] md:h-[600px] bg-surface-container-highest/5 rounded-[2rem] overflow-hidden border border-surface-variant/10 shadow-lg relative">
+        <img
+          id="spotlight-avatar"
+          src={members[0].avatar}
+          alt={members[0].name}
+          class="w-full h-full object-cover object-center transition-opacity duration-700"
+        />
+      </div>
+
+      <!-- Sisi Kanan: Nama, Username, dan Tombol GitHub (Tanpa Tombol Next/Prev) -->
+      <div class="lg:col-span-5 flex flex-col items-start gap-4">
+        
+        <h3 id="spotlight-name" class="text-4xl sm:text-5xl md:text-6xl font-headline font-medium text-[#f5f4ed] leading-[1.1] transition-opacity duration-500">
+          {members[0].name}
+        </h3>
+
+        <p id="spotlight-login" class="text-surface-variant font-headline text-2xl transition-opacity duration-500 mb-2">
+          @{members[0].login}
+        </p>
+
+        <!-- Tombol Profil GitHub Bersih -->
+        <a
+          id="spotlight-github"
+          class="inline-flex items-center gap-2.5 border border-surface-variant/30 px-6 py-3 rounded-full hover:bg-surface-variant/10 hover:border-surface-variant transition-all font-body text-[#f5f4ed] text-sm mt-2"
+          href={members[0].github}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>
+          <span>View GitHub Profile</span>
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- Auto Gonta-Ganti Sendiri dengan Transisi Halus -->
+<script is:inline define:vars={{ membersData: members }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    let currentIndex = 0;
+
+    const avatarEl = document.getElementById('spotlight-avatar');
+    const nameEl = document.getElementById('spotlight-name');
+    const loginEl = document.getElementById('spotlight-login');
+    const githubEl = document.getElementById('spotlight-github');
+
+    function switchMember() {
+      currentIndex = (currentIndex + 1) % membersData.length;
+      const m = membersData[currentIndex];
+
+      // Fade Out Halus
+      if (avatarEl) avatarEl.style.opacity = '0';
+      if (nameEl) nameEl.style.opacity = '0';
+      if (loginEl) loginEl.style.opacity = '0';
+
+      setTimeout(() => {
+        if (avatarEl) {
+          avatarEl.src = m.avatar;
+          avatarEl.alt = m.name;
+          avatarEl.style.opacity = '1';
+        }
+        if (nameEl) {
+          nameEl.textContent = m.name;
+          nameEl.style.opacity = '1';
+        }
+        if (loginEl) {
+          loginEl.textContent = `@${m.login}`;
+          loginEl.style.opacity = '1';
+        }
+        if (githubEl) {
+          githubEl.href = m.github;
+        }
+      }, 350);
+    }
+
+    // Berganti-ganti sendiri secara otomatis setiap 3.5 detik
+    setInterval(switchMember, 3500);
+  });
+</script>

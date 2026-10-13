@@ -1,0 +1,240 @@
+---
+interface Props {
+  variant?: 'sedan' | 'suv' | 'hatchback';
+  color?: 'slate' | 'terracotta' | 'teal' | 'charcoal';
+  class?: string;
+}
+
+const { variant = 'sedan', color = 'slate', class: className = '' } = Astro.props;
+
+// Color schemes matching Saku palette
+const colorMap = {
+  slate: {
+    body: '#3A444C',
+    roof: '#283138',
+    windshield: '#738A9C',
+    headlight: '#FCE788',
+    taillight: '#E53E3E',
+    shadow: 'rgba(40, 49, 56, 0.25)',
+  },
+  terracotta: {
+    body: '#9A4021',
+    roof: '#702B13',
+    windshield: '#D68C72',
+    headlight: '#FFF3B0',
+    taillight: '#B91C1C',
+    shadow: 'rgba(154, 64, 33, 0.25)',
+  },
+  teal: {
+    body: '#006768',
+    roof: '#004A4B',
+    windshield: '#5BB7B8',
+    headlight: '#FDE047',
+    taillight: '#DC2626',
+    shadow: 'rgba(0, 103, 104, 0.25)',
+  },
+  charcoal: {
+    body: '#262624',
+    roof: '#161615',
+    windshield: '#525250',
+    headlight: '#FEF08A',
+    taillight: '#EF4444',
+    shadow: 'rgba(22, 22, 21, 0.3)',
+  }
+};
+
+const c = colorMap[color] || colorMap.slate;
+---
+
+<div class={`relative flex items-center justify-center select-none ${className}`}>
+  {variant === 'sedan' && (
+    <svg viewBox="0 0 100 190" class="w-full h-full max-h-48 drop-shadow-md" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Shadow -->
+      <ellipse cx="50" cy="98" rx="42" ry="86" fill={c.shadow} />
+
+      <!-- Side Mirrors -->
+      <rect x="6" y="66" width="12" height="7" rx="3" fill={c.roof} />
+      <rect x="82" y="66" width="12" height="7" rx="3" fill={c.roof} />
+
+      <!-- Tires (Top-down side preview) -->
+      <rect x="10" y="32" width="7" height="24" rx="3.5" fill="#141413" />
+      <rect x="83" y="32" width="7" height="24" rx="3.5" fill="#141413" />
+      <rect x="10" y="132" width="7" height="24" rx="3.5" fill="#141413" />
+      <rect x="83" y="132" width="7" height="24" rx="3.5" fill="#141413" />
+
+      <!-- Main Body -->
+      <path
+        d="M 24 16
+           C 34 11, 66 11, 76 16
+           C 85 20, 86 52, 86 95
+           C 86 142, 85 174, 76 179
+           C 66 184, 34 184, 24 179
+           C 15 174, 14 142, 14 95
+           C 14 52, 15 20, 24 16 Z"
+        fill={c.body}
+      />
+
+      <!-- Hood lines -->
+      <path d="M 28 22 C 38 18, 62 18, 72 22" stroke="white" stroke-opacity="0.25" stroke-width="2" stroke-linecap="round" />
+      <line x1="30" y1="26" x2="30" y2="48" stroke="white" stroke-opacity="0.2" stroke-width="1.5" />
+      <line x1="70" y1="26" x2="70" y2="48" stroke="white" stroke-opacity="0.2" stroke-width="1.5" />
+
+      <!-- Front Windshield -->
+      <path
+        d="M 25 58
+           C 27 54, 73 54, 75 58
+           C 77 62, 73 82, 71 85
+           C 64 87, 36 87, 29 85
+           C 27 82, 23 62, 25 58 Z"
+        fill={c.windshield}
+      />
+      <!-- Windshield reflection -->
+      <path d="M 32 60 L 42 60 L 35 83 L 28 83 Z" fill="white" fill-opacity="0.2" />
+
+      <!-- Cabin Roof -->
+      <rect x="25" y="85" width="50" height="34" rx="4" fill={c.roof} />
+
+      <!-- Sunroof / Detail -->
+      <rect x="33" y="89" width="34" height="20" rx="3" fill="#1E2328" opacity="0.6" />
+
+      <!-- Rear Windshield -->
+      <path
+        d="M 28 120
+           C 34 118, 66 118, 72 120
+           C 75 122, 76 136, 74 139
+           C 68 141, 32 141, 26 139
+           C 24 136, 25 122, 28 120 Z"
+        fill={c.windshield}
+      />
+
+      <!-- Trunk line -->
+      <path d="M 30 166 C 42 170, 58 170, 70 166" stroke="white" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round" />
+
+      <!-- Headlights -->
+      <path d="M 18 19 C 22 17, 28 19, 28 24 C 23 25, 18 24, 18 19 Z" fill={c.headlight} />
+      <path d="M 82 19 C 78 17, 72 19, 72 24 C 77 25, 82 24, 82 19 Z" fill={c.headlight} />
+
+      <!-- Taillights -->
+      <rect x="19" y="174" width="10" height="4" rx="2" fill={c.taillight} />
+      <rect x="71" y="174" width="10" height="4" rx="2" fill={c.taillight} />
+    </svg>
+  )}
+
+  {variant === 'suv' && (
+    <svg viewBox="0 0 106 200" class="w-full h-full max-h-48 drop-shadow-md" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Shadow -->
+      <ellipse cx="53" cy="102" rx="46" ry="92" fill={c.shadow} />
+
+      <!-- Mirrors -->
+      <rect x="5" y="68" width="13" height="8" rx="3" fill={c.roof} />
+      <rect x="88" y="68" width="13" height="8" rx="3" fill={c.roof} />
+
+      <!-- Bigger Tires -->
+      <rect x="9" y="32" width="9" height="28" rx="4" fill="#141413" />
+      <rect x="88" y="32" width="9" height="28" rx="4" fill="#141413" />
+      <rect x="9" y="136" width="9" height="28" rx="4" fill="#141413" />
+      <rect x="88" y="136" width="9" height="28" rx="4" fill="#141413" />
+
+      <!-- SUV Body (Boxier) -->
+      <path
+        d="M 23 15
+           C 35 12, 71 12, 83 15
+           C 92 18, 93 45, 93 100
+           C 93 156, 92 184, 83 189
+           C 71 193, 35 193, 23 189
+           C 14 184, 13 156, 13 100
+           C 13 45, 14 18, 23 15 Z"
+        fill={c.body}
+      />
+
+      <!-- Roof Rails -->
+      <rect x="23" y="74" width="4" height="66" rx="2" fill="#525250" />
+      <rect x="79" y="74" width="4" height="66" rx="2" fill="#525250" />
+
+      <!-- Front Windshield -->
+      <path
+        d="M 24 55
+           C 27 52, 79 52, 82 55
+           C 84 59, 81 78, 79 81
+           C 70 83, 36 83, 27 81
+           C 25 78, 22 59, 24 55 Z"
+        fill={c.windshield}
+      />
+
+      <!-- Panoramic Roof -->
+      <rect x="28" y="82" width="50" height="48" rx="4" fill={c.roof} />
+      <rect x="33" y="86" width="40" height="38" rx="3" fill="#1A2026" opacity="0.6" />
+
+      <!-- Rear Windshield -->
+      <rect x="28" y="132" width="50" height="18" rx="3" fill={c.windshield} />
+
+      <!-- Headlights -->
+      <rect x="18" y="16" width="12" height="7" rx="3" fill={c.headlight} />
+      <rect x="76" y="16" width="12" height="7" rx="3" fill={c.headlight} />
+
+      <!-- Taillights -->
+      <rect x="18" y="184" width="12" height="5" rx="2" fill={c.taillight} />
+      <rect x="76" y="184" width="12" height="5" rx="2" fill={c.taillight} />
+    </svg>
+  )}
+
+  {variant === 'hatchback' && (
+    <svg viewBox="0 0 96 175" class="w-full h-full max-h-48 drop-shadow-md" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Shadow -->
+      <ellipse cx="48" cy="90" rx="39" ry="78" fill={c.shadow} />
+
+      <!-- Mirrors -->
+      <rect x="6" y="60" width="11" height="6" rx="2.5" fill={c.roof} />
+      <rect x="79" y="60" width="11" height="6" rx="2.5" fill={c.roof} />
+
+      <!-- Tires -->
+      <rect x="10" y="28" width="6.5" height="22" rx="3" fill="#141413" />
+      <rect x="79.5" y="28" width="6.5" height="22" rx="3" fill="#141413" />
+      <rect x="10" y="120" width="6.5" height="22" rx="3" fill="#141413" />
+      <rect x="79.5" y="120" width="6.5" height="22" rx="3" fill="#141413" />
+
+      <!-- Compact Body -->
+      <path
+        d="M 23 16
+           C 32 12, 64 12, 73 16
+           C 82 20, 83 50, 83 90
+           C 83 135, 82 162, 73 166
+           C 64 170, 32 170, 23 166
+           C 14 162, 13 135, 13 90
+           C 13 50, 14 20, 23 16 Z"
+        fill={c.body}
+      />
+
+      <!-- Front Windshield -->
+      <path
+        d="M 24 50
+           C 26 47, 70 47, 72 50
+           C 74 54, 71 72, 69 75
+           C 62 77, 34 77, 27 75
+           C 25 72, 22 54, 24 50 Z"
+        fill={c.windshield}
+      />
+
+      <!-- Roof -->
+      <rect x="25" y="76" width="46" height="38" rx="4" fill={c.roof} />
+
+      <!-- Rear Glass (Steep Hatchback angle) -->
+      <path
+        d="M 27 116
+           C 32 114, 64 114, 69 116
+           C 72 118, 73 134, 71 138
+           C 65 140, 31 140, 25 138
+           C 23 134, 24 118, 27 116 Z"
+        fill={c.windshield}
+      />
+
+      <!-- Headlights -->
+      <circle cx="23" cy="21" r="5" fill={c.headlight} />
+      <circle cx="73" cy="21" r="5" fill={c.headlight} />
+
+      <!-- Taillights -->
+      <rect x="18" y="161" width="9" height="4" rx="2" fill={c.taillight} />
+      <rect x="69" y="161" width="9" height="4" rx="2" fill={c.taillight} />
+    </svg>
+  )}
+</div>

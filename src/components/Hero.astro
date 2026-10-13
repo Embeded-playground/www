@@ -1,0 +1,174 @@
+---
+import CarIllustration from "./CarIllustration.astro";
+---
+
+<section class="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 md:px-12 pt-12 sm:pt-16 md:pt-24 pb-16 sm:pb-24 flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+    <!-- Left Side: Editorial Typography Khas Saku -->
+    <div class="w-full lg:w-1/2 flex flex-col gap-5 sm:gap-7 items-start">
+        <!-- Giant Headline persis format Saku -->
+        <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.2rem] leading-[1.04] font-headline font-medium text-on-background tracking-tight">
+            One Camera System. <br />
+            <span class="text-primary italic">
+                Two Tangible Campus Benefits.
+            </span>
+        </h1>
+
+        <!-- Problem Narration -->
+        <p class="text-base sm:text-lg md:text-xl text-on-surface-variant font-body font-light leading-relaxed max-w-xl">
+            Born out of student frustration with arriving late to class due to circling for parking. This Computer Vision system guides campus drivers directly to the nearest available bay in real-time.
+        </p>
+
+        <!-- Single CTA -->
+        <div class="mt-2 w-full sm:w-auto">
+            <a
+                href="#rekomendasi-user"
+                class="bg-primary text-on-primary px-8 py-4 rounded-full font-medium text-base shadow-[0_8px_30px_rgba(154,64,33,0.3)] hover:-translate-y-1 hover:shadow-lg transition-all duration-300 inline-flex items-center justify-center gap-2.5 w-full sm:w-auto"
+            >
+                <span class="material-symbols-outlined text-xl">
+                    directions_car
+                </span>
+                <span>Try Parking Recommendation</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Right Side: Rich Interactive Mini Simulation Frame (Saku aspect-[4/3] style) -->
+    <div class="w-full lg:w-1/2 relative">
+        <!-- Soft Glow Blur -->
+        <div class="absolute inset-0 bg-primary opacity-15 blur-[90px] rounded-full pointer-events-none"></div>
+
+        <!-- Main Rich Container Frame -->
+        <div class="relative w-full aspect-[4/3] min-h-[420px] sm:min-h-[460px] rounded-soft bg-gradient-to-br from-primary/10 via-surface-container-low to-surface-container-lowest overflow-hidden shadow-[0_32px_64px_-12px_rgba(27,28,24,0.12)] border border-outline-variant/20 flex flex-col justify-between p-4 sm:p-6 md:p-7">
+            <!-- Saku Decorative Background Patterns -->
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(154,64,33,0.12),transparent_50%)] pointer-events-none"></div>
+            <div class="absolute inset-0 bg-[linear-gradient(135deg,transparent_40%,rgba(255,255,255,0.3)_50%,transparent_60%)] pointer-events-none"></div>
+
+            <!-- Top Status HUD Bar: CCTV Feed info + Live Badge -->
+            <div class="relative z-10 flex items-center justify-between pb-3 border-b border-outline-variant/15">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-slot-available animate-ping"></span>
+                    <span class="text-xs font-mono font-bold text-on-surface">
+                        CAMPUS_CCTV_01 &bull; LIVE FEED
+                    </span>
+                </div>
+                <div class="flex items-center gap-2 text-[10px] font-mono">
+                    <span class="bg-surface-container-lowest/80 px-2 py-0.5 rounded border border-outline-variant/20 text-on-surface">
+                        4 ACTIVE ROI
+                    </span>
+                    <span class="bg-[#eaf8f0] text-slot-available font-bold px-2 py-0.5 rounded border border-slot-available/30">
+                        2 VACANT
+                    </span>
+                </div>
+            </div>
+
+            <!-- Center: 4 Rich Parking Bays -->
+            <div class="relative z-10 my-auto py-2">
+                <div class="grid grid-cols-4 gap-2 sm:gap-3">
+                    <!-- Bay 1 (Sedan Terracotta - Occupied) -->
+                    <div class="p-2 sm:p-2.5 rounded-xl bg-surface-container-lowest/90 backdrop-blur-md border border-slot-occupied/40 flex flex-col items-center justify-between h-32 sm:h-36 shadow-xs relative">
+                        <div class="w-full flex items-center justify-between text-[8px] font-mono font-bold">
+                            <span class="text-slot-occupied">ROI 1</span>
+                            <span class="bg-slot-occupied/10 text-slot-occupied px-1 rounded">
+                                OCCUPIED
+                            </span>
+                        </div>
+                        <div class="my-auto">
+                            <CarIllustration
+                                variant="sedan"
+                                color="terracotta"
+                                class="w-12 sm:w-14 drop-shadow-md"
+                            />
+                        </div>
+                        <span class="text-[7px] text-on-surface-variant font-mono">
+                            0.98 Conf
+                        </span>
+                    </div>
+
+                    <!-- Bay 2 (Primary Recommendation - Empty) -->
+                    <div class="p-2 sm:p-2.5 rounded-xl bg-[#eaf8f0]/90 backdrop-blur-md border-2 border-slot-available flex flex-col items-center justify-between h-32 sm:h-36 shadow-sm relative ring-2 ring-slot-available/20">
+                        <div class="w-full flex items-center justify-between text-[8px] font-mono font-bold">
+                            <span class="text-slot-available">ROI 2</span>
+                            <span class="bg-slot-available text-white px-1 rounded text-[7px]">
+                                CHOICE
+                            </span>
+                        </div>
+                        <div class="text-center my-auto">
+                            <span class="text-2xl sm:text-3xl font-headline font-bold text-slot-available">
+                                P
+                            </span>
+                            <p class="text-[8px] font-bold text-slot-available">
+                                RECOMMENDED
+                            </p>
+                        </div>
+                        <span class="text-[7px] text-slot-available font-bold font-mono">
+                            Available
+                        </span>
+                    </div>
+
+                    <!-- Bay 3 (SUV Slate - Occupied) -->
+                    <div class="p-2 sm:p-2.5 rounded-xl bg-surface-container-lowest/90 backdrop-blur-md border border-slot-occupied/40 flex flex-col items-center justify-between h-32 sm:h-36 shadow-xs relative">
+                        <div class="w-full flex items-center justify-between text-[8px] font-mono font-bold">
+                            <span class="text-slot-occupied">ROI 3</span>
+                            <span class="bg-slot-occupied/10 text-slot-occupied px-1 rounded">
+                                OCCUPIED
+                            </span>
+                        </div>
+                        <div class="my-auto">
+                            <CarIllustration
+                                variant="suv"
+                                color="slate"
+                                class="w-12 sm:w-14 drop-shadow-md"
+                            />
+                        </div>
+                        <span class="text-[7px] text-on-surface-variant font-mono">
+                            0.95 Conf
+                        </span>
+                    </div>
+
+                    <!-- Bay 4 (Hatchback Backup Option - Empty) -->
+                    <div class="p-2 sm:p-2.5 rounded-xl bg-surface-container-lowest/90 backdrop-blur-md border-2 border-dashed border-slot-available/50 flex flex-col items-center justify-between h-32 sm:h-36 shadow-xs relative">
+                        <div class="w-full flex items-center justify-between text-[8px] font-mono font-bold">
+                            <span class="text-slot-available">ROI 4</span>
+                            <span class="bg-slot-available/10 text-slot-available px-1 rounded">
+                                VACANT
+                            </span>
+                        </div>
+                        <div class="text-center my-auto">
+                            <span class="text-2xl sm:text-3xl font-headline font-bold text-slot-available/60">
+                                P
+                            </span>
+                        </div>
+                        <span class="text-[7px] text-slot-available font-mono">
+                            Option 2
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Entrance Lane Below 4 Bays -->
+                <div class="mt-2 py-1 px-3 rounded-lg bg-surface-container-highest/40 text-center text-[8px] font-mono text-on-surface-variant border border-outline-variant/10">
+                    &larr; CAMPUS VEHICLE ACCESS LANE &rarr;
+                </div>
+            </div>
+
+            <!-- Floating Narrative Insight Card persis Saku Hero -->
+            <div class="relative z-20 bg-surface-container-lowest/95 backdrop-blur-xl rounded-2xl sm:rounded-[2rem] p-3.5 sm:p-4 shadow-lg border border-white/50 flex justify-between items-center">
+                <div class="min-w-0 pr-3">
+                    <div class="flex items-center gap-1.5 mb-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                        <p class="text-[9px] sm:text-[10px] text-primary font-bold uppercase tracking-wider font-body">
+                            Real-Time Status &bull; South Gate
+                        </p>
+                    </div>
+                    <p class="text-xs sm:text-sm font-headline text-on-surface font-medium italic leading-snug">
+                        "Slot 2 recommended &bull; Fastest access to lecture hall lobby."
+                    </p>
+                </div>
+                <div class="w-9 sm:w-11 h-9 sm:h-11 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 shadow-sm">
+                    <span class="material-symbols-outlined text-base sm:text-lg">
+                        near_me
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
