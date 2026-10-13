@@ -1,0 +1,424 @@
+---
+import CarIllustration from './CarIllustration.astro';
+---
+
+<section id="rekomendasi-user" class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 scroll-mt-20">
+  
+  <!-- Header Narasi Mahasiswa/Pengendara -->
+  <div class="text-center max-w-3xl mx-auto mb-12">
+    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#eaf8f0] text-slot-available text-xs font-semibold uppercase tracking-wider mb-3 border border-slot-available/20">
+      <span class="material-symbols-outlined text-sm">directions_car</span>
+      Campus Drivers &bull; Instant Parking Guidance
+    </div>
+    <h2 class="text-3xl sm:text-4xl md:text-5xl font-headline font-medium text-on-surface tracking-tight">
+      Real-Time Parking Slot Recommendation
+    </h2>
+    <p class="text-on-surface-variant font-body text-sm sm:text-base mt-3 leading-relaxed">
+      Drivers do not need complex analytical charts while commuting. The Computer Vision system delivers a <strong>single, direct recommendation</strong> to the nearest vacant bay.
+    </p>
+
+    <!-- Simulation Presets -->
+    <div class="flex flex-wrap items-center justify-center gap-2 mt-6">
+      <button id="btn-preset-default" class="preset-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all bg-primary text-on-primary shadow-sm">
+        Normal State (Slots 1 &amp; 3 Occupied)
+      </button>
+      <button id="btn-preset-empty" class="preset-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all bg-surface-container-lowest text-on-surface border border-outline-variant/30 hover:border-primary">
+        Low Traffic (All Available)
+      </button>
+      <button id="btn-preset-full" class="preset-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all bg-surface-container-lowest text-on-surface border border-outline-variant/30 hover:border-primary">
+        Peak Lecture Hours (Full)
+      </button>
+      <button id="btn-toggle-auto" class="px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all border border-tertiary/40 text-tertiary hover:bg-tertiary/10 flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-base">autorenew</span>
+        <span id="auto-sim-label">Live Traffic Simulation: OFF</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN DRIVER GUIDANCE BOX -->
+  <div id="driver-guidance-card" class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary rounded-3xl p-6 sm:p-8 mb-10 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all duration-500">
+    <div class="flex items-start sm:items-center gap-4 sm:gap-5">
+      <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 shadow-inner">
+        <span class="material-symbols-outlined text-3xl sm:text-4xl text-white">near_me</span>
+      </div>
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[11px] font-mono uppercase tracking-widest bg-white/20 px-2.5 py-0.5 rounded-full font-bold">
+            DRIVER GUIDANCE
+          </span>
+          <span id="guidance-free-badge" class="text-[11px] font-mono text-white/90">2 Slots Available</span>
+        </div>
+        <h3 id="guidance-main-title" class="font-headline text-2xl sm:text-4xl font-bold leading-tight">
+          "Proceed Directly to <span class="underline decoration-white/50">Slot 2</span>"
+        </h3>
+        <p id="guidance-sub-text" class="text-xs sm:text-sm text-white/85 mt-1">
+          Optimal bay: Closest access to lecture hall lobby entrance.
+        </p>
+      </div>
+    </div>
+
+    <!-- Entrance Gate Display -->
+    <div class="bg-black/25 backdrop-blur-md px-5 py-3.5 rounded-2xl border border-white/20 shrink-0 self-stretch md:self-auto flex items-center justify-between md:justify-center gap-4">
+      <div class="text-left md:text-right">
+        <span class="text-[10px] uppercase font-mono text-white/70 block">Entrance Gate Display</span>
+        <span id="gate-status-text" class="font-headline text-base sm:text-lg font-bold text-white">PLEASE ENTER</span>
+      </div>
+      <span id="gate-status-dot" class="w-3.5 h-3.5 rounded-full bg-slot-available animate-ping shrink-0"></span>
+    </div>
+  </div>
+
+  <!-- Live 4-Bay Parking Map -->
+  <div class="bg-surface-container-lowest rounded-3xl p-6 sm:p-8 md:p-10 border border-outline-variant/20 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div>
+        <h3 class="font-headline text-2xl sm:text-3xl font-semibold text-on-surface">Live Parking Bay Layout</h3>
+        <p class="text-xs sm:text-sm text-on-surface-variant font-body">Click any slot to simulate arrival or departure</p>
+      </div>
+      <div class="flex items-center gap-3 text-xs font-medium">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#eaf8f0] text-slot-available border border-slot-available/20">
+          <span class="w-2 h-2 rounded-full bg-slot-available"></span> Green = Available Bay
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fdf2f0] text-slot-occupied border border-slot-occupied/20">
+          <span class="w-2 h-2 rounded-full bg-slot-occupied"></span> Red = Occupied
+        </span>
+      </div>
+    </div>
+
+    <!-- 4 Slot Bays Container -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-6">
+      
+      <!-- Slot 1 (Sedan terracotta) -->
+      <div
+        id="slot-bay-1"
+        data-slot-id="1"
+        class="slot-bay cursor-pointer group rounded-2xl p-4 flex flex-col justify-between transition-all duration-500 relative border-2 border-slot-occupied/40 bg-[#fdf8f7] hover:shadow-lg hover:-translate-y-1 overflow-hidden"
+      >
+        <div class="flex items-center justify-between text-xs font-semibold z-10">
+          <span class="text-on-surface font-body font-bold">Slot 1</span>
+          <span class="roi-tag px-2 py-0.5 rounded text-[10px] bg-slot-occupied/10 text-slot-occupied font-mono">OCCUPIED</span>
+        </div>
+
+        <div class="my-4 h-52 flex items-center justify-center relative overflow-hidden">
+          <div class="slot-empty-state hidden w-full h-full rounded-xl border-2 border-dashed border-slot-available/40 flex items-center justify-center bg-slot-available/5 transition-opacity duration-500">
+            <span class="text-5xl font-headline font-bold text-slot-available/60">P</span>
+          </div>
+          <div class="slot-car-state w-full h-full flex items-center justify-center transition-all duration-700">
+            <CarIllustration variant="sedan" color="terracotta" class="w-28 drop-shadow-xl transition-transform duration-500 group-hover:scale-105" />
+          </div>
+        </div>
+
+        <div class="slot-status-label flex items-center justify-center gap-1.5 text-xs font-semibold text-slot-occupied z-10">
+          <span class="w-2 h-2 rounded-full bg-slot-occupied"></span>
+          <span class="label-text">Vehicle Parked</span>
+        </div>
+      </div>
+
+      <!-- Slot 2 (Recommended) -->
+      <div
+        id="slot-bay-2"
+        data-slot-id="2"
+        class="slot-bay cursor-pointer group rounded-2xl p-4 flex flex-col justify-between transition-all duration-500 relative border-2 border-slot-available bg-[#f6fcf8] hover:shadow-lg hover:-translate-y-1 overflow-hidden shadow-xs ring-2 ring-slot-available/30"
+      >
+        <div class="flex items-center justify-between text-xs font-semibold z-10">
+          <span class="text-on-surface font-body font-bold">Slot 2</span>
+          <span class="roi-tag px-2 py-0.5 rounded text-[10px] bg-slot-available text-white font-mono font-bold">RECOMMENDED</span>
+        </div>
+
+        <div class="my-4 h-52 flex items-center justify-center relative overflow-hidden">
+          <div class="slot-empty-state w-full h-full rounded-xl border-2 border-dashed border-slot-available/40 flex items-center justify-center bg-slot-available/5 transition-opacity duration-500">
+            <span class="text-5xl font-headline font-bold text-slot-available">P</span>
+          </div>
+          <div class="slot-car-state hidden w-full h-full flex items-center justify-center transition-all duration-700">
+            <CarIllustration variant="suv" color="teal" class="w-28 drop-shadow-xl transition-transform duration-500 group-hover:scale-105" />
+          </div>
+        </div>
+
+        <div class="slot-status-label flex items-center justify-center gap-1.5 text-xs font-semibold text-slot-available z-10">
+          <span class="w-2 h-2 rounded-full bg-slot-available"></span>
+          <span class="label-text">Available &bull; Park Here</span>
+        </div>
+      </div>
+
+      <!-- Slot 3 (SUV Slate) -->
+      <div
+        id="slot-bay-3"
+        data-slot-id="3"
+        class="slot-bay cursor-pointer group rounded-2xl p-4 flex flex-col justify-between transition-all duration-500 relative border-2 border-slot-occupied/40 bg-[#fdf8f7] hover:shadow-lg hover:-translate-y-1 overflow-hidden"
+      >
+        <div class="flex items-center justify-between text-xs font-semibold z-10">
+          <span class="text-on-surface font-body font-bold">Slot 3</span>
+          <span class="roi-tag px-2 py-0.5 rounded text-[10px] bg-slot-occupied/10 text-slot-occupied font-mono">OCCUPIED</span>
+        </div>
+
+        <div class="my-4 h-52 flex items-center justify-center relative overflow-hidden">
+          <div class="slot-empty-state hidden w-full h-full rounded-xl border-2 border-dashed border-slot-available/40 flex items-center justify-center bg-slot-available/5 transition-opacity duration-500">
+            <span class="text-5xl font-headline font-bold text-slot-available/60">P</span>
+          </div>
+          <div class="slot-car-state w-full h-full flex items-center justify-center transition-all duration-700">
+            <CarIllustration variant="suv" color="slate" class="w-28 drop-shadow-xl transition-transform duration-500 group-hover:scale-105" />
+          </div>
+        </div>
+
+        <div class="slot-status-label flex items-center justify-center gap-1.5 text-xs font-semibold text-slot-occupied z-10">
+          <span class="w-2 h-2 rounded-full bg-slot-occupied"></span>
+          <span class="label-text">Vehicle Parked</span>
+        </div>
+      </div>
+
+      <!-- Slot 4 (Empty - Hatchback Charcoal) -->
+      <div
+        id="slot-bay-4"
+        data-slot-id="4"
+        class="slot-bay cursor-pointer group rounded-2xl p-4 flex flex-col justify-between transition-all duration-500 relative border-2 border-slot-available/40 bg-[#f6fcf8] hover:shadow-lg hover:-translate-y-1 overflow-hidden"
+      >
+        <div class="flex items-center justify-between text-xs font-semibold z-10">
+          <span class="text-on-surface font-body font-bold">Slot 4</span>
+          <span class="roi-tag px-2 py-0.5 rounded text-[10px] bg-slot-available/10 text-slot-available font-mono">AVAILABLE</span>
+        </div>
+
+        <div class="my-4 h-52 flex items-center justify-center relative overflow-hidden">
+          <div class="slot-empty-state w-full h-full rounded-xl border-2 border-dashed border-slot-available/40 flex items-center justify-center bg-slot-available/5 transition-opacity duration-500">
+            <span class="text-5xl font-headline font-bold text-slot-available/60">P</span>
+          </div>
+          <div class="slot-car-state hidden w-full h-full flex items-center justify-center transition-all duration-700">
+            <CarIllustration variant="hatchback" color="charcoal" class="w-28 drop-shadow-xl transition-transform duration-500 group-hover:scale-105" />
+          </div>
+        </div>
+
+        <div class="slot-status-label flex items-center justify-center gap-1.5 text-xs font-semibold text-slot-available z-10">
+          <span class="w-2 h-2 rounded-full bg-slot-available"></span>
+          <span class="label-text">Available &bull; Option 2</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Lane Access -->
+    <div class="w-full py-3 px-6 rounded-2xl bg-surface-container-low border border-outline-variant/15 flex items-center justify-center gap-4 text-xs font-mono text-on-surface-variant">
+      <span class="material-symbols-outlined text-base">arrow_forward</span>
+      <span class="tracking-widest uppercase font-semibold">CAMPUS VEHICLE ACCESS LANE</span>
+      <span class="material-symbols-outlined text-base">arrow_forward</span>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- CSS Animasi Mobil Datang & Pergi -->
+<style>
+  @keyframes carDriveIn {
+    0% {
+      transform: translateY(120px) scale(0.85);
+      opacity: 0;
+    }
+    70% {
+      transform: translateY(-8px) scale(1.03);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes carDriveOut {
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    30% {
+      transform: translateY(-10px) scale(1.02);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(140px) scale(0.8);
+      opacity: 0;
+    }
+  }
+
+  :global(.car-enter-active) {
+    animation: carDriveIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+
+  :global(.car-leave-active) {
+    animation: carDriveOut 0.5s cubic-bezier(0.7, 0, 0.84, 0) forwards !important;
+  }
+</style>
+
+<!-- Script Logic Rekomendasi Pengendara -->
+<script is:inline>
+  const userSlotState = {
+    1: 1,
+    2: 0,
+    3: 1,
+    4: 0
+  };
+
+  let userAutoTimer = null;
+
+  function updateRecommendationUI() {
+    let freeSlots = [];
+    let occCount = 0;
+
+    for (let id = 1; id <= 4; id++) {
+      const isOcc = userSlotState[id] === 1;
+      if (isOcc) occCount++;
+      else freeSlots.push(id);
+
+      const bay = document.getElementById(`slot-bay-${id}`);
+      if (!bay) continue;
+
+      const emptyEl = bay.querySelector('.slot-empty-state');
+      const carEl = bay.querySelector('.slot-car-state');
+      const roiTag = bay.querySelector('.roi-tag');
+      const statusLabel = bay.querySelector('.slot-status-label');
+      const labelText = statusLabel?.querySelector('.label-text');
+
+      if (isOcc) {
+        bay.className = "slot-bay cursor-pointer group rounded-2xl p-4 flex flex-col justify-between transition-all duration-500 relative border-2 border-slot-occupied/40 bg-[#fdf8f7] hover:shadow-lg hover:-translate-y-1 overflow-hidden";
+        emptyEl?.classList.add('hidden');
+        if (carEl) {
+          carEl.classList.remove('hidden');
+          carEl.classList.remove('car-leave-active');
+          carEl.classList.add('car-enter-active');
+        }
+        if (roiTag) {
+          roiTag.className = "roi-tag px-2 py-0.5 rounded text-[10px] bg-slot-occupied/10 text-slot-occupied font-mono font-bold";
+          roiTag.textContent = "OCCUPIED";
+        }
+        if (statusLabel) {
+          statusLabel.className = "slot-status-label flex items-center justify-center gap-1.5 text-xs font-semibold text-slot-occupied z-10";
+          if (labelText) labelText.textContent = "Vehicle Parked";
+          const dot = statusLabel.querySelector('span');
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-slot-occupied";
+        }
+      } else {
+        // Slot Available - Check if this is the #1 recommendation
+        const isBest = freeSlots.length > 0 && freeSlots[0] === id;
+        
+        if (isBest) {
+          bay.className = "slot-bay cursor-pointer group rounded-2xl p-4 flex flex-col justify-between transition-all duration-500 relative border-2 border-slot-available bg-[#f6fcf8] hover:shadow-lg hover:-translate-y-1 overflow-hidden ring-2 ring-slot-available/30";
+        } else {
+          bay.className = "slot-bay cursor-pointer group rounded-2xl p-4 flex flex-col justify-between transition-all duration-500 relative border-2 border-slot-available/40 bg-[#f6fcf8] hover:shadow-lg hover:-translate-y-1 overflow-hidden";
+        }
+
+        if (carEl && !carEl.classList.contains('hidden')) {
+          carEl.classList.remove('car-enter-active');
+          carEl.classList.add('car-leave-active');
+          setTimeout(() => {
+            carEl.classList.add('hidden');
+            carEl.classList.remove('car-leave-active');
+            emptyEl?.classList.remove('hidden');
+          }, 450);
+        } else {
+          emptyEl?.classList.remove('hidden');
+          carEl?.classList.add('hidden');
+        }
+
+        if (roiTag) {
+          if (isBest) {
+            roiTag.className = "roi-tag px-2 py-0.5 rounded text-[10px] bg-slot-available text-white font-mono font-bold";
+            roiTag.textContent = "RECOMMENDED";
+          } else {
+            roiTag.className = "roi-tag px-2 py-0.5 rounded text-[10px] bg-slot-available/10 text-slot-available font-mono font-bold";
+            roiTag.textContent = "AVAILABLE";
+          }
+        }
+        if (statusLabel) {
+          statusLabel.className = "slot-status-label flex items-center justify-center gap-1.5 text-xs font-semibold text-slot-available z-10";
+          if (labelText) labelText.textContent = isBest ? "Available • Park Here" : "Available • Backup Option";
+          const dot = statusLabel.querySelector('span');
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-slot-available";
+        }
+      }
+    }
+
+    // Update Big Guidance Card
+    const guideCard = document.getElementById('driver-guidance-card');
+    const freeBadge = document.getElementById('guidance-free-badge');
+    const mainTitle = document.getElementById('guidance-main-title');
+    const subText = document.getElementById('guidance-sub-text');
+    const gateText = document.getElementById('gate-status-text');
+    const gateDot = document.getElementById('gate-status-dot');
+
+    if (freeSlots.length > 0) {
+      const best = freeSlots[0];
+      if (guideCard) guideCard.className = "w-full bg-gradient-to-r from-primary to-primary-container text-on-primary rounded-3xl p-6 sm:p-8 mb-10 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all duration-500";
+      if (freeBadge) freeBadge.textContent = `${freeSlots.length} Slots Available`;
+      if (mainTitle) mainTitle.innerHTML = `"Proceed Directly to <span class="underline decoration-white/50">Slot ${best}</span>"`;
+      if (subText) subText.textContent = `Optimal bay: Closest access to lecture hall lobby entrance.`;
+      if (gateText) gateText.textContent = "PLEASE ENTER";
+      if (gateDot) gateDot.className = "w-3.5 h-3.5 rounded-full bg-slot-available animate-ping shrink-0";
+    } else {
+      // Parking Full
+      if (guideCard) guideCard.className = "w-full bg-gradient-to-r from-slot-occupied to-[#912417] text-white rounded-3xl p-6 sm:p-8 mb-10 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all duration-500";
+      if (freeBadge) freeBadge.textContent = `0 Slots Remaining`;
+      if (mainTitle) mainTitle.innerHTML = `"Parking Area Full (100%)"`;
+      if (subText) subText.textContent = `Please wait or proceed to the campus overflow parking area.`;
+      if (gateText) gateText.textContent = "GATE FULL (QUEUE)";
+      if (gateDot) gateDot.className = "w-3.5 h-3.5 rounded-full bg-white animate-pulse shrink-0";
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    for (let id = 1; id <= 4; id++) {
+      const bay = document.getElementById(`slot-bay-${id}`);
+      bay?.addEventListener('click', () => {
+        userSlotState[id] = userSlotState[id] === 1 ? 0 : 1;
+        updateRecommendationUI();
+      });
+    }
+
+    const bNorm = document.getElementById('btn-preset-default');
+    const bEmpty = document.getElementById('btn-preset-empty');
+    const bFull = document.getElementById('btn-preset-full');
+    const bAuto = document.getElementById('btn-toggle-auto');
+    const autoLabel = document.getElementById('auto-sim-label');
+
+    const setActive = (active) => {
+      document.querySelectorAll('.preset-btn').forEach(b => {
+        b.className = "preset-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all bg-surface-container-lowest text-on-surface border border-outline-variant/30 hover:border-primary";
+      });
+      active.className = "preset-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all bg-primary text-on-primary shadow-sm";
+    };
+
+    bNorm?.addEventListener('click', () => {
+      userSlotState[1] = 1; userSlotState[2] = 0; userSlotState[3] = 1; userSlotState[4] = 0;
+      setActive(bNorm);
+      updateRecommendationUI();
+    });
+
+    bEmpty?.addEventListener('click', () => {
+      userSlotState[1] = 0; userSlotState[2] = 0; userSlotState[3] = 0; userSlotState[4] = 0;
+      setActive(bEmpty);
+      updateRecommendationUI();
+    });
+
+    bFull?.addEventListener('click', () => {
+      userSlotState[1] = 1; userSlotState[2] = 1; userSlotState[3] = 1; userSlotState[4] = 1;
+      setActive(bFull);
+      updateRecommendationUI();
+    });
+
+    bAuto?.addEventListener('click', () => {
+      if (userAutoTimer) {
+        clearInterval(userAutoTimer);
+        userAutoTimer = null;
+        if (autoLabel) autoLabel.textContent = "Live Traffic Simulation: OFF";
+        bAuto.classList.remove('bg-tertiary', 'text-white');
+        bAuto.classList.add('text-tertiary');
+      } else {
+        if (autoLabel) autoLabel.textContent = "Live Traffic Simulation: ON";
+        bAuto.classList.add('bg-tertiary', 'text-white');
+        bAuto.classList.remove('text-tertiary');
+        userAutoTimer = setInterval(() => {
+          const rand = Math.floor(Math.random() * 4) + 1;
+          userSlotState[rand] = userSlotState[rand] === 1 ? 0 : 1;
+          updateRecommendationUI();
+        }, 2200);
+      }
+    });
+
+    updateRecommendationUI();
+  });
+</script>

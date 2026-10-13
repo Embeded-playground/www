@@ -1,11 +1,32 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Navbar from '../components/Navbar.astro';
+import Hero from '../components/Hero.astro';
+import UserRecommendation from '../components/UserRecommendation.astro';
+import AdminAnalytics from '../components/AdminAnalytics.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import Team from '../components/Team.astro';
+import Footer from '../components/Footer.astro';
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="GoParkir · Computer Vision Campus Parking Recommendation & Analytics">
+  <Navbar />
+  <main class="flex-grow">
+    <!-- 1. Hero: Cerita Masalah Kampus & Rekomendasi Mahasiswa -->
+    <Hero />
+
+    <!-- 2. FITUR USER: Hanya Rekomendasi Slot Parkir Langsung + Animasi Mobil Masuk/Keluar -->
+    <UserRecommendation />
+
+    <!-- 3. FITUR KHUSUS ADMIN: Portal Eksklusif Trafik Jam Sibuk & Keputusan Lahan -->
+    <AdminAnalytics />
+
+    <!-- 4. Arsitektur Aliran Data (Python -> Golang -> Astro JS) -->
+    <HowItWorks />
+
+    <!-- 5. The Architects: Tim Pengembang Embeded-playground -->
+    <Team />
+  </main>
+  <!-- 6. Footer Khas Saku -->
+  <Footer />
 </Layout>

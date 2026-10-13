@@ -1,0 +1,149 @@
+---
+---
+
+<section id="admin-dashboard" class="w-full bg-surface-container-low py-20 sm:py-28 rounded-soft my-12 border border-outline-variant/15 scroll-mt-20">
+  <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 md:px-12">
+    
+    <!-- Title Section -->
+    <div class="max-w-3xl mb-12 sm:mb-16">
+      <h2 class="text-4xl sm:text-5xl md:text-6xl font-headline font-medium text-on-surface tracking-tight leading-tight">
+        Traffic Analytics &amp; <span class="italic text-primary">AI Advisor</span>
+      </h2>
+      <p class="text-base sm:text-lg md:text-xl text-on-surface-variant font-headline italic mt-3 leading-relaxed">
+        Evaluation suite for parking space utilization, peak congestion patterns, and data-driven land expansion advisories.
+      </p>
+    </div>
+
+    <!-- Admin Analytics Bento Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- LEFT COLUMN: Peak Hour & Occupancy Chart (Cols 7) -->
+      <div class="lg:col-span-7 bg-surface-container-lowest rounded-3xl p-6 sm:p-8 border border-outline-variant/15 shadow-sm flex flex-col justify-between">
+        
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-outline-variant/10 mb-6">
+          <div>
+            <h3 class="font-headline text-2xl font-semibold text-on-surface">Daily Traffic Density Profile</h3>
+            <p class="text-xs text-on-surface-variant font-body">Incoming vehicle volume across lecture schedules (30-day historical data)</p>
+          </div>
+          <span class="text-xs font-mono px-3 py-1 rounded-full bg-slot-occupied/10 text-slot-occupied font-bold">
+            PEAK HOURS: 08:30 - 11:00 AM
+          </span>
+        </div>
+
+        <!-- Visual Bar Chart: 07:00 to 17:00 -->
+        <div class="space-y-4 my-2">
+          
+          <!-- Bar 07:00 -->
+          <div>
+            <div class="flex justify-between text-xs font-mono text-on-surface-variant mb-1">
+              <span>07:00 AM &bull; Morning Lecture Shift Arrivals</span>
+              <span class="font-bold text-on-surface">75% Occupancy</span>
+            </div>
+            <div class="w-full h-3.5 rounded-full bg-surface-container-low overflow-hidden">
+              <div class="h-full bg-tertiary rounded-full" style="width: 75%;"></div>
+            </div>
+          </div>
+
+          <!-- Bar 09:00 (PEAK OVERLOAD) -->
+          <div>
+            <div class="flex justify-between text-xs font-mono text-on-surface-variant mb-1">
+              <span class="text-slot-occupied font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">warning</span> 09:00 - 11:00 AM &bull; Peak Lectures (OVER-CAPACITY)
+              </span>
+              <span class="font-bold text-slot-occupied">100% Full (Queue Delay)</span>
+            </div>
+            <div class="w-full h-3.5 rounded-full bg-surface-container-low overflow-hidden">
+              <div class="h-full bg-slot-occupied rounded-full animate-pulse" style="width: 100%;"></div>
+            </div>
+          </div>
+
+          <!-- Bar 12:00 -->
+          <div>
+            <div class="flex justify-between text-xs font-mono text-on-surface-variant mb-1">
+              <span>12:00 - 01:00 PM &bull; Lunch Break / Class Transitions</span>
+              <span class="font-bold text-on-surface">60% Occupancy</span>
+            </div>
+            <div class="w-full h-3.5 rounded-full bg-surface-container-low overflow-hidden">
+              <div class="h-full bg-primary rounded-full" style="width: 60%;"></div>
+            </div>
+          </div>
+
+          <!-- Bar 14:00 -->
+          <div>
+            <div class="flex justify-between text-xs font-mono text-on-surface-variant mb-1">
+              <span>02:00 PM &bull; Afternoon Labs &amp; Faculty Sessions</span>
+              <span class="font-bold text-on-surface">85% Occupancy</span>
+            </div>
+            <div class="w-full h-3.5 rounded-full bg-surface-container-low overflow-hidden">
+              <div class="h-full bg-tertiary rounded-full" style="width: 85%;"></div>
+            </div>
+          </div>
+
+          <!-- Bar 17:00 -->
+          <div>
+            <div class="flex justify-between text-xs font-mono text-on-surface-variant mb-1">
+              <span>05:00 PM &bull; Campus Dismissal &amp; Off-Peak</span>
+              <span class="font-bold text-slot-available">20% Occupancy (Sparse)</span>
+            </div>
+            <div class="w-full h-3.5 rounded-full bg-surface-container-low overflow-hidden">
+              <div class="h-full bg-slot-available rounded-full" style="width: 20%;"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-outline-variant/10 flex flex-wrap items-center justify-between text-xs text-on-surface-variant gap-2 font-mono">
+          <span>&bull; Data processed automatically by backend</span>
+          <span>Campus Land Status: <strong class="text-slot-occupied font-bold">EXPANSION REQUIRED</strong></span>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Executive AI Advisory - Cols 5 -->
+      <div class="lg:col-span-5 flex flex-col gap-6">
+        
+        <div class="bg-surface-container-lowest rounded-3xl p-6 sm:p-8 border-2 border-primary/20 shadow-md relative overflow-hidden">
+          
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-primary font-bold flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base">psychology</span>
+              Executive AI Summary
+            </span>
+            <span class="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">Campus Leadership</span>
+          </div>
+
+          <h3 class="font-headline text-2xl font-bold text-on-surface leading-snug mb-3">
+            "Does the current parking capacity satisfy campus demand?"
+          </h3>
+
+          <div class="bg-surface-container-low rounded-2xl p-4 border border-outline-variant/15 text-xs sm:text-sm text-on-surface-variant font-body space-y-2 mb-4 leading-relaxed">
+            <p>
+              <strong class="text-slot-occupied font-bold">&bull; AI Evaluation: INSUFFICIENT.</strong> Current parking bays fail to accommodate the influx of student and faculty vehicles during morning peak lecture hours (08:30–11:00 AM).
+            </p>
+            <p>
+              <strong class="text-on-surface font-semibold">&bull; Empirical Evidence:</strong> Bays reach 100% saturation for <strong>4.2 hours daily</strong>, triggering an average entrance gate delay of 8.4 minutes.
+            </p>
+            <p>
+              <strong class="text-primary font-bold">&bull; Strategic Action:</strong> Campus administration should prioritize allocating land for a <strong>West Wing expansion (+15 car bays)</strong> prior to the new academic term.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-3 border-t border-outline-variant/15 text-center">
+            <div class="p-2.5 rounded-xl bg-surface-container-low">
+              <p class="font-headline text-xl font-bold text-slot-occupied">4.2 Hrs/Day</p>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">At 100% Saturation</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-surface-container-low">
+              <p class="font-headline text-xl font-bold text-primary">+15 Bays</p>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">Recommended Expansion</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
