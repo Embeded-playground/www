@@ -1,0 +1,240 @@
+---
+// Reusable Sidebar - Smart Parking Mobil
+// Matching exact design of Image 2 with updated menus:
+// - Dashboard
+// - Manajemen Slot
+// - Manajemen ROI
+// - Logout (placed at the very bottom)
+
+interface Props {
+  activeMenu?: "dashboard" | "slot" | "roi";
+}
+
+const { activeMenu = "dashboard" } = Astro.props;
+---
+
+<!-- Mobile Backdrop Overlay -->
+<div
+  id="sidebar-backdrop"
+  class="fixed inset-0 bg-black/40 backdrop-blur-2xs z-40 md:hidden opacity-0 pointer-events-none transition-opacity duration-300"
+  aria-hidden="true"
+></div>
+
+<!-- Sidebar Container -->
+<aside
+  id="app-sidebar"
+  class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-200/80 p-4 sm:p-5 flex flex-col justify-between shrink-0 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:z-auto md:w-64 lg:w-72 md:min-h-[calc(100vh-65px)] md:sticky md:top-[65px] md:self-start select-none shadow-xl md:shadow-none"
+  aria-label="Sidebar Menu"
+>
+  <!-- TOP SECTION: Navigation Menus -->
+  <div class="flex flex-col">
+    
+    <!-- Mobile Header with Close Button (Visible on mobile only) -->
+    <div class="flex items-center justify-between pb-3 mb-2 border-b border-gray-100 md:hidden">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-[#1c382f] flex items-center justify-center text-white font-bold text-sm">
+          P
+        </div>
+        <span class="font-bold text-gray-900 text-sm">Smart Parking</span>
+      </div>
+      <button
+        id="btn-sidebar-close"
+        type="button"
+        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+        aria-label="Tutup Menu"
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Section Title: RUANG KERJA -->
+    <div class="px-3 pt-2 pb-2">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 font-sans">
+        RUANG KERJA
+      </span>
+    </div>
+
+    <!-- Navigation Menu Items -->
+    <nav class="space-y-1.5">
+      
+      <!-- 1. Menu: Dashboard -->
+      <a
+        href="#dashboard"
+        class:list={[
+          "flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group",
+          activeMenu === "dashboard"
+            ? "bg-[#eaf4ee] text-[#1b4332] font-semibold shadow-2xs"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/70"
+        ]}
+      >
+        <!-- 2x2 Grid Icon (Matching image 1:1) -->
+        <svg
+          class:list={[
+            "w-5 h-5 shrink-0 transition-colors",
+            activeMenu === "dashboard" ? "text-[#1b4332]" : "text-gray-400 group-hover:text-gray-600"
+          ]}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+        </svg>
+        <span>Dashboard</span>
+      </a>
+
+      <!-- 2. Menu: Manajemen Slot -->
+      <a
+        href="#manajemen-slot"
+        class:list={[
+          "flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group",
+          activeMenu === "slot"
+            ? "bg-[#eaf4ee] text-[#1b4332] font-semibold shadow-2xs"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/70"
+        ]}
+      >
+        <!-- Slot / Parking Bay Icon -->
+        <svg
+          class:list={[
+            "w-5 h-5 shrink-0 transition-colors",
+            activeMenu === "slot" ? "text-[#1b4332]" : "text-gray-400 group-hover:text-gray-600"
+          ]}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 16V8h3.5a2.5 2.5 0 010 5H9" />
+        </svg>
+        <span>Manajemen Slot</span>
+      </a>
+
+      <!-- 3. Menu: Manajemen ROI -->
+      <a
+        href="#manajemen-roi"
+        class:list={[
+          "flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group",
+          activeMenu === "roi"
+            ? "bg-[#eaf4ee] text-[#1b4332] font-semibold shadow-2xs"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/70"
+        ]}
+      >
+        <!-- Computer Vision ROI (Region of Interest) Bounding Box Icon -->
+        <svg
+          class:list={[
+            "w-5 h-5 shrink-0 transition-colors",
+            activeMenu === "roi" ? "text-[#1b4332]" : "text-gray-400 group-hover:text-gray-600"
+          ]}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 8V5a2 2 0 012-2h3m8 0h3a2 2 0 012 2v3m0 8v3a2 2 0 01-2 2h-3m-8 0H5a2 2 0 01-2-2v-3" />
+          <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+        </svg>
+        <span>Manajemen ROI</span>
+      </a>
+
+    </nav>
+  </div>
+
+  <!-- BOTTOM SECTION: Academic Prototype Card + Logout Button -->
+  <div class="flex flex-col pt-6 mt-auto">
+    
+    <!-- Prototipe Akademik Card (Exact replica of Image 2) -->
+    <div class="rounded-2xl p-4 bg-[#f4f7f5] border border-[#e2e9e4] mb-3 transition-all hover:border-[#cfdad2]">
+      <!-- Beaker / Science Flask Icon in Green -->
+      <svg
+        class="w-6 h-6 text-[#2d6a4f] mb-2.5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M10 2v7.31L4.89 18.5A2 2 0 0 0 6.64 21h10.72a2 2 0 0 0 1.75-2.5L14 9.31V2" />
+        <path d="M8.5 2h7" />
+        <path d="M7 16h10" />
+      </svg>
+
+      <h4 class="text-sm font-bold text-gray-900 leading-snug">
+        Prototipe akademik
+      </h4>
+
+      <p class="text-xs text-gray-500 leading-relaxed mt-1 mb-3">
+        Input foto atau video. Seluruh status dan waktu merupakan data contoh.
+      </p>
+
+      <div class="text-[10px] font-bold tracking-wider text-gray-400 uppercase font-mono">
+        VERSI 0.1 / UAS
+      </div>
+    </div>
+
+    <!-- LOGOUT MENU (Placed at the very bottom as requested) -->
+    <div class="pt-2 border-t border-gray-100">
+      <a
+        href="#logout"
+        id="btn-logout"
+        class="w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors group cursor-pointer"
+        title="Keluar dari sesi"
+      >
+        <!-- Logout Exit Door Icon -->
+        <svg
+          class="w-5 h-5 text-red-500 group-hover:text-red-700 transition-colors shrink-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        <span>Logout</span>
+      </a>
+    </div>
+
+  </div>
+</aside>
+
+<!-- Client Script to Toggle Sidebar on Mobile -->
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('app-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const toggleBtn = document.getElementById('btn-sidebar-toggle');
+    const closeBtn = document.getElementById('btn-sidebar-close');
+
+    if (!sidebar || !backdrop) return;
+
+    const openSidebar = () => {
+      sidebar.classList.remove('-translate-x-full');
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      backdrop.classList.add('opacity-100', 'pointer-events-auto');
+      document.body.classList.add('overflow-hidden', 'md:overflow-auto');
+    };
+
+    const closeSidebar = () => {
+      sidebar.classList.add('-translate-x-full');
+      backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      document.body.classList.remove('overflow-hidden', 'md:overflow-auto');
+    };
+
+    toggleBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openSidebar();
+    });
+
+    closeBtn?.addEventListener('click', closeSidebar);
+    backdrop?.addEventListener('click', closeSidebar);
+
+    // Close when Esc is pressed
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeSidebar();
+    });
+  });
+</script>
