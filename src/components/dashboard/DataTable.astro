@@ -1,0 +1,71 @@
+---
+export interface Column {
+  key: string;
+  label: string;
+  align?: 'left' | 'center' | 'right';
+  width?: string;
+}
+
+interface Props {
+  columns: Column[];
+  data?: Record<string, any>[];
+  emptyText?: string;
+  striped?: boolean;
+  class?: string;
+}
+
+const {
+  columns,
+  data = [],
+  emptyText = 'No data available',
+  striped = false,
+  class: className = '',
+} = Astro.props;
+
+const alignClasses = {
+  left: 'text-left',
+  center: 'text-center',
+  right: 'text-right',
+};
+---
+
+<div class={`w-full overflow-x-auto rounded-2xl border border-outline-variant/15 ${className}`}>
+  <table class="w-full text-left border-collapse text-xs sm:text-sm">
+    <thead>
+      <tr class="bg-surface-container-low border-b border-outline-variant/15">
+        {columns.map((col) => (
+          <th
+            scope="col"
+            style={col.width ? `width: ${col.width};` : undefined}
+            class={`px-4 py-3 font-mono text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider ${alignClasses[col.align ?? 'left']}`}
+          >
+            {col.label}
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-outline-variant/10 bg-surface-container-lowest font-body">
+      {Astro.slots.has('default') ? (
+        <slot />
+      ) : data.length === 0 ? (
+        <tr>
+          <td colspan={columns.length} class="px-4 py-8 text-center text-on-surface-variant text-xs">
+            {emptyText}
+          </td>
+        </tr>
+      ) : (
+        data.map((row, idx) => (
+          <tr
+            class={`transition-colors hover:bg-surface-container-low/60 ${striped && idx % 2 === 1 ? 'bg-surface-container-low/30' : ''}`}
+          >
+            {columns.map((col) => (
+              <td class={`px-4 py-3 text-on-surface ${alignClasses[col.align ?? 'left']}`}>
+                {row[col.key]}
+              </td>
+            ))}
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+</div>

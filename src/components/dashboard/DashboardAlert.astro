@@ -1,0 +1,84 @@
+---
+interface Props {
+  title: string;
+  message?: string;
+  type?: 'info' | 'warning' | 'critical' | 'success';
+  icon?: string;
+  actionText?: string;
+  actionHref?: string;
+  class?: string;
+}
+
+const {
+  title,
+  message,
+  type = 'info',
+  icon,
+  actionText,
+  actionHref,
+  class: className = '',
+} = Astro.props;
+
+const alertStyles = {
+  info: {
+    container: 'bg-tertiary/10 border-tertiary/25 text-on-surface',
+    iconColor: 'text-tertiary',
+    defaultIcon: 'info',
+  },
+  warning: {
+    container: 'bg-amber-500/10 border-amber-500/25 text-on-surface',
+    iconColor: 'text-amber-700',
+    defaultIcon: 'warning',
+  },
+  critical: {
+    container: 'bg-slot-occupied/10 border-slot-occupied/25 text-on-surface',
+    iconColor: 'text-slot-occupied',
+    defaultIcon: 'error',
+  },
+  success: {
+    container: 'bg-slot-available/10 border-slot-available/25 text-on-surface',
+    iconColor: 'text-slot-available',
+    defaultIcon: 'check_circle',
+  },
+};
+
+const style = alertStyles[type];
+const resolvedIcon = icon ?? style.defaultIcon;
+---
+
+<div
+  role="alert"
+  class={`p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${style.container} ${className}`}
+>
+  <div class="flex items-start gap-3">
+    <div class={`w-8 h-8 rounded-xl bg-surface-container-lowest/80 flex items-center justify-center shrink-0 shadow-2xs ${style.iconColor}`}>
+      <span class="material-symbols-outlined text-xl">{resolvedIcon}</span>
+    </div>
+    <div class="space-y-0.5">
+      <h4 class="font-headline font-semibold text-sm sm:text-base leading-snug">
+        {title}
+      </h4>
+      {message && (
+        <p class="text-xs sm:text-sm text-on-surface-variant font-body leading-relaxed">
+          {message}
+        </p>
+      )}
+      <slot />
+    </div>
+  </div>
+
+  {(actionHref || Astro.slots.has('action')) && (
+    <div class="shrink-0 self-end sm:self-center">
+      {actionHref && (
+        <a
+          href={actionHref}
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-xs font-mono font-semibold hover:border-primary/50 transition-colors"
+        >
+          {actionText ?? 'Action'}
+          <span class="material-symbols-outlined text-sm leading-none">arrow_forward</span>
+        </a>
+      )}
+      <slot name="action" />
+    </div>
+  )}
+</div>

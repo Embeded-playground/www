@@ -1,0 +1,92 @@
+---
+import StatusBadge from './StatusBadge.astro';
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  icon?: string;
+  badge?: string;
+  badgeVariant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'primary';
+  actionHref?: string;
+  actionText?: string;
+  class?: string;
+  headerClass?: string;
+  bodyClass?: string;
+  footerClass?: string;
+}
+
+const {
+  title,
+  subtitle,
+  icon,
+  badge,
+  badgeVariant = 'neutral',
+  actionHref,
+  actionText,
+  class: className = '',
+  headerClass = '',
+  bodyClass = '',
+  footerClass = '',
+} = Astro.props;
+
+const hasHeader = title || subtitle || icon || badge || actionHref || Astro.slots.has('header') || Astro.slots.has('header-action');
+const hasFooter = Astro.slots.has('footer');
+---
+
+<div
+  class={`bg-surface-container-lowest rounded-2xl sm:rounded-3xl border border-outline-variant/15 shadow-xs overflow-hidden flex flex-col ${className}`}
+>
+  {hasHeader && (
+    <div
+      class={`px-4 sm:px-6 py-3.5 sm:py-5 border-b border-outline-variant/10 flex flex-wrap items-center justify-between gap-3 ${headerClass}`}
+    >
+      <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        {icon && (
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-surface-container-high text-on-surface flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-lg sm:text-xl">{icon}</span>
+          </div>
+        )}
+        <div class="min-w-0">
+          {title && (
+            <h3 class="font-headline text-base sm:text-xl font-bold text-on-surface leading-tight truncate">
+              {title}
+            </h3>
+          )}
+          {subtitle && (
+            <p class="text-xs text-on-surface-variant font-body mt-0.5 line-clamp-1">
+              {subtitle}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5 shrink-0">
+        {badge && (
+          <StatusBadge label={badge} variant={badgeVariant} size="sm" />
+        )}
+        {actionHref && (
+          <a
+            href={actionHref}
+            class="inline-flex items-center gap-1 min-h-[44px] text-xs font-mono font-medium text-primary hover:text-primary/80 transition-colors"
+          >
+            {actionText ?? 'View All'}
+            <span class="material-symbols-outlined text-sm leading-none">arrow_forward</span>
+          </a>
+        )}
+        <slot name="header-action" />
+      </div>
+    </div>
+  )}
+
+  <div class={`p-4 sm:p-6 flex-1 ${bodyClass}`}>
+    <slot />
+  </div>
+
+  {hasFooter && (
+    <div
+      class={`px-4 sm:px-6 py-3 sm:py-4 bg-surface-container-low/50 border-t border-outline-variant/10 text-xs text-on-surface-variant ${footerClass}`}
+    >
+      <slot name="footer" />
+    </div>
+  )}
+</div>

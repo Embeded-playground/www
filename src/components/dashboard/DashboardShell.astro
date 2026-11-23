@@ -1,0 +1,381 @@
+---
+import DashboardSidebar, { type NavItem } from './DashboardSidebar.astro';
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  activeNavId?: string;
+  navItems?: NavItem[];
+  class?: string;
+}
+
+const {
+  title = 'GoParkir Dashboard',
+  subtitle = 'Campus Parking Intelligence & Edge AI',
+  activeNavId = 'overview',
+  navItems,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class={`antialiased flex h-screen overflow-hidden bg-surface-container-low text-on-surface ${className}`}>
+  
+  <!-- Mobile Overlay (Saku Style) -->
+  <div
+    id="sidebar-overlay"
+    class="fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none transition-opacity duration-300 lg:hidden"
+  ></div>
+
+  <!-- Sidebar (Drawer on mobile, fixed persistent on desktop) -->
+  <aside
+    id="sidebar-wrapper"
+    class="fixed lg:relative h-screen shrink-0 border-none bg-surface-container-low py-6 px-4 md:px-6 z-50 transition-transform duration-300 flex flex-col w-72 -translate-x-full lg:translate-x-0 lg:py-8 lg:px-6"
+  >
+    <DashboardSidebar activeId={activeNavId} items={navItems} />
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
+    
+    <!-- TopNav with Hamburger, Shifted Search Bar & Notification Center (Saku Style) -->
+    <header class="h-16 md:h-20 w-full flex justify-between items-center px-4 md:px-8 lg:px-12 bg-surface-container-low z-30 shrink-0 relative">
+      
+      <!-- Left: Mobile Menu & Pill Search Bar (Shifted to Left, Saku Style) -->
+      <div class="flex items-center gap-3 md:gap-4 flex-1 max-w-xs sm:max-w-sm md:max-w-md">
+        <!-- Hamburger Button for Mobile -->
+        <button
+          id="dashboard-sidebar-toggle"
+          type="button"
+          class="lg:hidden p-2 -ml-2 hover:bg-surface-container-highest rounded-full text-on-surface-variant transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+          aria-label="Buka Navigasi Sidebar"
+        >
+          <span class="material-symbols-outlined text-2xl">menu</span>
+        </button>
+        <span class="font-headline font-bold text-lg text-primary lg:hidden shrink-0">GoParkir</span>
+
+        <!-- Pill Search Bar (Shifted Left) -->
+        <div class="relative w-full">
+          <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-base pointer-events-none">
+            search
+          </span>
+          <input
+            id="top-search-input"
+            type="search"
+            placeholder="Cari bay, plat, atau sensor..."
+            class="w-full pl-10 pr-4 py-2 min-h-[40px] rounded-full bg-surface-container-highest border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all font-body text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant outline-hidden"
+          />
+        </div>
+      </div>
+
+      <!-- Right Actions: Notifications Center (Profile removed from navbar) -->
+      <div class="flex items-center gap-3 relative" id="top-notif-container">
+        <!-- Notification Bell Button -->
+        <button
+          type="button"
+          id="btn-top-notif"
+          class="h-10 w-10 min-h-[40px] min-w-[40px] rounded-full hover:bg-surface-container-highest flex items-center justify-center text-on-surface-variant transition-colors relative cursor-pointer"
+          aria-label="Notifikasi Sistem"
+          aria-expanded="false"
+          aria-haspopup="true"
+        >
+          <span class="material-symbols-outlined text-xl">notifications</span>
+          <span
+            id="notif-badge"
+            class="absolute top-1.5 right-1.5 h-4 min-w-[16px] px-1 rounded-full bg-primary text-on-primary text-[10px] flex items-center justify-center font-bold font-mono"
+          >
+            3
+          </span>
+        </button>
+
+        <!-- Saku-Style Notification Center Card -->
+        <div
+          id="top-notif-panel"
+          class="hidden absolute top-12 right-0 w-[320px] sm:w-[380px] bg-surface rounded-2xl shadow-[0_24px_56px_rgba(27,28,24,0.14)] border border-outline-variant/20 overflow-hidden flex flex-col z-50 transition-all duration-200"
+        >
+          <!-- Header -->
+          <div class="px-5 py-3.5 flex justify-between items-center bg-surface-container-low border-b border-outline-variant/10 shrink-0">
+            <div class="flex items-center gap-2">
+              <h3 class="font-headline font-semibold text-sm text-on-surface">Notifikasi Sistem</h3>
+              <span id="notif-count-badge" class="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-mono text-[10px] font-bold">
+                3 baru
+              </span>
+            </div>
+            <button
+              type="button"
+              id="btn-mark-all-read"
+              class="text-xs font-body font-semibold text-primary hover:underline cursor-pointer"
+            >
+              Tandai Dibaca
+            </button>
+          </div>
+
+          <!-- Notification Items List (Scrollable) -->
+          <div class="max-h-[320px] overflow-y-auto divide-y divide-outline-variant/10 bg-surface" id="notif-items-list">
+            
+            <!-- Notif 1: Kapasitas Puncak -->
+            <div class="notif-item p-3.5 hover:bg-surface-container-highest transition-colors cursor-pointer flex gap-3 relative" data-id="1" data-read="false">
+              <div class="w-8 h-8 rounded-full bg-slot-occupied/10 text-slot-occupied flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-base">warning</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-1 mb-0.5">
+                  <h4 class="font-body font-semibold text-xs text-on-surface truncate">Kapasitas Puncak Zona B</h4>
+                  <span class="text-[10px] font-mono text-on-surface-variant shrink-0">5 mnt lalu</span>
+                </div>
+                <p class="text-xs font-body text-on-surface-variant leading-relaxed line-clamp-2">
+                  Okupansi Gedung Kuliah mencapai 94.2%. Rekomendasi VMS: alihkan kendaraan ke Sayap Barat.
+                </p>
+              </div>
+              <span class="notif-dot w-2 h-2 rounded-full bg-primary shrink-0 self-center"></span>
+            </div>
+
+            <!-- Notif 2: Deteksi Bay Kosong -->
+            <div class="notif-item p-3.5 hover:bg-surface-container-highest transition-colors cursor-pointer flex gap-3 relative" data-id="2" data-read="false">
+              <div class="w-8 h-8 rounded-full bg-slot-available/10 text-slot-available flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-base">check_circle</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-1 mb-0.5">
+                  <h4 class="font-body font-semibold text-xs text-on-surface truncate">Bay A-02 Kosong</h4>
+                  <span class="text-[10px] font-mono text-on-surface-variant shrink-0">18 mnt lalu</span>
+                </div>
+                <p class="text-xs font-body text-on-surface-variant leading-relaxed line-clamp-2">
+                  Inferensi YOLO26m mendeteksi pelepasan roda kendaraan. Slot siap ditempati.
+                </p>
+              </div>
+              <span class="notif-dot w-2 h-2 rounded-full bg-primary shrink-0 self-center"></span>
+            </div>
+
+            <!-- Notif 3: API Gateway Sync -->
+            <div class="notif-item p-3.5 hover:bg-surface-container-highest transition-colors cursor-pointer flex gap-3 relative" data-id="3" data-read="false">
+              <div class="w-8 h-8 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-base">sync</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-1 mb-0.5">
+                  <h4 class="font-body font-semibold text-xs text-on-surface truncate">Node Edge Sinkron</h4>
+                  <span class="text-[10px] font-mono text-on-surface-variant shrink-0">1 jam lalu</span>
+                </div>
+                <p class="text-xs font-body text-on-surface-variant leading-relaxed line-clamp-2">
+                  Feed telemetri gerbang utama berhasil diperbarui dengan latensi 14.6 ms.
+                </p>
+              </div>
+              <span class="notif-dot w-2 h-2 rounded-full bg-primary shrink-0 self-center"></span>
+            </div>
+
+          </div>
+
+          <!-- Empty State -->
+          <div id="notif-empty-state" class="hidden p-6 text-center flex-col items-center justify-center">
+            <span class="material-symbols-outlined text-3xl text-on-surface-variant mb-1.5">notifications_none</span>
+            <p class="text-xs font-body text-on-surface-variant">Tidak ada notifikasi baru.</p>
+          </div>
+
+          <!-- Footer Action -->
+          <div class="p-2.5 bg-surface-container-low border-t border-outline-variant/10 text-center shrink-0">
+            <button
+              type="button"
+              id="btn-clear-notifs"
+              class="text-xs font-body font-semibold text-secondary hover:text-on-surface transition-colors cursor-pointer"
+            >
+              Hapus Semua Notifikasi
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Saku Main Container with Signature Curve & Shadow -->
+    <main class="flex-1 overflow-y-auto bg-surface rounded-tl-[24px] md:rounded-tl-[32px] p-4 md:p-6 lg:p-12 shadow-[-8px_-8px_32px_rgba(27,28,24,0.02)]">
+      <slot />
+    </main>
+
+  </div>
+</div>
+
+<script>
+  function verifyAdminAuth() {
+    const isAuth = localStorage.getItem('goparkir_admin_auth');
+    if (isAuth !== 'true') {
+      window.location.href = '/login';
+    }
+  }
+
+  function setupSidebarDrawer() {
+    verifyAdminAuth();
+
+    const toggleBtn = document.getElementById('dashboard-sidebar-toggle');
+    const closeBtn = document.getElementById('dashboard-sidebar-close');
+    const sidebar = document.getElementById('sidebar-wrapper');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    if (!toggleBtn || !sidebar || !overlay) return;
+
+    function openSidebar() {
+      sidebar?.classList.remove('-translate-x-full');
+      sidebar?.classList.add('translate-x-0');
+      overlay?.classList.remove('opacity-0', 'pointer-events-none');
+      overlay?.classList.add('opacity-100', 'pointer-events-auto');
+    }
+
+    function closeSidebar() {
+      sidebar?.classList.add('-translate-x-full');
+      sidebar?.classList.remove('translate-x-0');
+      overlay?.classList.remove('opacity-100', 'pointer-events-auto');
+      overlay?.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    toggleBtn.addEventListener('click', openSidebar);
+    closeBtn?.addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeSidebar);
+  }
+
+  function setupNotificationCenter() {
+    const container = document.getElementById('top-notif-container');
+    const notifBtn = document.getElementById('btn-top-notif');
+    const notifPanel = document.getElementById('top-notif-panel');
+    const notifBadge = document.getElementById('notif-badge');
+    const notifCountBadge = document.getElementById('notif-count-badge');
+    const btnMarkAll = document.getElementById('btn-mark-all-read');
+    const btnClearAll = document.getElementById('btn-clear-notifs');
+    const notifList = document.getElementById('notif-items-list');
+    const emptyState = document.getElementById('notif-empty-state');
+
+    if (!notifBtn || !notifPanel) return;
+
+    let unreadCount = 3;
+
+    function updateBadge() {
+      if (notifBadge) {
+        if (unreadCount > 0) {
+          notifBadge.textContent = unreadCount.toString();
+          notifBadge.classList.remove('hidden');
+        } else {
+          notifBadge.classList.add('hidden');
+        }
+      }
+      if (notifCountBadge) {
+        if (unreadCount > 0) {
+          notifCountBadge.textContent = `${unreadCount} baru`;
+          notifCountBadge.classList.remove('hidden');
+        } else {
+          notifCountBadge.textContent = 'Semua dibaca';
+        }
+      }
+    }
+
+    notifBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = notifPanel.classList.contains('hidden');
+      if (isHidden) {
+        notifPanel.classList.remove('hidden');
+        notifBtn.setAttribute('aria-expanded', 'true');
+        notifBtn.classList.add('bg-surface-container-highest');
+      } else {
+        notifPanel.classList.add('hidden');
+        notifBtn.setAttribute('aria-expanded', 'false');
+        notifBtn.classList.remove('bg-surface-container-highest');
+      }
+    });
+
+    // Close on click outside
+    document.addEventListener('click', (e) => {
+      if (container && !container.contains(e.target as Node)) {
+        notifPanel.classList.add('hidden');
+        notifBtn.setAttribute('aria-expanded', 'false');
+        notifBtn.classList.remove('bg-surface-container-highest');
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !notifPanel.classList.contains('hidden')) {
+        notifPanel.classList.add('hidden');
+        notifBtn.setAttribute('aria-expanded', 'false');
+        notifBtn.classList.remove('bg-surface-container-highest');
+      }
+    });
+
+    // Individual notif click to mark as read
+    const items = notifList?.querySelectorAll('.notif-item');
+    items?.forEach((item) => {
+      item.addEventListener('click', () => {
+        if (item.getAttribute('data-read') === 'false') {
+          item.setAttribute('data-read', 'true');
+          const dot = item.querySelector('.notif-dot');
+          if (dot) dot.remove();
+          unreadCount = Math.max(0, unreadCount - 1);
+          updateBadge();
+        }
+      });
+    });
+
+    // Mark all as read
+    btnMarkAll?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      items?.forEach((item) => {
+        item.setAttribute('data-read', 'true');
+        const dot = item.querySelector('.notif-dot');
+        if (dot) dot.remove();
+      });
+      unreadCount = 0;
+      updateBadge();
+    });
+
+    // Clear all notifs
+    btnClearAll?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (notifList) notifList.innerHTML = '';
+      if (emptyState) {
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+      }
+      unreadCount = 0;
+      updateBadge();
+    });
+  }
+
+  function setupTopSearch() {
+    const searchInput = document.getElementById('top-search-input') as HTMLInputElement;
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', (e) => {
+      const query = (e.target as HTMLInputElement).value.toLowerCase().trim();
+      
+      // If on live-slots page
+      const bayCards = document.querySelectorAll('[data-bay-card]');
+      if (bayCards.length > 0) {
+        bayCards.forEach((card) => {
+          const text = card.textContent?.toLowerCase() || '';
+          (card as HTMLElement).style.display = text.includes(query) ? 'block' : 'none';
+        });
+      }
+
+      // If on settings page with admin table
+      const searchAdmin = document.getElementById('search-admin-input') as HTMLInputElement;
+      if (searchAdmin) {
+        searchAdmin.value = query;
+        searchAdmin.dispatchEvent(new Event('input'));
+      }
+
+      // If on analytics page with telemetry rows
+      const telemetryRows = document.querySelectorAll('#telemetry-table-body tr');
+      if (telemetryRows.length > 0) {
+        telemetryRows.forEach((row) => {
+          const text = row.textContent?.toLowerCase() || '';
+          (row as HTMLElement).style.display = text.includes(query) ? '' : 'none';
+        });
+      }
+    });
+  }
+
+  function initDashboardShell() {
+    setupSidebarDrawer();
+    setupNotificationCenter();
+    setupTopSearch();
+  }
+
+  initDashboardShell();
+  document.addEventListener('astro:page-load', initDashboardShell);
+</script>

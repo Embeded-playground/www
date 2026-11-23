@@ -1,0 +1,328 @@
+---
+import DashboardCard from './DashboardCard.astro';
+import StatusBadge from './StatusBadge.astro';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<DashboardCard
+  title="AI Executive Summary & Rekomendasi Lahan"
+  subtitle="Analisis penalaran otomatis berbasis model multimodal computer vision"
+  icon="psychology"
+  class={`border-2 border-primary/20 ${className}`}
+>
+  <div slot="header-action" class="flex items-center gap-2">
+    <span id="ai-model-tag" class="hidden sm:inline-flex">
+      <StatusBadge label="Gemini Nano Edge · 99.4% Confidence" variant="info" size="sm" icon="memory" />
+    </span>
+    <button
+      id="btn-refresh-ai"
+      type="button"
+      class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-xl bg-surface-container-high hover:bg-primary/10 hover:text-primary transition-colors text-xs font-mono font-medium cursor-pointer"
+      title="Generate ulang penalaran AI"
+    >
+      <span id="refresh-ai-icon" class="material-symbols-outlined text-sm">refresh</span>
+      <span>Perbarui Ringkasan</span>
+    </button>
+  </div>
+
+  <!-- AI Generating Overlay / Feedback -->
+  <div id="ai-loading-overlay" class="hidden py-12 flex-col items-center justify-center text-center space-y-3">
+    <div class="w-10 h-10 rounded-full border-3 border-primary/30 border-t-primary animate-spin"></div>
+    <div class="space-y-1">
+      <p class="font-headline font-semibold text-on-surface">Menganalisis Pola Telemetri Komputer Vision...</p>
+      <p class="text-xs font-mono text-on-surface-variant">Menghitung regresi antrean & saturasi slot</p>
+    </div>
+  </div>
+
+  <!-- Main AI Content Container -->
+  <div id="ai-content-box" class="space-y-4">
+    <!-- Period Badge & Strategic Question -->
+    <div class="flex items-center justify-between gap-2 flex-wrap">
+      <span id="ai-period-badge" class="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-mono font-bold">
+        Laporan Harian (Hari Ini)
+      </span>
+      <span class="text-[11px] font-mono text-on-surface-variant">
+        Target: Rektorat &amp; Manajemen Fasilitas Kampus
+      </span>
+    </div>
+
+    <h3 id="ai-question" class="font-headline text-xl sm:text-2xl font-bold text-on-surface leading-snug">
+      "Apakah kapasitas parkir saat ini mencukupi lonjakan jam kuliah hari ini?"
+    </h3>
+
+    <!-- Structured AI Findings Box -->
+    <div id="ai-body-content" class="bg-surface-container-low rounded-2xl p-4 sm:p-5 border border-outline-variant/15 text-xs sm:text-sm text-on-surface-variant font-body space-y-3 leading-relaxed">
+      <p>
+        <strong id="ai-diagnosis" class="text-slot-occupied font-bold">&bull; Diagnosis AI: DEFISIT KRITIS SAAT JAM SIBUK.</strong>
+        Kapasitas 120 slot saat ini tidak mampu menampung arus kendaraan mahasiswa dan dosen antara pukul 08:30 – 11:00 AM, menyebabkan antrean masuk hingga tumpah ke jalan raya utama kampus.
+      </p>
+      <p>
+        <strong class="text-on-surface font-semibold">&bull; Bukti Empiris Kamera:</strong>
+        <span id="ai-evidence">
+          Slot di Zona A dan B mencapai saturasi 100% selama <strong>2.5 jam berturut-turut</strong>, dengan keterlambatan gate rata-rata 8.4 menit dan penolakan 18 kendaraan/jam.
+        </span>
+      </p>
+      <p>
+        <strong class="text-primary font-bold">&bull; Solusi &amp; Tindakan Rekomendasi:</strong>
+        <span id="ai-action">
+          Segera alihkan rute dinamis (VMS) ke Sayap Barat (Zona C Annex) dan siapkan alokasi lahan perluasan <strong>+15 slot mobil</strong> sebelum semester baru dimulai.
+        </span>
+      </p>
+    </div>
+
+    <!-- Numerical Highlights Grid -->
+    <div class="grid grid-cols-3 gap-2.5 sm:gap-3 pt-2 text-center">
+      <div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/10">
+        <span id="stat-peak-val" class="font-headline text-xl sm:text-2xl font-bold text-slot-occupied">4.2 Jam</span>
+        <p id="stat-peak-label" class="text-[10px] font-mono text-on-surface-variant mt-0.5">Saturasi Penuh/Hari</p>
+      </div>
+
+      <div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/10">
+        <span id="stat-expansion-val" class="font-headline text-xl sm:text-2xl font-bold text-primary">+15 Slot</span>
+        <p id="stat-expansion-label" class="text-[10px] font-mono text-on-surface-variant mt-0.5">Kebutuhan Lahan Baru</p>
+      </div>
+
+      <div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/10">
+        <span id="stat-delay-val" class="font-headline text-xl sm:text-2xl font-bold text-amber-700">-65%</span>
+        <p id="stat-delay-label" class="text-[10px] font-mono text-on-surface-variant mt-0.5">Proyeksi Reduksi Antrean</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div slot="footer" class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-2 text-[11px] font-mono text-on-surface-variant">
+      <span class="material-symbols-outlined text-sm text-primary">verified</span>
+      <span>Divalidasi dari telemetry 4 node kamera computer vision</span>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+      <button
+        id="btn-copy-summary"
+        type="button"
+        class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 min-h-[44px] rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-xs font-mono font-semibold hover:border-primary/50 transition-colors cursor-pointer"
+      >
+        <span class="material-symbols-outlined text-sm">content_copy</span>
+        <span>Salin Teks AI</span>
+      </button>
+
+      <button
+        id="btn-download-report"
+        type="button"
+        class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-xl bg-primary text-on-primary text-xs font-mono font-semibold hover:bg-primary-container transition-colors shadow-xs cursor-pointer"
+      >
+        <span class="material-symbols-outlined text-sm">download</span>
+        <span>Unduh Laporan Lengkap (.TXT)</span>
+      </button>
+    </div>
+  </div>
+</DashboardCard>
+
+<script>
+  interface PeriodAISummary {
+    periodBadge: string;
+    question: string;
+    diagnosis: string;
+    evidence: string;
+    action: string;
+    statPeakVal: string;
+    statPeakLabel: string;
+    statExpansionVal: string;
+    statExpansionLabel: string;
+    statDelayVal: string;
+    statDelayLabel: string;
+  }
+
+  const aiDataMap: Record<string, PeriodAISummary> = {
+    daily: {
+      periodBadge: 'Laporan Harian (Hari Ini)',
+      question: '"Apakah kapasitas parkir saat ini mencukupi lonjakan jam kuliah hari ini?"',
+      diagnosis: '• Diagnosis AI: DEFISIT KRITIS SAAT JAM SIBUK.',
+      evidence:
+        'Slot di Zona A dan B mencapai saturasi 100% selama <strong>2.5 jam berturut-turut (08:30–11:00 AM)</strong>, memicu antrean gerbang masuk hingga 8.4 menit dan mengganggu kelancaran lalu lintas kampus.',
+      action:
+        'Segera aktifkan papan rambu dinamis (VMS) untuk mengalihkan sisa mobil ke Zona C (Sayap Barat) yang masih tersedia 9 slot kosong, dan siapkan petugas pengatur di Gerbang Utama.',
+      statPeakVal: '2.5 Jam',
+      statPeakLabel: 'Puncak Kritis Hari Ini',
+      statExpansionVal: '22 Slot',
+      statExpansionLabel: 'Slot Tersedia di Zona C & D',
+      statDelayVal: '8.4 Mnt',
+      statDelayLabel: 'Delay Antrean Gerbang',
+    },
+    weekly: {
+      periodBadge: 'Laporan Mingguan (7 Hari Terakhir)',
+      question: '"Pola kemacetan apa yang paling dominan terjadi selama sepekan perkuliahan?"',
+      diagnosis: '• Diagnosis AI: BENTURAN JADWAL HARI SENIN & RABU.',
+      evidence:
+        'Hari Senin dan Rabu mengalami over-kapasitas rata-rata <strong>3.8 jam per hari</strong> akibat konsentrasi kelas tatap muka wajib. Hari Jumat memiliki lonjakan sekunder pada pukul 11:30–13:00 WIB menjelang ibadah siang.',
+      action:
+        'Rekomendasikan koordinasi dengan Biro Akademik untuk melakukan <em>staggered class schedule</em> (menggeser 20% sesi praktikum ke sesi siang/sore) untuk meratakan kurva kedatangan kendaraan.',
+      statPeakVal: '3.8 Jam/Hr',
+      statPeakLabel: 'Rata-rata Kejenuhan/Hari',
+      statExpansionVal: '+12 Slot',
+      statExpansionLabel: 'Defisit Puncak Mingguan',
+      statDelayVal: '9.2 Mnt',
+      statDelayLabel: 'Rata-rata Antrean Senin',
+    },
+    monthly: {
+      periodBadge: 'Laporan Bulanan (Bulan Ini - November 2026)',
+      question: '"Apakah kampus perlu mengalokasikan anggaran ekspansi lahan parkir permanen?"',
+      diagnosis: '• Diagnosis AI: EKSPANSI LAHAN SANGAT DIREKOMENDASIKAN (URGENT).',
+      evidence:
+        'Selama 30 hari observasi telemetry kamera, terjadi <strong>4.2 jam saturasi 100% setiap hari kerja</strong>. Pada pekan UTS/UAS, antrean mencapai rekor 10.5 menit dan 120 slot parkir terisi tanpa jeda selama 5 jam penuh.',
+      action:
+        'Pimpinan universitas disarankan memprioritaskan alokasi anggaran pembangunan <strong>ekspansi Sayap Barat (+15 car bays)</strong> sebelum dimulainya tahun ajaran baru guna mencegah kemacetan kronis.',
+      statPeakVal: '4.2 Jam/Hr',
+      statPeakLabel: 'Saturasi Penuh Harian',
+      statExpansionVal: '+15 Slot',
+      statExpansionLabel: 'Rekomendasi Lahan Baru',
+      statDelayVal: '-65%',
+      statDelayLabel: 'Proyeksi Penurunan Antrean',
+    },
+    yearly: {
+      periodBadge: 'Laporan Tahunan (Tahun Akademik 2026)',
+      question: '"Bagaimana proyeksi pertumbuhan volume kendaraan dan strategi tata ruang 5 tahun ke depan?"',
+      diagnosis: '• Diagnosis AI: KEBUTUHAN STRUKTUR PARKIR BERTINGKAT (MULTI-STOREY).',
+      evidence:
+        'Pertumbuhan rasio mahasiswa membawa kendaraan pribadi meningkat <strong>+18.4% secara tahunan (YoY)</strong>. Lahan datar horizontal kampus diperkirakan habis dalam 2 semester ke depan.',
+      action:
+        'Susun studi kelayakan untuk <em>modular steel multi-storey parking deck</em> 2 lantai di area parkir utara untuk menggandakan kapasitas menjadi 240 kendaraan tanpa memakan lahan hijau kampus.',
+      statPeakVal: '+18.4%',
+      statPeakLabel: 'Pertumbuhan YoY Kendaraan',
+      statExpansionVal: '2 Lantai',
+      statExpansionLabel: 'Kajian Struktur Bertingkat',
+      statDelayVal: '240 Slot',
+      statDelayLabel: 'Target Kapasitas 2027',
+    },
+  };
+
+  let currentPeriod = 'daily';
+
+  function renderAISummary(period: string) {
+    currentPeriod = period;
+    const data = aiDataMap[period] ?? aiDataMap.daily;
+
+    const periodBadge = document.getElementById('ai-period-badge');
+    const question = document.getElementById('ai-question');
+    const diagnosis = document.getElementById('ai-diagnosis');
+    const evidence = document.getElementById('ai-evidence');
+    const action = document.getElementById('ai-action');
+    const statPeakVal = document.getElementById('stat-peak-val');
+    const statPeakLabel = document.getElementById('stat-peak-label');
+    const statExpansionVal = document.getElementById('stat-expansion-val');
+    const statExpansionLabel = document.getElementById('stat-expansion-label');
+    const statDelayVal = document.getElementById('stat-delay-val');
+    const statDelayLabel = document.getElementById('stat-delay-label');
+
+    if (periodBadge) periodBadge.textContent = data.periodBadge;
+    if (question) question.textContent = data.question;
+    if (diagnosis) diagnosis.textContent = data.diagnosis;
+    if (evidence) evidence.innerHTML = data.evidence;
+    if (action) action.innerHTML = data.action;
+    if (statPeakVal) statPeakVal.textContent = data.statPeakVal;
+    if (statPeakLabel) statPeakLabel.textContent = data.statPeakLabel;
+    if (statExpansionVal) statExpansionVal.textContent = data.statExpansionVal;
+    if (statExpansionLabel) statExpansionLabel.textContent = data.statExpansionLabel;
+    if (statDelayVal) statDelayVal.textContent = data.statDelayVal;
+    if (statDelayLabel) statDelayLabel.textContent = data.statDelayLabel;
+  }
+
+  function setupAIInteractions() {
+    const refreshBtn = document.getElementById('btn-refresh-ai');
+    const overlay = document.getElementById('ai-loading-overlay');
+    const contentBox = document.getElementById('ai-content-box');
+    const copyBtn = document.getElementById('btn-copy-summary');
+    const downloadBtn = document.getElementById('btn-download-report');
+
+    // Simulate regeneration
+    refreshBtn?.addEventListener('click', () => {
+      if (!overlay || !contentBox) return;
+      contentBox.classList.add('hidden');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+
+      setTimeout(() => {
+        renderAISummary(currentPeriod);
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        contentBox.classList.remove('hidden');
+      }, 700);
+    });
+
+    // Copy to clipboard
+    copyBtn?.addEventListener('click', async () => {
+      const data = aiDataMap[currentPeriod] ?? aiDataMap.daily;
+      const text = `GOPARKIR AI EXECUTIVE SUMMARY (${data.periodBadge})
+Pertanyaan: ${data.question}
+${data.diagnosis}
+Bukti: ${data.evidence.replace(/<[^>]+>/g, '')}
+Rekomendasi: ${data.action.replace(/<[^>]+>/g, '')}
+Metrik: ${data.statPeakVal} (${data.statPeakLabel}) | ${data.statExpansionVal} (${data.statExpansionLabel})`;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<span class="material-symbols-outlined text-sm text-slot-available">check</span><span>Tersalin!</span>';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalText;
+        }, 2000);
+      } catch (e) {
+        console.error('Failed to copy', e);
+      }
+    });
+
+    // Download text report
+    downloadBtn?.addEventListener('click', () => {
+      const data = aiDataMap[currentPeriod] ?? aiDataMap.daily;
+      const reportContent = `=======================================================
+GOPARKIR · SMART CAMPUS PARKING & COMPUTER VISION REPORT
+Periode: ${data.periodBadge}
+Waktu Export: ${new Date().toLocaleString('id-ID')}
+=======================================================
+
+PERTANYAAN STRATEGIS:
+${data.question}
+
+1. EVALUASI DAN DIAGNOSIS AI:
+${data.diagnosis}
+
+2. BUKTI EMPIRIS TELEMETRI KAMERA (YOLOv8 CV):
+${data.evidence.replace(/<[^>]+>/g, '')}
+
+3. TINDAKAN REKOMENDASI MANAJEMEN KAMPUS:
+${data.action.replace(/<[^>]+>/g, '')}
+
+4. INDIKATOR UTAMA:
+- ${data.statPeakLabel}: ${data.statPeakVal}
+- ${data.statExpansionLabel}: ${data.statExpansionVal}
+- ${data.statDelayLabel}: ${data.statDelayVal}
+
+=======================================================
+Generated automatically by GoParkir CV Edge AI System
+=======================================================`;
+
+      const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `GoParkir-Laporan-AI-${currentPeriod}-${Date.now()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // Listen to global period change from PeriodFilter
+    window.addEventListener('dashboard:period-change', ((event: CustomEvent<{ period: string }>) => {
+      renderAISummary(event.detail.period);
+    }) as EventListener);
+  }
+
+  setupAIInteractions();
+  document.addEventListener('astro:page-load', setupAIInteractions);
+</script>

@@ -1,0 +1,265 @@
+---
+export interface NavItem {
+  id: string;
+  label: string;
+  icon: string;
+  href: string;
+  badge?: string;
+}
+
+interface Props {
+  activeId?: string;
+  items?: NavItem[];
+  class?: string;
+}
+
+const defaultItems: NavItem[] = [
+  { id: 'overview', label: 'Dashboard', icon: 'dashboard', href: '/dashboard' },
+  { id: 'live-slots', label: 'Live Bays', icon: 'local_parking', href: '/dashboard/live-slots', badge: 'Live' },
+  { id: 'analytics', label: 'Trafik & Lahan', icon: 'analytics', href: '/dashboard/analytics' },
+  { id: 'settings', label: 'Pengaturan & Admin', icon: 'settings', href: '/dashboard/settings' },
+];
+
+const {
+  activeId = 'overview',
+  items = defaultItems,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class={`w-full h-full flex flex-col justify-between shrink-0 ${className}`}>
+  
+  <!-- Brand / Logo (Saku Style) -->
+  <div class="mb-8 md:mb-10 px-2 flex items-center justify-between">
+    <a href="/dashboard" class="flex items-center gap-2.5 group">
+      <div class="w-9 h-9 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold text-base shadow-xs group-hover:scale-105 transition-transform">
+        G
+      </div>
+      <h1 class="font-headline text-2xl sm:text-3xl font-medium text-primary tracking-tight">
+        GoParkir
+      </h1>
+    </a>
+
+    <!-- Mobile Drawer Close Button -->
+    <button
+      id="dashboard-sidebar-close"
+      type="button"
+      class="lg:hidden p-2 -mr-2 text-on-surface-variant hover:bg-surface-container-highest rounded-full transition-colors cursor-pointer"
+      aria-label="Tutup Menu"
+    >
+      <span class="material-symbols-outlined text-xl">close</span>
+    </button>
+  </div>
+
+  <!-- Navigation Links (Saku rounded-full pills) -->
+  <ul class="flex-1 space-y-2 overflow-y-auto pr-1">
+    {items.map((item) => {
+      const isActive = item.id === activeId;
+      return (
+        <li>
+          <a
+            href={item.href}
+            class={`flex items-center justify-between px-4 py-3 rounded-full transition-all min-h-[44px] ${
+              isActive
+                ? 'bg-surface-container-highest text-primary font-bold shadow-xs'
+                : 'text-secondary font-medium hover:bg-surface-container-highest/50 transition-colors'
+            }`}
+          >
+            <div class="flex items-center gap-3 min-w-0">
+              <span class={`material-symbols-outlined text-xl ${isActive ? 'text-primary' : 'text-on-surface-variant'}`}>
+                {item.icon}
+              </span>
+              <span class="font-body text-sm truncate">{item.label}</span>
+            </div>
+
+            {item.badge && (
+              <span class={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+                isActive
+                  ? 'bg-primary text-on-primary'
+                  : 'bg-surface-container-high text-on-surface-variant'
+              }`}>
+                {item.badge}
+              </span>
+            )}
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+
+  <!-- Bottom Profile Pill & Click-to-Reveal Dropdown (Saku Style) -->
+  <div class="mt-auto pt-6 relative" id="sidebar-profile-container">
+    
+    <!-- Floating Popover / Dropdown Menu -->
+    <div
+      id="sidebar-profile-menu"
+      class="hidden absolute bottom-full left-0 right-0 mb-2.5 bg-surface-container-lowest rounded-2xl shadow-[0_16px_40px_rgba(27,28,24,0.14)] border border-outline-variant/20 p-2 z-50 transition-all duration-200"
+      role="menu"
+      aria-orientation="vertical"
+    >
+      <!-- Menu Header: User Brief Info -->
+      <div class="px-3 py-2.5 bg-surface-container-low rounded-xl mb-1.5 border border-outline-variant/10">
+        <div class="flex items-center justify-between gap-2">
+          <p class="font-headline font-semibold text-xs text-on-surface truncate">
+            pavelc4
+          </p>
+          <span class="text-[9px] font-mono px-2 py-0.5 rounded-full font-bold bg-primary/10 text-primary uppercase">
+            Admin
+          </span>
+        </div>
+        <p class="text-[11px] font-mono text-on-surface-variant truncate mt-0.5" id="menu-admin-email">
+          admin@widyatama.ac.id
+        </p>
+      </div>
+
+      <!-- Quick Action: Settings -->
+      <a
+        href="/dashboard/settings"
+        class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-body font-medium text-on-surface hover:bg-surface-container-highest transition-colors min-h-[36px]"
+        role="menuitem"
+      >
+        <span class="material-symbols-outlined text-base text-primary">settings</span>
+        <span>Pengaturan Akun</span>
+      </a>
+
+      <!-- Quick Info: Edge Status -->
+      <div class="flex items-center justify-between px-3 py-1.5 text-[11px] font-mono text-on-surface-variant">
+        <span class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-slot-available"></span>
+          <span>Node Gateway</span>
+        </span>
+        <span class="font-bold text-slot-available">Online</span>
+      </div>
+
+      <div class="h-px bg-outline-variant/15 my-1.5"></div>
+
+      <!-- Logout Action -->
+      <button
+        type="button"
+        id="btn-admin-logout"
+        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-body font-semibold text-error hover:bg-error/10 transition-colors cursor-pointer min-h-[36px] text-left"
+        role="menuitem"
+      >
+        <span class="material-symbols-outlined text-base">logout</span>
+        <span>Keluar (Logout)</span>
+      </button>
+    </div>
+
+    <!-- Clickable Profile Pill (Toggles Menu) -->
+    <button
+      type="button"
+      id="sidebar-profile-pill"
+      class="w-full flex items-center gap-3 px-4 py-3 rounded-full bg-surface-container-highest hover:bg-surface-container-high transition-all text-left shadow-xs cursor-pointer group select-none min-h-[48px]"
+      aria-haspopup="true"
+      aria-expanded="false"
+      aria-label="Menu Profil Admin"
+    >
+      <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center font-mono font-bold text-primary text-xs shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+        p4
+      </div>
+      <div class="flex-1 min-w-0">
+        <p id="sidebar-admin-name" class="font-medium text-on-surface text-sm truncate font-headline leading-tight">
+          pavelc4
+        </p>
+        <p id="sidebar-admin-email" class="text-xs text-on-surface-variant truncate font-mono">
+          admin@widyatama.ac.id
+        </p>
+      </div>
+      <span
+        id="sidebar-profile-chevron"
+        class="material-symbols-outlined text-on-surface-variant text-lg group-hover:text-on-surface transition-transform duration-200"
+      >
+        unfold_more
+      </span>
+    </button>
+  </div>
+
+</div>
+
+<script>
+  function setupSidebarProfile() {
+    const container = document.getElementById('sidebar-profile-container');
+    const pillBtn = document.getElementById('sidebar-profile-pill');
+    const menuEl = document.getElementById('sidebar-profile-menu');
+    const chevronEl = document.getElementById('sidebar-profile-chevron');
+    const logoutBtn = document.getElementById('btn-admin-logout');
+    const adminNameEl = document.getElementById('sidebar-admin-name');
+    const adminEmailEl = document.getElementById('sidebar-admin-email');
+    const menuEmailEl = document.getElementById('menu-admin-email');
+
+    // Restore saved admin profile if available
+    const savedName = localStorage.getItem('goparkir_admin_name');
+    if (savedName && !savedName.toLowerCase().includes('catur')) {
+      if (adminNameEl) adminNameEl.textContent = savedName;
+    } else {
+      if (adminNameEl) adminNameEl.textContent = 'pavelc4';
+      localStorage.setItem('goparkir_admin_name', 'pavelc4');
+    }
+
+    const savedEmail = localStorage.getItem('goparkir_admin_email');
+    if (savedEmail) {
+      if (adminEmailEl) adminEmailEl.textContent = savedEmail;
+      if (menuEmailEl) menuEmailEl.textContent = savedEmail;
+    }
+
+    if (!pillBtn || !menuEl) return;
+
+    let isOpen = false;
+
+    function openMenu() {
+      isOpen = true;
+      menuEl.classList.remove('hidden');
+      pillBtn.setAttribute('aria-expanded', 'true');
+      pillBtn.classList.add('ring-2', 'ring-primary/20');
+      if (chevronEl) chevronEl.style.transform = 'rotate(180deg)';
+    }
+
+    function closeMenu() {
+      isOpen = false;
+      menuEl.classList.add('hidden');
+      pillBtn.setAttribute('aria-expanded', 'false');
+      pillBtn.classList.remove('ring-2', 'ring-primary/20');
+      if (chevronEl) chevronEl.style.transform = 'rotate(0deg)';
+    }
+
+    // Toggle popover on pill click
+    pillBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (isOpen) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      if (isOpen && container && !container.contains(e.target as Node)) {
+        closeMenu();
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        closeMenu();
+        pillBtn.focus();
+      }
+    });
+
+    // Handle logout action
+    logoutBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const confirmed = confirm('Apakah Anda yakin ingin keluar dari sesi Admin GoParkir?');
+      if (confirmed) {
+        localStorage.removeItem('goparkir_admin_auth');
+        localStorage.removeItem('goparkir_admin_email');
+        localStorage.removeItem('goparkir_login_time');
+        window.location.href = '/login';
+      }
+    });
+  }
+
+  setupSidebarProfile();
+  document.addEventListener('astro:page-load', setupSidebarProfile);
+</script>

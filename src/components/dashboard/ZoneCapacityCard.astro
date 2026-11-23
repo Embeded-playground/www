@@ -1,0 +1,77 @@
+---
+import CapacityBar from './CapacityBar.astro';
+
+interface Props {
+  zoneCode: string;
+  zoneName: string;
+  occupied: number;
+  total: number;
+  statusLabel: string;
+  statusVariant?: 'occupied' | 'warning' | 'available' | 'primary' | 'tertiary' | 'auto';
+  queueNote?: string;
+  class?: string;
+}
+
+const {
+  zoneCode,
+  zoneName,
+  occupied,
+  total,
+  statusLabel,
+  statusVariant = 'auto',
+  queueNote,
+  class: className = '',
+} = Astro.props;
+
+const percentage = Math.min(Math.max(Math.round((occupied / total) * 100), 0), 100);
+const remaining = Math.max(total - occupied, 0);
+
+const statusColorClasses: Record<string, string> = {
+  occupied: 'text-slot-occupied',
+  warning: 'text-amber-700',
+  available: 'text-slot-available',
+  primary: 'text-primary',
+  tertiary: 'text-tertiary',
+  auto: percentage >= 90 ? 'text-slot-occupied' : percentage >= 70 ? 'text-amber-700' : 'text-slot-available',
+};
+
+const statusColorClass = statusColorClasses[statusVariant] ?? 'text-slot-available';
+---
+
+<div class={`p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/15 space-y-3.5 transition-all hover:border-outline-variant/30 ${className}`}>
+  <!-- Zone Header -->
+  <div class="flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface font-mono text-xs font-bold">
+        {zoneCode}
+      </span>
+      <h4 class="font-headline font-semibold text-sm sm:text-base text-on-surface truncate">
+        {zoneName}
+      </h4>
+    </div>
+    <span class="text-xs font-mono font-bold text-on-surface">
+      {percentage}%
+    </span>
+  </div>
+
+  <!-- Capacity Progress Bar -->
+  <CapacityBar
+    label=""
+    showValue={false}
+    value={percentage}
+    variant={statusVariant}
+    animated={true}
+  />
+
+  <!-- Footer Info & Remaining Count -->
+  <div class="flex items-center justify-between text-xs font-mono text-on-surface-variant pt-1 border-t border-outline-variant/10">
+    <div class="truncate">
+      <span>Status: </span>
+      <strong class={statusColorClass}>{statusLabel}</strong>
+      {queueNote && <span class="hidden sm:inline text-on-surface-variant/70"> ({queueNote})</span>}
+    </div>
+    <span class="shrink-0 font-medium">
+      {remaining > 0 ? `Sisa ${remaining} Slot` : 'Penuh'}
+    </span>
+  </div>
+</div>

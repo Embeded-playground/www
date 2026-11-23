@@ -1,0 +1,54 @@
+---
+interface Props {
+  label: string;
+  variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'primary';
+  dot?: boolean;
+  icon?: string;
+  size?: 'sm' | 'md';
+  class?: string;
+}
+
+const {
+  label,
+  variant = 'neutral',
+  dot = false,
+  icon,
+  size = 'md',
+  class: className = '',
+} = Astro.props;
+
+const variantClasses = {
+  success: 'bg-slot-available/10 text-slot-available border-slot-available/25',
+  warning: 'bg-amber-500/10 text-amber-700 border-amber-500/25',
+  danger: 'bg-slot-occupied/10 text-slot-occupied border-slot-occupied/25',
+  info: 'bg-tertiary/10 text-tertiary border-tertiary/25',
+  neutral: 'bg-surface-container-high text-on-surface-variant border-outline-variant/30',
+  primary: 'bg-primary/10 text-primary border-primary/25',
+};
+
+const dotClasses = {
+  success: 'bg-slot-available',
+  warning: 'bg-amber-500',
+  danger: 'bg-slot-occupied animate-pulse',
+  info: 'bg-tertiary',
+  neutral: 'bg-on-surface-variant',
+  primary: 'bg-primary',
+};
+
+const sizeClasses = {
+  sm: 'text-[10px] px-2 py-0.5 gap-1',
+  md: 'text-xs px-2.5 py-1 gap-1.5',
+};
+---
+
+<span
+  class={`inline-flex items-center font-mono font-medium rounded-full border tracking-wide transition-colors ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+>
+  {dot && (
+    <span class={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClasses[variant]}`}></span>
+  )}
+  {icon && (
+    <span class="material-symbols-outlined text-[13px] leading-none shrink-0">{icon}</span>
+  )}
+  <span>{label}</span>
+</span>

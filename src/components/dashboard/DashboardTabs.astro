@@ -1,0 +1,125 @@
+---
+export interface TabItem {
+  id: string;
+  label: string;
+  icon?: string;
+  badge?: string;
+}
+
+interface Props {
+  tabs: TabItem[];
+  activeTabId?: string;
+  tabsNavId?: string;
+  class?: string;
+}
+
+const {
+  tabs,
+  activeTabId = tabs[0]?.id ?? '',
+  tabsNavId = 'dashboard-tabs-nav',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class={`pt-1 ${className}`}>
+  <div
+    id={tabsNavId}
+    class="flex items-center p-1.5 rounded-2xl bg-surface-container-high/80 border border-outline-variant/20 gap-1.5 overflow-x-auto max-w-full"
+    role="tablist"
+    aria-label="Dashboard views"
+  >
+    {tabs.map((tab) => {
+      const isActive = tab.id === activeTabId;
+      return (
+        <button
+          type="button"
+          role="tab"
+          id={`tab-btn-${tab.id}`}
+          aria-selected={isActive ? 'true' : 'false'}
+          aria-controls={`panel-${tab.id}`}
+          data-tab={tab.id}
+          class={`dash-tab-btn flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 min-h-[44px] rounded-xl text-xs sm:text-sm font-headline transition-all shrink-0 cursor-pointer ${
+            isActive
+              ? 'bg-primary text-on-primary shadow-xs font-semibold'
+              : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest font-medium'
+          }`}
+        >
+          {tab.icon && (
+            <span class="material-symbols-outlined text-base" aria-hidden="true">
+              {tab.icon}
+            </span>
+          )}
+          <span>{tab.label}</span>
+          {tab.badge && (
+            <span
+              class={`text-[10px] font-mono px-1.5 py-0.5 rounded-md ${
+                isActive
+                  ? 'bg-on-primary/20 text-on-primary'
+                  : 'bg-primary/10 text-primary'
+              }`}
+            >
+              {tab.badge}
+            </span>
+          )}
+        </button>
+      );
+    })}
+  </div>
+</div>
+
+<script>
+  function initDashboardTabs() {
+    const tabButtons = document.querySelectorAll<HTMLButtonElement>('.dash-tab-btn');
+    const tabPanels = document.querySelectorAll<HTMLElement>('.dash-tab-panel');
+
+    tabButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.tab;
+        if (!targetId) return;
+
+        // Update button states
+        tabButtons.forEach((b) => {
+          const isMatch = b === btn;
+          b.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+          if (isMatch) {
+            b.classList.remove(
+              'text-on-surface-variant',
+              'hover:text-on-surface',
+              'hover:bg-surface-container-lowest',
+              'font-medium'
+            );
+            b.classList.add('bg-primary', 'text-on-primary', 'shadow-xs', 'font-semibold');
+          } else {
+            b.classList.remove('bg-primary', 'text-on-primary', 'shadow-xs', 'font-semibold');
+            b.classList.add(
+              'text-on-surface-variant',
+              'hover:text-on-surface',
+              'hover:bg-surface-container-lowest',
+              'font-medium'
+            );
+          }
+        });
+
+        // Update panel visibility
+        tabPanels.forEach((panel) => {
+          const isPanelMatch = panel.id === targetId || panel.id === `panel-${targetId}`;
+          if (isPanelMatch) {
+            panel.classList.remove('hidden');
+          } else {
+            panel.classList.add('hidden');
+          }
+        });
+
+        // Dispatch tab change event
+        window.dispatchEvent(
+          new CustomEvent('dashboard:tab-change', {
+            detail: { tabId: targetId },
+          })
+        );
+      });
+    });
+  }
+
+  initDashboardTabs();
+  document.addEventListener('astro:page-load', initDashboardTabs);
+</script>

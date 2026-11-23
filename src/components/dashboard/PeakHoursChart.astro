@@ -1,0 +1,547 @@
+---
+import DashboardCard from './DashboardCard.astro';
+import StatusBadge from './StatusBadge.astro';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<DashboardCard
+  title="Tren &amp; Kurva Kepadatan Lalu Lintas"
+  subtitle="Grafik fluktuasi volume kendaraan dan jam sibuk berbasis deteksi komputer vision"
+  icon="show_chart"
+  class={className}
+>
+  <div slot="header-action" class="flex items-center gap-2">
+    <span id="peak-badge-container">
+      <StatusBadge label="JAM PUNCAK: 08:30 - 11:00 AM" variant="danger" dot={true} size="sm" />
+    </span>
+  </div>
+
+  <!-- KPI Sub-Metrics (Clean horizontal summary) -->
+  <div class="grid grid-cols-3 gap-2.5 sm:gap-3 mb-5 p-3 sm:p-4 rounded-2xl bg-surface-container-low border border-outline-variant/15 text-center">
+    <div class="p-1">
+      <span class="text-[10px] font-mono uppercase text-on-surface-variant font-semibold">Jam Kritis</span>
+      <p id="peak-time-window" class="font-headline text-base sm:text-xl font-bold text-slot-occupied mt-0.5">
+        08:30 – 11:00 AM
+      </p>
+      <span id="peak-time-sub" class="text-[10px] text-on-surface-variant font-mono hidden sm:inline">2.5 Jam Penuh 100%</span>
+    </div>
+
+    <div class="p-1 border-x border-outline-variant/15">
+      <span class="text-[10px] font-mono uppercase text-on-surface-variant font-semibold">Delay Gate</span>
+      <p id="peak-queue-delay" class="font-headline text-base sm:text-xl font-bold text-amber-700 mt-0.5">
+        8.4 Menit
+      </p>
+      <span id="peak-queue-sub" class="text-[10px] text-on-surface-variant font-mono hidden sm:inline">Puncak Kedatangan</span>
+    </div>
+
+    <div class="p-1">
+      <span class="text-[10px] font-mono uppercase text-on-surface-variant font-semibold">Zona Terpadat</span>
+      <p id="peak-hottest-zone" class="font-headline text-base sm:text-xl font-bold text-primary mt-0.5">
+        Zona A
+      </p>
+      <span id="peak-zone-sub" class="text-[10px] text-on-surface-variant font-mono hidden sm:inline">96% Terpakai</span>
+    </div>
+  </div>
+
+  <!-- Interactive SVG Chart Area Container -->
+  <div
+    id="chart-interactive-area"
+    class="relative w-full bg-surface-container-low/50 rounded-2xl p-3 sm:p-5 border border-outline-variant/10 select-none overflow-hidden touch-pan-y"
+  >
+    <!-- Floating Proportional Tooltip on Scrub / Slide -->
+    <div
+      id="chart-tooltip"
+      class="absolute hidden pointer-events-none z-30 px-3 py-2 rounded-xl bg-near-black text-white text-xs font-mono shadow-xl border border-white/10 transition-all duration-75 whitespace-nowrap"
+      style="transform: translate(-50%, -100%); margin-top: -14px;"
+    >
+      <div id="tooltip-time" class="font-bold text-primary-container text-xs">08:30 AM</div>
+      <div id="tooltip-val" class="text-white text-[11px] mt-0.5">Kapasitas: 98% (Kritis)</div>
+      <!-- Triangle Arrow Pointer -->
+      <div class="absolute left-1/2 -bottom-1.5 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-6 border-t-near-black"></div>
+    </div>
+
+    <!-- Responsive SVG Chart -->
+    <div class="w-full relative">
+      <svg
+        id="traffic-svg"
+        viewBox="0 0 600 220"
+        class="w-full h-52 sm:h-64 overflow-visible cursor-crosshair"
+      >
+        <defs>
+          <!-- Gradient for area fill -->
+          <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#9a4021" stop-opacity="0.38"></stop>
+            <stop offset="80%" stop-color="#9a4021" stop-opacity="0.05"></stop>
+            <stop offset="100%" stop-color="#9a4021" stop-opacity="0"></stop>
+          </linearGradient>
+
+          <!-- Critical threshold line gradient -->
+          <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#006768"></stop>
+            <stop offset="25%" stop-color="#9a4021"></stop>
+            <stop offset="38%" stop-color="#c93b2b"></stop>
+            <stop offset="60%" stop-color="#9a4021"></stop>
+            <stop offset="100%" stop-color="#0d8251"></stop>
+          </linearGradient>
+        </defs>
+
+        <!-- Horizontal Grid Lines & Y-Labels -->
+        <g class="text-[10px] font-mono fill-on-surface-variant/70 stroke-outline-variant/15 select-none">
+          <!-- 100% Critical Line -->
+          <line x1="35" y1="20" x2="590" y2="20" stroke-dasharray="3 3" stroke="#c93b2b" stroke-opacity="0.4" stroke-width="1.2"></line>
+          <text x="5" y="24" fill="#c93b2b" font-weight="bold">100%</text>
+
+          <!-- 75% Warning Line -->
+          <line x1="35" y1="65" x2="590" y2="65" stroke-dasharray="3 3" stroke-width="1"></line>
+          <text x="12" y="69">75%</text>
+
+          <!-- 50% Line -->
+          <line x1="35" y1="110" x2="590" y2="110" stroke-dasharray="3 3" stroke-width="1"></line>
+          <text x="12" y="114">50%</text>
+
+          <!-- 25% Line -->
+          <line x1="35" y1="155" x2="590" y2="155" stroke-dasharray="3 3" stroke-width="1"></line>
+          <text x="12" y="159">25%</text>
+
+          <!-- Base Line 0% -->
+          <line x1="35" y1="195" x2="590" y2="195" stroke-width="1.5"></line>
+          <text x="18" y="199">0%</text>
+        </g>
+
+        <!-- Shaded Peak Area Zone (08:30 - 11:00) -->
+        <rect
+          id="peak-zone-rect"
+          x="110"
+          y="20"
+          width="140"
+          height="175"
+          fill="#c93b2b"
+          fill-opacity="0.08"
+          rx="6"
+        ></rect>
+
+        <!-- Area fill path under curve -->
+        <path
+          id="chart-area-path"
+          d=""
+          fill="url(#chartGradient)"
+        ></path>
+
+        <!-- Main Chart Curve Line -->
+        <path
+          id="chart-line-path"
+          d=""
+          fill="none"
+          stroke="url(#lineGradient)"
+          stroke-width="3.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></path>
+
+        <!-- Dynamic Scrubber Vertical Guide Line -->
+        <line
+          id="scrubber-vertical-line"
+          x1="0"
+          y1="20"
+          x2="0"
+          y2="195"
+          stroke="#9a4021"
+          stroke-width="1.5"
+          stroke-dasharray="3 3"
+          class="hidden pointer-events-none"
+        ></line>
+
+        <!-- Dynamic Scrubber Active Halo Dot -->
+        <circle
+          id="scrubber-active-dot"
+          cx="0"
+          cy="0"
+          r="7"
+          fill="#9a4021"
+          stroke="#ffffff"
+          stroke-width="2.5"
+          class="hidden pointer-events-none transition-transform duration-100"
+        ></circle>
+
+        <!-- Interactive Static Data Points -->
+        <g id="chart-points-group">
+          <!-- Populated by JS -->
+        </g>
+
+        <!-- X-Axis Labels -->
+        <g id="chart-x-labels" class="text-[10px] font-mono fill-on-surface-variant font-medium select-none">
+          <!-- Populated by JS -->
+        </g>
+      </svg>
+    </div>
+
+    <!-- Mobile Slide / Drag Hint -->
+    <div class="mt-2 text-center text-[10px] font-mono text-on-surface-variant/70 sm:hidden flex items-center justify-center gap-1">
+      <span class="material-symbols-outlined text-xs">touch_app</span>
+      <span>Geser jari di area grafik untuk melihat jam &amp; persentase</span>
+    </div>
+
+  </div>
+
+  <div slot="footer" class="flex flex-wrap items-center justify-between text-xs font-mono gap-2">
+    <div class="flex items-center gap-4">
+      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slot-occupied"></span> Area Jam Penuh (Overload)</span>
+      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-primary"></span> Kurva Kepadatan (%)</span>
+    </div>
+    <span id="peak-dataset-label" class="text-on-surface-variant font-medium">Dataset: Telemetri Hari Ini</span>
+  </div>
+</DashboardCard>
+
+<script>
+  interface ChartDataPoint {
+    x: number;
+    yPct: number; // 0 to 100
+    label: string;
+    detail: string;
+  }
+
+  interface PeriodChartConfig {
+    badge: string;
+    timeWindow: string;
+    timeSub: string;
+    queueDelay: string;
+    queueSub: string;
+    hottestZone: string;
+    zoneSub: string;
+    datasetLabel: string;
+    peakZone: { x: number; width: number };
+    points: ChartDataPoint[];
+  }
+
+  const periodChartData: Record<string, PeriodChartConfig> = {
+    daily: {
+      badge: 'JAM PUNCAK: 08:30 - 11:00 AM',
+      timeWindow: '08:30 – 11:00 AM',
+      timeSub: '2.5 Jam Penuh 100%',
+      queueDelay: '8.4 Menit',
+      queueSub: 'Puncak Kedatangan',
+      hottestZone: 'Zona A',
+      zoneSub: '96% Terpakai',
+      datasetLabel: 'Dataset: Telemetri Hari Ini',
+      peakZone: { x: 105, width: 145 },
+      points: [
+        { x: 45, yPct: 45, label: '07:00', detail: '07:00 AM · 45% (Shift 1)' },
+        { x: 120, yPct: 98, label: '08:30', detail: '08:30 AM · 98% (Kritis)' },
+        { x: 195, yPct: 100, label: '10:00', detail: '10:00 AM · 100% (PUNCAK)' },
+        { x: 270, yPct: 62, label: '11:30', detail: '11:30 AM · 62% (Istirahat)' },
+        { x: 345, yPct: 86, label: '13:30', detail: '01:30 PM · 86% (Praktikum)' },
+        { x: 420, yPct: 70, label: '15:30', detail: '03:30 PM · 70% (Sore)' },
+        { x: 495, yPct: 42, label: '17:30', detail: '05:30 PM · 42% (Kepulangan)' },
+        { x: 570, yPct: 20, label: '19:00', detail: '07:00 PM · 20% (Lengang)' },
+      ],
+    },
+    weekly: {
+      badge: 'HARI SIBUK: SENIN & RABU',
+      timeWindow: 'Senin & Rabu',
+      timeSub: 'Rata-rata 3.8 Jam/Hari',
+      queueDelay: '9.2 Menit',
+      queueSub: 'Pekan Ini',
+      hottestZone: 'Zona B',
+      zoneSub: '92% Terpakai',
+      datasetLabel: 'Dataset: 7 Hari Terakhir',
+      peakZone: { x: 40, width: 195 },
+      points: [
+        { x: 55, yPct: 98, label: 'Senin', detail: 'Senin · 98% (Puncak Mingguan)' },
+        { x: 140, yPct: 82, label: 'Selasa', detail: 'Selasa · 82% (Reguler)' },
+        { x: 225, yPct: 94, label: 'Rabu', detail: 'Rabu · 94% (Lab Komputer)' },
+        { x: 310, yPct: 70, label: 'Kamis', detail: 'Kamis · 70% (Stabil)' },
+        { x: 395, yPct: 88, label: 'Jumat', detail: 'Jumat · 88% (Shalat Siang)' },
+        { x: 480, yPct: 35, label: 'Sabtu', detail: 'Sabtu · 35% (Ekstrakurikuler)' },
+        { x: 565, yPct: 18, label: 'Minggu', detail: 'Minggu · 18% (Off-Peak)' },
+      ],
+    },
+    monthly: {
+      badge: 'PEAK BULAN: PEKAN UJIAN (UTS)',
+      timeWindow: 'Minggu Ke-3',
+      timeSub: 'Saturasi 4.2 Jam Harian',
+      queueDelay: '10.5 Menit',
+      queueSub: 'Pekan Ujian',
+      hottestZone: 'Zona A & C',
+      zoneSub: 'Defisit 15 Bay',
+      datasetLabel: 'Dataset: 30 Hari (Bulan Ini)',
+      peakZone: { x: 275, width: 165 },
+      points: [
+        { x: 75, yPct: 74, label: 'Mgg 1', detail: 'Minggu 1 · 74% (Awal Bulan)' },
+        { x: 215, yPct: 85, label: 'Mgg 2', detail: 'Minggu 2 · 85% (Pra-Ujian)' },
+        { x: 355, yPct: 100, label: 'Mgg 3 (UTS)', detail: 'Minggu 3 · 100% (PUNCAK UTS)' },
+        { x: 525, yPct: 60, label: 'Mgg 4', detail: 'Minggu 4 · 60% (Evaluasi)' },
+      ],
+    },
+    yearly: {
+      badge: 'SEMESTER GANJIL: +34% TRAFIK',
+      timeWindow: 'Kuartal 3 & 4',
+      timeSub: 'Orientasi Mahasiswa Baru',
+      queueDelay: '12.0 Menit',
+      queueSub: 'Rata-rata 2026',
+      hottestZone: 'Gedung Utara',
+      zoneSub: 'Kebutuhan Bertingkat',
+      datasetLabel: 'Dataset: Tahunan 2026',
+      peakZone: { x: 295, width: 270 },
+      points: [
+        { x: 75, yPct: 68, label: 'Q1 (Genap)', detail: 'Q1 · 68% (Semester Genap)' },
+        { x: 220, yPct: 45, label: 'Q2 (Libur)', detail: 'Q2 · 45% (Libur Semester)' },
+        { x: 370, yPct: 92, label: 'Q3 (Maba)', detail: 'Q3 · 92% (Mahasiswa Baru)' },
+        { x: 525, yPct: 96, label: 'Q4 (Penuh)', detail: 'Q4 · 96% (Ujian Akhir Tahun)' },
+      ],
+    },
+  };
+
+  let currentActivePeriod = 'daily';
+
+  function valueToY(pct: number): number {
+    const topY = 20;
+    const bottomY = 195;
+    return bottomY - (pct / 100) * (bottomY - topY);
+  }
+
+  // Smooth Catmull-Rom to Cubic Bezier path generation
+  function generateSmoothPath(points: ChartDataPoint[]): { linePath: string; areaPath: string } {
+    if (points.length === 0) return { linePath: '', areaPath: '' };
+
+    const coords = points.map((p) => ({ x: p.x, y: valueToY(p.yPct) }));
+
+    if (coords.length === 1) {
+      return {
+        linePath: `M ${coords[0].x} ${coords[0].y}`,
+        areaPath: `M ${coords[0].x} ${coords[0].y} L ${coords[0].x} 195 Z`,
+      };
+    }
+
+    let linePath = `M ${coords[0].x} ${coords[0].y}`;
+    for (let i = 0; i < coords.length - 1; i++) {
+      const p0 = i > 0 ? coords[i - 1] : coords[i];
+      const p1 = coords[i];
+      const p2 = coords[i + 1];
+      const p3 = i !== coords.length - 2 ? coords[i + 2] : p2;
+
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+      linePath += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+
+    const first = coords[0];
+    const last = coords[coords.length - 1];
+    const bottomY = 195;
+    const areaPath = `${linePath} L ${last.x.toFixed(1)} ${bottomY} L ${first.x.toFixed(1)} ${bottomY} Z`;
+
+    return { linePath, areaPath };
+  }
+
+  function renderChart(period: string) {
+    currentActivePeriod = period;
+    const config = periodChartData[period] ?? periodChartData.daily;
+
+    // Update Header and Cards
+    const timeWindow = document.getElementById('peak-time-window');
+    const timeSub = document.getElementById('peak-time-sub');
+    const queueDelay = document.getElementById('peak-queue-delay');
+    const queueSub = document.getElementById('peak-queue-sub');
+    const hottestZone = document.getElementById('peak-hottest-zone');
+    const zoneSub = document.getElementById('peak-zone-sub');
+    const datasetLabel = document.getElementById('peak-dataset-label');
+    const badgeContainer = document.getElementById('peak-badge-container');
+
+    if (timeWindow) timeWindow.textContent = config.timeWindow;
+    if (timeSub) timeSub.textContent = config.timeSub;
+    if (queueDelay) queueDelay.textContent = config.queueDelay;
+    if (queueSub) queueSub.textContent = config.queueSub;
+    if (hottestZone) hottestZone.textContent = config.hottestZone;
+    if (zoneSub) zoneSub.textContent = config.zoneSub;
+    if (datasetLabel) datasetLabel.textContent = config.datasetLabel;
+
+    if (badgeContainer) {
+      badgeContainer.innerHTML = `
+        <span class="inline-flex items-center font-mono font-bold rounded-full border tracking-wide text-xs px-2.5 py-1 gap-1.5 bg-slot-occupied/10 text-slot-occupied border-slot-occupied/25">
+          <span class="w-1.5 h-1.5 rounded-full shrink-0 bg-slot-occupied animate-pulse"></span>
+          <span>${config.badge}</span>
+        </span>
+      `;
+    }
+
+    // Update Peak Zone Rect
+    const peakRect = document.getElementById('peak-zone-rect');
+    if (peakRect) {
+      peakRect.setAttribute('x', config.peakZone.x.toString());
+      peakRect.setAttribute('width', config.peakZone.width.toString());
+    }
+
+    // Update SVG Line and Area
+    const { linePath, areaPath } = generateSmoothPath(config.points);
+    const lineEl = document.getElementById('chart-line-path');
+    const areaEl = document.getElementById('chart-area-path');
+    if (lineEl) lineEl.setAttribute('d', linePath);
+    if (areaEl) areaEl.setAttribute('d', areaPath);
+
+    // Update Static Points
+    const pointsGroup = document.getElementById('chart-points-group');
+    if (pointsGroup) {
+      pointsGroup.innerHTML = config.points
+        .map((p) => {
+          const cy = valueToY(p.yPct);
+          const isOver = p.yPct >= 90;
+          return `
+            <circle
+              cx="${p.x}"
+              cy="${cy.toFixed(1)}"
+              r="${isOver ? '5.5' : '4'}"
+              fill="${isOver ? '#c93b2b' : '#9a4021'}"
+              stroke="#ffffff"
+              stroke-width="2"
+              class="pointer-events-none"
+            ></circle>
+          `;
+        })
+        .join('');
+    }
+
+    // Update X-Axis labels
+    const xLabelsGroup = document.getElementById('chart-x-labels');
+    if (xLabelsGroup) {
+      xLabelsGroup.innerHTML = config.points
+        .map(
+          (p) => `
+          <text x="${p.x}" y="214" text-anchor="middle">${p.label}</text>
+        `
+        )
+        .join('');
+    }
+
+    // Hide any active scrub indicator on period switch
+    hideScrub();
+  }
+
+  // Interactive Scrubbing / Sliding Handler (Mouse & Touch)
+  function handleScrub(clientX: number) {
+    const svg = document.getElementById('traffic-svg');
+    const container = document.getElementById('chart-interactive-area');
+    if (!svg || !container) return;
+
+    const config = periodChartData[currentActivePeriod] ?? periodChartData.daily;
+    if (!config || config.points.length === 0) return;
+
+    const rect = svg.getBoundingClientRect();
+    if (rect.width <= 0) return;
+
+    // Calculate relative X ratio inside SVG [0, 1] mapped to SVG coordinate range [0, 600]
+    const relativeX = (clientX - rect.left) / rect.width;
+    const svgX = Math.max(35, Math.min(585, relativeX * 600));
+
+    // Find closest point in current dataset
+    let nearest = config.points[0];
+    let minDiff = Infinity;
+    for (const p of config.points) {
+      const diff = Math.abs(p.x - svgX);
+      if (diff < minDiff) {
+        minDiff = diff;
+        nearest = p;
+      }
+    }
+
+    const targetY = valueToY(nearest.yPct);
+
+    // Update Visuals
+    const scrubberLine = document.getElementById('scrubber-vertical-line');
+    const activeDot = document.getElementById('scrubber-active-dot');
+    const tooltip = document.getElementById('chart-tooltip');
+    const tooltipTime = document.getElementById('tooltip-time');
+    const tooltipVal = document.getElementById('tooltip-val');
+
+    if (scrubberLine) {
+      scrubberLine.setAttribute('x1', nearest.x.toString());
+      scrubberLine.setAttribute('x2', nearest.x.toString());
+      scrubberLine.classList.remove('hidden');
+    }
+
+    if (activeDot) {
+      activeDot.setAttribute('cx', nearest.x.toString());
+      activeDot.setAttribute('cy', targetY.toFixed(1));
+      activeDot.setAttribute('fill', nearest.yPct >= 90 ? '#c93b2b' : '#9a4021');
+      activeDot.classList.remove('hidden');
+    }
+
+    if (tooltip && tooltipTime && tooltipVal) {
+      tooltipTime.textContent = nearest.label;
+      tooltipVal.textContent = nearest.detail;
+      tooltip.classList.remove('hidden');
+
+      // Calculate percentage inside container for rock-solid positioning
+      const xPct = (nearest.x / 600) * 100;
+      const yPct = (targetY / 220) * 100;
+
+      // Clamp X position so tooltip never clips outside the chart container
+      const clampedX = Math.max(12, Math.min(88, xPct));
+
+      tooltip.style.left = `${clampedX}%`;
+      tooltip.style.top = `${yPct}%`;
+    }
+  }
+
+  function hideScrub() {
+    document.getElementById('scrubber-vertical-line')?.classList.add('hidden');
+    document.getElementById('scrubber-active-dot')?.classList.add('hidden');
+    document.getElementById('chart-tooltip')?.classList.add('hidden');
+  }
+
+  function setupChart() {
+    renderChart('daily');
+
+    const area = document.getElementById('chart-interactive-area');
+    if (area) {
+      // 1. Mouse Drag / Scrub
+      area.addEventListener('mousemove', (e) => {
+        handleScrub(e.clientX);
+      });
+
+      area.addEventListener('mouseleave', () => {
+        hideScrub();
+      });
+
+      // 2. Touch Slide / Scrub for Mobile & Tablet
+      area.addEventListener(
+        'touchstart',
+        (e) => {
+          if (e.touches && e.touches.length > 0) {
+            handleScrub(e.touches[0].clientX);
+          }
+        },
+        { passive: true }
+      );
+
+      area.addEventListener(
+        'touchmove',
+        (e) => {
+          if (e.touches && e.touches.length > 0) {
+            handleScrub(e.touches[0].clientX);
+          }
+        },
+        { passive: true }
+      );
+
+      area.addEventListener('touchend', () => {
+        // Keep active point briefly or hide
+        setTimeout(hideScrub, 1200);
+      });
+    }
+
+    // Listen to global period switch
+    window.addEventListener('dashboard:period-change', ((event: CustomEvent<{ period: string }>) => {
+      renderChart(event.detail.period);
+    }) as EventListener);
+  }
+
+  setupChart();
+  document.addEventListener('astro:page-load', setupChart);
+</script>

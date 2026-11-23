@@ -1,0 +1,98 @@
+---
+interface PeriodOption {
+  id: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  label: string;
+  sublabel?: string;
+  icon?: string;
+}
+
+interface Props {
+  activePeriod?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  filterId?: string;
+  class?: string;
+}
+
+const defaultOptions: PeriodOption[] = [
+  { id: 'daily', label: 'Per Hari', sublabel: 'Hari Ini', icon: 'today' },
+  { id: 'weekly', label: 'Per Minggu', sublabel: '7 Hari Terakhir', icon: 'date_range' },
+  { id: 'monthly', label: 'Per Bulan', sublabel: 'Bulan Ini', icon: 'calendar_month' },
+  { id: 'yearly', label: 'Per Tahun', sublabel: 'Tahun 2026', icon: 'calendar_today' },
+];
+
+const {
+  activePeriod = 'daily',
+  filterId = 'period-filter',
+  class: className = '',
+} = Astro.props;
+---
+
+<div
+  id={filterId}
+  class={`inline-flex items-center p-1.5 rounded-2xl bg-surface-container-high/70 border border-outline-variant/20 gap-1 overflow-x-auto max-w-full ${className}`}
+  role="tablist"
+  aria-label="Filter Periode Waktu"
+>
+  {defaultOptions.map((opt) => {
+    const isActive = opt.id === activePeriod;
+    return (
+      <button
+        type="button"
+        role="tab"
+        aria-selected={isActive ? 'true' : 'false'}
+        data-period={opt.id}
+        class={`period-filter-btn flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-mono font-medium transition-all shrink-0 cursor-pointer ${
+          isActive
+            ? 'bg-primary text-on-primary shadow-xs font-semibold'
+            : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest'
+        }`}
+      >
+        {opt.icon && (
+          <span class="material-symbols-outlined text-base leading-none shrink-0">
+            {opt.icon}
+          </span>
+        )}
+        <span>{opt.label}</span>
+      </button>
+    );
+  })}
+</div>
+
+<script>
+  function setupPeriodFilters() {
+    const filterContainers = document.querySelectorAll('[role="tablist"][id*="period"]');
+    
+    filterContainers.forEach((container) => {
+      const buttons = container.querySelectorAll<HTMLButtonElement>('.period-filter-btn');
+      
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const selectedPeriod = btn.dataset.period;
+          if (!selectedPeriod) return;
+
+          // Update active tab styling within this container
+          buttons.forEach((b) => {
+            const isMatch = b === btn;
+            b.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+            if (isMatch) {
+              b.classList.remove('text-on-surface-variant', 'hover:text-on-surface', 'hover:bg-surface-container-lowest');
+              b.classList.add('bg-primary', 'text-on-primary', 'shadow-xs', 'font-semibold');
+            } else {
+              b.classList.remove('bg-primary', 'text-on-primary', 'shadow-xs', 'font-semibold');
+              b.classList.add('text-on-surface-variant', 'hover:text-on-surface', 'hover:bg-surface-container-lowest');
+            }
+          });
+
+          // Dispatch global custom event for charts, AI summary, and stat cards
+          window.dispatchEvent(
+            new CustomEvent('dashboard:period-change', {
+              detail: { period: selectedPeriod },
+            })
+          );
+        });
+      });
+    });
+  }
+
+  setupPeriodFilters();
+  document.addEventListener('astro:page-load', setupPeriodFilters);
+</script>

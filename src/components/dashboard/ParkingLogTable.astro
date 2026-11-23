@@ -1,0 +1,294 @@
+---
+import StatusBadge from './StatusBadge.astro';
+
+export interface ParkingLogRow {
+  bay: string;
+  zone: string;
+  plate: string;
+  status: 'Occupied' | 'Available' | 'Reserved';
+  duration: string;
+  variant: 'danger' | 'success' | 'warning';
+}
+
+interface Props {
+  initialData?: ParkingLogRow[];
+  title?: string;
+  class?: string;
+}
+
+const defaultData: ParkingLogRow[] = [
+  { bay: 'BAY-A01', zone: 'Zona A · Sayap Dosen', plate: 'B 1409 UMN', status: 'Occupied', duration: '1h 42m', variant: 'danger' },
+  { bay: 'BAY-A02', zone: 'Zona A · Sayap Dosen', plate: 'B 2291 VKA', status: 'Occupied', duration: '35m', variant: 'danger' },
+  { bay: 'BAY-A03', zone: 'Zona A · Sayap Dosen', plate: 'N/A', status: 'Available', duration: 'Kosong', variant: 'success' },
+  { bay: 'BAY-B12', zone: 'Zona B · Plaza Mahasiswa', plate: 'D 8802 XYZ', status: 'Occupied', duration: '2h 10m', variant: 'danger' },
+  { bay: 'BAY-C05', zone: 'Zona C · Sayap Barat', plate: 'N/A', status: 'Available', duration: 'Kosong', variant: 'success' },
+  { bay: 'BAY-C06', zone: 'Zona C · Sayap Barat', plate: 'B 9910 KAS', status: 'Reserved', duration: 'Dipesan', variant: 'warning' },
+];
+
+const {
+  initialData = defaultData,
+  title = 'Log Telemetri Deteksi Plat & Slot',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class={`space-y-4 ${className}`}>
+  <!-- Controls: Search Input + Status Filter Pills -->
+  <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+    <!-- Search Bar -->
+    <div class="relative flex-1 max-w-sm">
+      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/70 text-lg pointer-events-none" aria-hidden="true">
+        search
+      </span>
+      <input
+        type="search"
+        id="parking-log-search"
+        placeholder="Cari plat nomor atau ID bay..."
+        class="w-full pl-9 pr-4 py-2 min-h-[44px] rounded-xl bg-surface-container-low border border-outline-variant/30 text-xs font-mono text-on-surface placeholder:text-on-surface-variant/60 focus:outline-hidden focus:border-primary transition-colors"
+        aria-label="Cari plat nomor atau ID bay"
+      />
+    </div>
+
+    <!-- Filter Buttons + Export Button -->
+    <div class="flex items-center gap-2 flex-wrap">
+      <div class="flex items-center p-1 rounded-xl bg-surface-container-high/80 border border-outline-variant/20 gap-1" role="group" aria-label="Filter status">
+        <button
+          type="button"
+          data-filter="all"
+          class="log-filter-btn px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-mono font-bold bg-primary text-on-primary shadow-2xs transition-colors cursor-pointer"
+        >
+          Semua
+        </button>
+        <button
+          type="button"
+          data-filter="Occupied"
+          class="log-filter-btn px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-mono font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest transition-colors cursor-pointer"
+        >
+          Terisi
+        </button>
+        <button
+          type="button"
+          data-filter="Available"
+          class="log-filter-btn px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-mono font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest transition-colors cursor-pointer"
+        >
+          Kosong
+        </button>
+        <button
+          type="button"
+          data-filter="Reserved"
+          class="log-filter-btn px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-mono font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest transition-colors cursor-pointer"
+        >
+          Dipesan
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="btn-export-log-csv"
+        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 min-h-[36px] rounded-xl border border-outline-variant/30 hover:border-primary text-xs font-mono font-medium text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer shadow-2xs"
+        title="Unduh log data telemetri dalam format CSV"
+      >
+        <span class="material-symbols-outlined text-base text-primary" aria-hidden="true">download</span>
+        <span>Export CSV</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Table Responsive Container -->
+  <div class="w-full overflow-x-auto rounded-2xl border border-outline-variant/15">
+    <table class="w-full text-left border-collapse text-xs sm:text-sm" id="parking-log-table">
+      <thead>
+        <tr class="bg-surface-container-low border-b border-outline-variant/15 select-none">
+          <th scope="col" class="px-4 py-3 font-mono text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider w-1/6">
+            Bay ID
+          </th>
+          <th scope="col" class="px-4 py-3 font-mono text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider w-1/3">
+            Zona &amp; Area
+          </th>
+          <th scope="col" class="px-4 py-3 font-mono text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider w-1/5">
+            Plat Nomor (CV)
+          </th>
+          <th scope="col" class="px-4 py-3 font-mono text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider w-1/6">
+            Status
+          </th>
+          <th scope="col" class="px-4 py-3 font-mono text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider text-right w-1/6">
+            Durasi
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-outline-variant/10 bg-surface-container-lowest font-body" id="parking-log-tbody">
+        {initialData.map((row) => (
+          <tr
+            class="log-row hover:bg-surface-container-low/60 transition-colors"
+            data-bay={row.bay.toLowerCase()}
+            data-zone={row.zone.toLowerCase()}
+            data-plate={row.plate.toLowerCase()}
+            data-status={row.status}
+          >
+            <td class="px-4 py-3 font-mono font-bold text-on-surface">
+              {row.bay}
+            </td>
+            <td class="px-4 py-3 text-on-surface">
+              {row.zone}
+            </td>
+            <td class="px-4 py-3 font-mono text-on-surface-variant">
+              {row.plate}
+            </td>
+            <td class="px-4 py-3">
+              <StatusBadge label={row.status} variant={row.variant} dot={true} size="sm" />
+            </td>
+            <td class="px-4 py-3 text-right font-mono text-on-surface-variant">
+              {row.duration}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <!-- Empty State (Shown when search/filter has no match) -->
+    <div id="parking-log-empty" class="hidden py-12 px-4 text-center space-y-2 bg-surface-container-lowest">
+      <div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center mx-auto">
+        <span class="material-symbols-outlined text-xl" aria-hidden="true">search_off</span>
+      </div>
+      <h5 class="font-headline font-semibold text-sm text-on-surface">
+        Tidak Ada Data yang Cocok
+      </h5>
+      <p class="text-xs text-on-surface-variant font-body max-w-sm mx-auto">
+        Pencarian plat nomor atau filter status yang Anda pilih tidak menemukan hasil di basis data aktif.
+      </p>
+      <button
+        type="button"
+        id="btn-reset-log-filter"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-lg bg-surface-container-high text-on-surface text-xs font-mono font-medium hover:bg-surface-container-highest transition-colors cursor-pointer mt-2"
+      >
+        <span>Reset Filter</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer Info & Live Sync Status -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-mono text-on-surface-variant gap-2 pt-1">
+    <span id="log-count-label">
+      Menampilkan {initialData.length} dari {initialData.length} slot terdaftar
+    </span>
+    <span class="text-slot-available font-semibold flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-slot-available"></span>
+      <span>Edge Node Streaming: Terhubung Sinkron</span>
+    </span>
+  </div>
+</div>
+
+<script>
+  function setupParkingLogTable() {
+    const searchInput = document.getElementById('parking-log-search') as HTMLInputElement | null;
+    const filterButtons = document.querySelectorAll<HTMLButtonElement>('.log-filter-btn');
+    const rows = document.querySelectorAll<HTMLTableRowElement>('.log-row');
+    const emptyState = document.getElementById('parking-log-empty');
+    const countLabel = document.getElementById('log-count-label');
+    const resetBtn = document.getElementById('btn-reset-log-filter');
+    const exportBtn = document.getElementById('btn-export-log-csv');
+
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    function applyFilter() {
+      let visibleCount = 0;
+      const query = searchQuery.trim().toLowerCase();
+
+      rows.forEach((row) => {
+        const bay = row.dataset.bay || '';
+        const plate = row.dataset.plate || '';
+        const zone = row.dataset.zone || '';
+        const status = row.dataset.status || '';
+
+        const matchesQuery = !query || bay.includes(query) || plate.includes(query) || zone.includes(query);
+        const matchesStatus = currentFilter === 'all' || status === currentFilter;
+
+        if (matchesQuery && matchesStatus) {
+          row.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          row.classList.add('hidden');
+        }
+      });
+
+      if (emptyState) {
+        if (visibleCount === 0) {
+          emptyState.classList.remove('hidden');
+        } else {
+          emptyState.classList.add('hidden');
+        }
+      }
+
+      if (countLabel) {
+        countLabel.textContent = `Menampilkan ${visibleCount} dari ${rows.length} slot terdaftar`;
+      }
+    }
+
+    searchInput?.addEventListener('input', (e) => {
+      searchQuery = (e.target as HTMLInputElement).value;
+      applyFilter();
+    });
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentFilter = btn.dataset.filter || 'all';
+        filterButtons.forEach((b) => {
+          if (b === btn) {
+            b.classList.remove('text-on-surface-variant', 'hover:text-on-surface', 'hover:bg-surface-container-lowest', 'font-medium');
+            b.classList.add('bg-primary', 'text-on-primary', 'shadow-2xs', 'font-bold');
+          } else {
+            b.classList.remove('bg-primary', 'text-on-primary', 'shadow-2xs', 'font-bold');
+            b.classList.add('text-on-surface-variant', 'hover:text-on-surface', 'hover:bg-surface-container-lowest', 'font-medium');
+          }
+        });
+        applyFilter();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      searchQuery = '';
+      currentFilter = 'all';
+      filterButtons.forEach((b, idx) => {
+        if (idx === 0) {
+          b.classList.add('bg-primary', 'text-on-primary', 'shadow-2xs', 'font-bold');
+          b.classList.remove('text-on-surface-variant', 'hover:text-on-surface', 'hover:bg-surface-container-lowest', 'font-medium');
+        } else {
+          b.classList.remove('bg-primary', 'text-on-primary', 'shadow-2xs', 'font-bold');
+          b.classList.add('text-on-surface-variant', 'hover:text-on-surface', 'hover:bg-surface-container-lowest', 'font-medium');
+        }
+      });
+      applyFilter();
+    });
+
+    // Real CSV Download implementation
+    exportBtn?.addEventListener('click', () => {
+      const csvRows: string[] = ['Bay ID,Zone,Plate,Status,Duration'];
+      rows.forEach((row) => {
+        if (!row.classList.contains('hidden')) {
+          const cells = row.querySelectorAll('td');
+          const bay = cells[0]?.textContent?.trim() || '';
+          const zone = cells[1]?.textContent?.trim() || '';
+          const plate = cells[2]?.textContent?.trim() || '';
+          const status = cells[3]?.textContent?.trim() || '';
+          const duration = cells[4]?.textContent?.trim() || '';
+          csvRows.push(`"${bay}","${zone}","${plate}","${status}","${duration}"`);
+        }
+      });
+
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `goparkir-telemetri-${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  setupParkingLogTable();
+  document.addEventListener('astro:page-load', setupParkingLogTable);
+</script>

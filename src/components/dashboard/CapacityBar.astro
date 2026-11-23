@@ -1,0 +1,87 @@
+---
+interface Props {
+  label: string;
+  value: number;
+  max?: number;
+  sublabel?: string;
+  variant?: 'auto' | 'primary' | 'tertiary' | 'available' | 'occupied' | 'warning';
+  showValue?: boolean;
+  valueSuffix?: string;
+  size?: 'sm' | 'md' | 'lg';
+  animated?: boolean;
+  class?: string;
+}
+
+const {
+  label,
+  value,
+  max = 100,
+  sublabel,
+  variant = 'auto',
+  showValue = true,
+  valueSuffix = '%',
+  size = 'md',
+  animated = false,
+  class: className = '',
+} = Astro.props;
+
+// Calculate clamped percentage
+const percentage = Math.min(Math.max(Math.round((value / max) * 100), 0), 100);
+
+// Resolve color based on variant or auto-threshold
+let barColor = 'bg-primary';
+let textColor = 'text-on-surface';
+
+if (variant === 'auto') {
+  if (percentage >= 90) {
+    barColor = 'bg-slot-occupied';
+    textColor = 'text-slot-occupied';
+  } else if (percentage >= 70) {
+    barColor = 'bg-amber-600';
+    textColor = 'text-amber-700';
+  } else {
+    barColor = 'bg-slot-available';
+    textColor = 'text-slot-available';
+  }
+} else {
+  const map: Record<string, { bar: string; text: string }> = {
+    primary: { bar: 'bg-primary', text: 'text-primary' },
+    tertiary: { bar: 'bg-tertiary', text: 'text-tertiary' },
+    available: { bar: 'bg-slot-available', text: 'text-slot-available' },
+    occupied: { bar: 'bg-slot-occupied', text: 'text-slot-occupied' },
+    warning: { bar: 'bg-amber-500', text: 'text-amber-700' },
+  };
+  const resolved = map[variant] ?? map.primary;
+  barColor = resolved.bar;
+  textColor = resolved.text;
+}
+
+const sizeClasses = {
+  sm: 'h-2',
+  md: 'h-3',
+  lg: 'h-4',
+};
+---
+
+<div class={`w-full ${className}`}>
+  <div class="flex items-center justify-between text-xs mb-1.5 gap-2">
+    <div class="flex items-center gap-1.5 truncate">
+      <span class="font-medium text-on-surface truncate">{label}</span>
+      {sublabel && (
+        <span class="text-on-surface-variant font-mono text-[11px] truncate">({sublabel})</span>
+      )}
+    </div>
+    {showValue && (
+      <span class={`font-mono font-bold shrink-0 ${textColor}`}>
+        {percentage}{valueSuffix}
+      </span>
+    )}
+  </div>
+
+  <div class={`w-full rounded-full bg-surface-container-high overflow-hidden ${sizeClasses[size]}`}>
+    <div
+      class={`h-full rounded-full transition-all duration-500 ${barColor} ${animated && percentage >= 90 ? 'animate-pulse' : ''}`}
+      style={`width: ${percentage}%;`}
+    ></div>
+  </div>
+</div>
