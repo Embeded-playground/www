@@ -18,16 +18,16 @@ import CarIllustration from "./CarIllustration.astro";
             Born out of student frustration with arriving late to class due to circling for parking. This Computer Vision system guides campus drivers directly to the nearest available bay in real-time.
         </p>
 
-        <!-- Single CTA -->
+        <!-- Single Primary CTA -->
         <div class="mt-2 w-full sm:w-auto">
             <a
                 href="#rekomendasi-user"
-                class="bg-primary text-on-primary px-8 py-4 rounded-full font-medium text-base shadow-[0_8px_30px_rgba(154,64,33,0.3)] hover:-translate-y-1 hover:shadow-lg transition-all duration-300 inline-flex items-center justify-center gap-2.5 w-full sm:w-auto"
+                class="bg-primary text-on-primary px-7 py-3.5 rounded-full font-medium text-sm sm:text-base shadow-[0_8px_30px_rgba(154,64,33,0.3)] hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 inline-flex items-center justify-center gap-2.5 cursor-pointer w-full sm:w-auto"
             >
                 <span class="material-symbols-outlined text-xl">
                     directions_car
                 </span>
-                <span>Try Parking Recommendation</span>
+                <span>Lihat Slot Parkir Kosong</span>
             </a>
         </div>
     </div>
@@ -55,7 +55,7 @@ import CarIllustration from "./CarIllustration.astro";
                     <span class="bg-surface-container-lowest/80 px-2 py-0.5 rounded border border-outline-variant/20 text-on-surface">
                         4 ACTIVE ROI
                     </span>
-                    <span class="bg-[#eaf8f0] text-slot-available font-bold px-2 py-0.5 rounded border border-slot-available/30">
+                    <span class="bg-surface-container-lowest/90 text-on-surface font-mono font-bold px-2 py-0.5 rounded border border-outline-variant/20">
                         2 VACANT
                     </span>
                 </div>
@@ -85,7 +85,7 @@ import CarIllustration from "./CarIllustration.astro";
                     </div>
 
                     <!-- Bay 2 (Primary Recommendation - Empty) -->
-                    <div class="p-2 sm:p-2.5 rounded-xl bg-[#eaf8f0]/90 backdrop-blur-md border-2 border-slot-available flex flex-col items-center justify-between h-32 sm:h-36 shadow-sm relative ring-2 ring-slot-available/20">
+                    <div class="p-2 sm:p-2.5 rounded-xl bg-surface-container-lowest/90 backdrop-blur-md border-2 border-slot-available flex flex-col items-center justify-between h-32 sm:h-36 shadow-xs relative">
                         <div class="w-full flex items-center justify-between text-[8px] font-mono font-bold">
                             <span class="text-slot-available">ROI 2</span>
                             <span class="bg-slot-available text-white px-1 rounded text-[7px]">

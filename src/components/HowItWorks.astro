@@ -46,45 +46,45 @@
         </div>
       </div>
 
-      <!-- STAGE 2: PYTHON CV -->
+      <!-- STAGE 2: PYTHON CARVISION -->
       <div class="bg-surface-container-highest/5 rounded-2xl p-7 border border-surface-variant/10 flex flex-col justify-between h-full">
         <div>
           <div class="flex items-center justify-between mb-8">
             <span class="text-4xl font-headline font-light text-primary/40 italic">02</span>
             <span class="text-[10px] font-mono tracking-wider uppercase bg-primary/10 text-[#fbdcd1] px-2.5 py-1 rounded font-bold">
-              Python YOLOv8
+              CarVision Python
             </span>
           </div>
           <h3 class="text-2xl font-headline font-medium text-[#f5f4ed] mb-2">
-            Object Detection
+            YOLO26 &amp; Geometry
           </h3>
           <p class="text-xs sm:text-sm text-surface-variant leading-relaxed font-body">
-            The Computer Vision model projects detected vehicle bounding boxes onto 4 calibrated ROI coordinates, computing overlap ratios with low latency (&lt;40ms).
+            FastAPI microservice evaluating ground contact points (x_center, y_max), vectorized IoA fallback, and temporal smoothing buffers on CUDA GPU.
           </p>
         </div>
         <div class="mt-8 pt-4 border-t border-surface-variant/10 text-xs font-mono text-primary">
-          Inference &bull; OpenCV + YOLO
+          Inference &bull; YOLO26 + Ground Point
         </div>
       </div>
 
-      <!-- STAGE 3: GOLANG BACKEND -->
+      <!-- STAGE 3: GOLANG BACKEND GATEWAY -->
       <div class="bg-surface-container-highest/5 rounded-2xl p-7 border border-surface-variant/10 flex flex-col justify-between h-full">
         <div>
           <div class="flex items-center justify-between mb-8">
             <span class="text-4xl font-headline font-light text-surface-variant/30 italic">03</span>
             <span class="text-[10px] font-mono tracking-wider uppercase bg-surface-container-highest/15 text-surface-variant px-2.5 py-1 rounded">
-              Golang Backend
+              Golang Gateway
             </span>
           </div>
           <h3 class="text-2xl font-headline font-medium text-[#f5f4ed] mb-2">
-            Validation &amp; Rules
+            Ingest &amp; Webhooks
           </h3>
           <p class="text-xs sm:text-sm text-surface-variant leading-relaxed font-body">
-            The Golang service validates vision states against database schedules: checking if a bay is genuinely free or reserved for campus expo events and sponsors.
+            The Go orchestrator ingests RTSP feeds, forwards frames to Python /detect, receives state-change webhooks, and serves real-time cache to Astro Web UI.
           </p>
         </div>
         <div class="mt-8 pt-4 border-t border-surface-variant/10 text-xs font-mono text-surface-variant">
-          REST API &bull; WebSocket Hub
+          REST API &bull; Webhook Dispatcher
         </div>
       </div>
 
@@ -136,7 +136,7 @@
 
     <!-- Footer Stack -->
     <div class="mt-16 pt-8 border-t border-surface-variant/10 flex flex-wrap items-center justify-between gap-4 text-xs text-surface-variant font-mono">
-      <span>Pipeline Stack: <strong class="text-[#f5f4ed]">CCTV Camera &rarr; Python (YOLOv8) &rarr; Golang Service &rarr; Astro JS UI</strong></span>
+      <span>Pipeline Stack: <strong class="text-[#f5f4ed]">CCTV Camera &rarr; Python CarVision (YOLO26) &rarr; Golang Gateway &rarr; Astro JS UI</strong></span>
       <span>Informatics Engineering &bull; Computer Vision UAS Project</span>
     </div>
 

@@ -1,47 +1,28 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
-import Sidebar from '../components/Sidebar.astro';
 import Hero from '../components/Hero.astro';
 import UserRecommendation from '../components/UserRecommendation.astro';
-import AdminAnalytics from '../components/AdminAnalytics.astro';
 import HowItWorks from '../components/HowItWorks.astro';
 import Team from '../components/Team.astro';
 import Footer from '../components/Footer.astro';
 ---
 
-<Layout title="Smart Parking Mobil · Prototype UAS Computer Vision">
-  <!-- Top Bar: Matches Image 1 -->
+<Layout title="GoParkir · Computer Vision Campus Parking Recommendation & Analytics">
   <Navbar />
+  <main class="flex-grow">
+    <!-- 1. Hero: Cerita Masalah Kampus & Rekomendasi Mahasiswa -->
+    <Hero />
 
-  <!-- Layout Container: Sidebar on left (Matches Image 2) + Main Dashboard Content on right -->
-  <div class="flex flex-1 min-h-[calc(100vh-65px)]">
-    <!-- Left Sidebar with updated menus: Dashboard, Manajemen Slot, Manajemen ROI, Logout at bottom -->
-    <Sidebar activeMenu="dashboard" />
+    <!-- 2. FITUR PENGENDARA: Rekomendasi Slot Parkir Langsung & Animasi Mobil Masuk/Keluar -->
+    <UserRecommendation />
 
-    <!-- Main Workspace / Dashboard Area -->
-    <main class="flex-grow min-w-0 overflow-y-auto">
-      <!-- 1. Hero: Cerita Masalah Kampus & Rekomendasi Mahasiswa -->
-      <Hero />
+    <!-- 3. Arsitektur Aliran Data (Python CarVision -> Golang -> Astro JS) -->
+    <HowItWorks />
 
-      <!-- 2. FITUR USER: Hanya Rekomendasi Slot Parkir Langsung + Animasi Mobil Masuk/Keluar -->
-      <div id="manajemen-slot">
-        <UserRecommendation />
-      </div>
-
-      <!-- 3. FITUR KHUSUS ADMIN: Portal Eksklusif Trafik Jam Sibuk & Keputusan Lahan -->
-      <div id="manajemen-roi">
-        <AdminAnalytics />
-      </div>
-
-      <!-- 4. Arsitektur Aliran Data (Python -> Golang -> Astro JS) -->
-      <HowItWorks />
-
-      <!-- 5. The Architects: Tim Pengembang Embeded-playground -->
-      <Team />
-
-      <!-- 6. Footer Khas Saku -->
-      <Footer />
-    </main>
-  </div>
+    <!-- 4. The Architects: Tim Pengembang Embeded-playground -->
+    <Team />
+  </main>
+  <!-- 5. Footer -->
+  <Footer />
 </Layout>

@@ -1,82 +1,130 @@
 ---
-// Reusable Navbar - Smart Parking Mobil
-// Matching exact design of Image 1 (Prototype UAS Computer Vision)
-interface Props {
-  title?: string;
-  subtitle?: string;
-  slotCount?: number;
-  rowCount?: number;
-  mode?: string;
-  tag?: string;
-}
-
-const {
-  title = "Smart Parking Mobil",
-  subtitle = "PROTOTYPE UAS / COMPUTER VISION",
-  slotCount = 4,
-  rowCount = 1,
-  mode = "Mode demonstrasi",
-  tag = "UAS"
-} = Astro.props;
 ---
 
-<header class="w-full bg-white border-b border-gray-200/80 sticky top-0 z-40 transition-all">
-  <div class="w-full px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between">
+<header class="w-full bg-[#fbf9f2]/95 backdrop-blur-md sticky top-0 z-50 border-b border-outline-variant/15 transition-all">
+  <div class="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 md:px-12 py-3.5 sm:py-4 flex items-center justify-between">
     
-    <!-- LEFT: Mobile Menu Button + Brand Logo & Title -->
-    <div class="flex items-center gap-3">
-      <!-- Mobile Sidebar Toggle Hamburger Button -->
-      <button
-        id="btn-sidebar-toggle"
-        type="button"
-        class="md:hidden p-2 -ml-2 rounded-xl text-gray-500 hover:text-gray-800 hover:bg-gray-100 focus:outline-hidden transition-colors flex items-center justify-center cursor-pointer"
-        aria-label="Buka menu navigasi"
-        title="Buka Menu"
+    <!-- Brand Title: GoParkir -->
+    <a href="/" class="flex items-center gap-2 group">
+      <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold text-sm shadow-2xs group-hover:scale-105 transition-transform">
+        G
+      </div>
+      <span class="font-headline text-2xl font-bold tracking-tight text-primary">
+        GoParkir
+      </span>
+    </a>
+
+    <!-- Desktop Navigation Links (Murni Publik untuk Mahasiswa / Civitas) -->
+    <nav class="hidden md:flex items-center gap-8">
+      <a
+        href="/#rekomendasi-user"
+        class="font-headline text-base text-near-black hover:text-primary transition-colors duration-200"
       >
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
+        Slot Parkir
+      </a>
+      <a
+        href="/#metode"
+        class="font-headline text-base text-near-black hover:text-primary transition-colors duration-200"
+      >
+        Arsitektur
+      </a>
+      <a
+        href="/#tim"
+        class="font-headline text-base text-near-black hover:text-primary transition-colors duration-200"
+      >
+        Tim Pengembang
+      </a>
+    </nav>
 
-      <!-- Parking "P" Logo Box -->
-      <a href="/" class="flex items-center gap-3.5 group focus:outline-hidden">
-        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#1c382f] flex items-center justify-center shrink-0 shadow-xs group-hover:bg-[#162d26] transition-colors">
-          <span class="text-white font-bold text-lg sm:text-xl tracking-tight leading-none">P</span>
-        </div>
-
-        <!-- Title & Subtitle block -->
-        <div class="flex flex-col">
-          <h1 class="font-bold text-gray-900 text-sm sm:text-base leading-tight tracking-tight group-hover:text-primary transition-colors">
-            {title}
-          </h1>
-          <p class="text-[9px] sm:text-[10px] font-semibold tracking-wider text-gray-400 uppercase mt-0.5 leading-none">
-            {subtitle}
-          </p>
-        </div>
+    <!-- Desktop Right Action: Cek Slot -->
+    <div class="hidden md:flex items-center gap-3">
+      <a
+        href="/#rekomendasi-user"
+        class="inline-flex items-center gap-1.5 px-5 py-2.5 min-h-[44px] rounded-full bg-primary text-on-primary hover:bg-primary-container shadow-xs transition-colors text-xs font-mono font-semibold cursor-pointer"
+      >
+        <span class="material-symbols-outlined text-base" aria-hidden="true">local_parking</span>
+        <span>Cek Slot Sekarang</span>
       </a>
     </div>
 
-    <!-- RIGHT: Info text, Divider, Mode demonstrasi badge, UAS badge -->
-    <div class="flex items-center gap-2 sm:gap-3">
-      <!-- Slot & Row Information Text (visible on tablet/desktop) -->
-      <span class="hidden md:inline-block text-xs text-gray-500 font-medium">
-        {slotCount} slot &middot; {rowCount} baris parkir
-      </span>
-
-      <!-- Vertical Separator Divider Line -->
-      <div class="hidden md:block h-4 w-px bg-gray-200 mx-1"></div>
-
-      <!-- Mode Demonstrasi Pill -->
-      <div class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full border border-gray-200/90 bg-gray-50/80 text-xs font-medium text-gray-700 shadow-2xs">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-        <span class="text-[11px] sm:text-xs">{mode}</span>
-      </div>
-
-      <!-- UAS Badge -->
-      <span class="px-2.5 py-1 rounded-md bg-[#e3eee8] text-[#1e4e3a] text-xs font-bold tracking-wider uppercase shrink-0">
-        {tag}
-      </span>
-    </div>
+    <!-- Mobile Hamburger Button -->
+    <button
+      id="btn-mobile-menu"
+      type="button"
+      class="md:hidden p-2 min-h-[44px] min-w-[44px] rounded-xl text-on-surface hover:bg-surface-container-low transition-colors flex items-center justify-center cursor-pointer"
+      aria-label="Buka menu navigasi"
+      aria-expanded="false"
+      aria-controls="mobile-dropdown"
+    >
+      <span id="menu-icon" class="material-symbols-outlined text-2xl select-none" aria-hidden="true">menu</span>
+    </button>
 
   </div>
+
+  <!-- Mobile Dropdown Menu -->
+  <div
+    id="mobile-dropdown"
+    class="hidden md:hidden w-full bg-[#fbf9f2] border-b border-outline-variant/20 px-6 py-5 flex-col gap-3 shadow-xl"
+  >
+    <a
+      href="/#rekomendasi-user"
+      class="mobile-nav-link font-headline text-lg text-near-black hover:text-primary transition-colors py-2 min-h-[44px] flex items-center"
+    >
+      Slot Parkir
+    </a>
+    <a
+      href="/#metode"
+      class="mobile-nav-link font-headline text-lg text-near-black hover:text-primary transition-colors py-2 min-h-[44px] flex items-center"
+    >
+      Arsitektur
+    </a>
+    <a
+      href="/#tim"
+      class="mobile-nav-link font-headline text-lg text-near-black hover:text-primary transition-colors py-2 min-h-[44px] flex items-center"
+    >
+      Tim Pengembang
+    </a>
+    <div class="pt-3 border-t border-outline-variant/15">
+      <a
+        href="/#rekomendasi-user"
+        class="mobile-nav-link w-full bg-primary text-on-primary py-2.5 min-h-[44px] rounded-full font-mono text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5"
+      >
+        <span class="material-symbols-outlined text-base" aria-hidden="true">local_parking</span>
+        <span>Cek Slot Sekarang</span>
+      </a>
+    </div>
+  </div>
 </header>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnMenu = document.getElementById('btn-mobile-menu');
+    const dropdown = document.getElementById('mobile-dropdown');
+    const menuIcon = document.getElementById('menu-icon');
+    const navLinks = document.querySelectorAll('.mobile-nav-link');
+
+    let isOpen = false;
+
+    const toggle = () => {
+      isOpen = !isOpen;
+      btnMenu?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      if (isOpen) {
+        dropdown?.classList.remove('hidden');
+        dropdown?.classList.add('flex');
+        if (menuIcon) menuIcon.textContent = 'close';
+      } else {
+        dropdown?.classList.add('hidden');
+        dropdown?.classList.remove('flex');
+        if (menuIcon) menuIcon.textContent = 'menu';
+      }
+    };
+
+    btnMenu?.addEventListener('click', toggle);
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (isOpen) toggle();
+      });
+    });
+  });
+</script>
