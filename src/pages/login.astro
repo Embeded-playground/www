@@ -1,0 +1,244 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Admin Login · GoParkir Campus CV Monitoring">
+  <div class="min-h-screen bg-background flex flex-col justify-between p-4 sm:p-6 md:p-8">
+    
+    <!-- Top Navigation / Back to Home -->
+    <div class="max-w-screen-2xl w-full mx-auto flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 group">
+        <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold text-sm shadow-xs group-hover:scale-105 transition-transform">
+          G
+        </div>
+        <span class="font-headline font-bold text-lg text-on-surface group-hover:text-primary transition-colors">
+          GoParkir
+        </span>
+      </a>
+
+      <a
+        href="/"
+        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-outline-variant/30 text-xs font-mono font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors min-h-[44px]"
+      >
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+        <span>Kembali ke Beranda</span>
+      </a>
+    </div>
+
+    <!-- Center: Login Card -->
+    <div class="w-full max-w-md mx-auto my-8">
+      <div class="bg-surface-container-lowest rounded-3xl border border-outline-variant/20 p-6 sm:p-8 shadow-sm">
+        
+        <!-- Header -->
+        <div class="text-center mb-6">
+          <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3">
+            <span class="material-symbols-outlined text-2xl">admin_panel_settings</span>
+          </div>
+          <h1 class="font-headline text-2xl sm:text-3xl font-bold text-on-surface">
+            Portal Masuk Admin
+          </h1>
+          <p class="text-xs sm:text-sm text-on-surface-variant font-body mt-1">
+            Masuk untuk mengakses kendali kamera, sensor parkir, dan analitik AI kampus.
+          </p>
+        </div>
+
+        <!-- Quick Demo Pill Autofill -->
+        <div class="mb-5 p-3 rounded-2xl bg-surface-container-low border border-outline-variant/15 text-center">
+          <span class="text-[10px] font-mono uppercase text-on-surface-variant block mb-1.5 font-semibold">
+            Akun Percobaan (Demo Quick-Fill)
+          </span>
+          <button
+            type="button"
+            id="btn-autofill-demo"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 text-primary text-xs font-mono font-bold hover:bg-primary/20 transition-colors cursor-pointer min-h-[36px]"
+          >
+            <span class="material-symbols-outlined text-sm">flash_on</span>
+            <span>admin@goparkir.ac.id &bull; admin123</span>
+          </button>
+        </div>
+
+        <!-- Error Feedback Alert -->
+        <div
+          id="login-error-alert"
+          class="hidden mb-4 p-3 rounded-xl bg-slot-occupied/10 border border-slot-occupied/25 text-slot-occupied text-xs font-mono flex items-center gap-2"
+          role="alert"
+        >
+          <span class="material-symbols-outlined text-base shrink-0">error</span>
+          <span id="login-error-message">Email atau password tidak sesuai.</span>
+        </div>
+
+        <!-- Form -->
+        <form id="login-form" class="space-y-4">
+          <div>
+            <label for="admin-email" class="block text-xs font-mono font-semibold text-on-surface mb-1.5">
+              Email Administrator
+            </label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg pointer-events-none">
+                mail
+              </span>
+              <input
+                type="text"
+                id="admin-email"
+                required
+                placeholder="nama@goparkir.ac.id"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 text-xs font-mono text-on-surface focus:outline-hidden focus:border-primary transition-colors min-h-[44px]"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="admin-password" class="block text-xs font-mono font-semibold text-on-surface">
+                Kata Sandi (Password)
+              </label>
+              <a href="#" class="text-[11px] font-mono text-primary hover:underline">
+                Lupa sandi?
+              </a>
+            </div>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg pointer-events-none">
+                lock
+              </span>
+              <input
+                type="password"
+                id="admin-password"
+                required
+                placeholder="••••••••"
+                class="w-full pl-10 pr-11 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 text-xs font-mono text-on-surface focus:outline-hidden focus:border-primary transition-colors min-h-[44px]"
+              />
+              <button
+                type="button"
+                id="btn-toggle-password"
+                class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg"
+                aria-label="Tampilkan sandi"
+              >
+                <span id="pwd-icon" class="material-symbols-outlined text-lg">visibility</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Remember Me -->
+          <div class="flex items-center justify-between text-xs pt-1">
+            <label class="flex items-center gap-2 cursor-pointer select-none font-body text-on-surface-variant">
+              <input
+                type="checkbox"
+                id="remember-me"
+                checked
+                class="w-4 h-4 rounded-md border-outline-variant/40 text-primary accent-primary cursor-pointer"
+              />
+              <span>Ingat sesi masuk ini</span>
+            </label>
+            <span class="text-[11px] font-mono text-on-surface-variant/80">Edge Token 24h</span>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            id="btn-submit-login"
+            class="w-full mt-2 py-3 px-4 rounded-xl bg-primary text-on-primary font-headline font-semibold text-sm hover:bg-primary-container transition-all shadow-xs flex items-center justify-center gap-2 min-h-[44px] cursor-pointer"
+          >
+            <span id="btn-text">Masuk ke Dashboard</span>
+            <span class="material-symbols-outlined text-lg">login</span>
+          </button>
+        </form>
+
+      </div>
+
+      <!-- Footer Info -->
+      <div class="text-center mt-6 text-xs font-mono text-on-surface-variant space-y-1">
+        <p>&bull; Akses terenkripsi ke Golang Telemetry Gateway &bull;</p>
+        <p class="text-[11px] text-on-surface-variant/70">GoParkir Smart Campus System v2.0</p>
+      </div>
+    </div>
+
+    <!-- Empty bottom space to center vertically -->
+    <div class="hidden sm:block"></div>
+
+  </div>
+</Layout>
+
+<script>
+  function setupLogin() {
+    // If already logged in, redirect directly to dashboard
+    if (localStorage.getItem('goparkir_admin_auth') === 'true') {
+      window.location.href = '/dashboard';
+      return;
+    }
+
+    const form = document.getElementById('login-form') as HTMLFormElement | null;
+    const emailInput = document.getElementById('admin-email') as HTMLInputElement | null;
+    const passwordInput = document.getElementById('admin-password') as HTMLInputElement | null;
+    const togglePwdBtn = document.getElementById('btn-toggle-password');
+    const pwdIcon = document.getElementById('pwd-icon');
+    const autofillBtn = document.getElementById('btn-autofill-demo');
+    const errorAlert = document.getElementById('login-error-alert');
+    const errorMsg = document.getElementById('login-error-message');
+    const submitBtn = document.getElementById('btn-submit-login') as HTMLButtonElement | null;
+    const btnText = document.getElementById('btn-text');
+
+    // Auto-fill demo credentials
+    autofillBtn?.addEventListener('click', () => {
+      if (emailInput && passwordInput) {
+        emailInput.value = 'admin@goparkir.ac.id';
+        passwordInput.value = 'admin123';
+        emailInput.focus();
+        errorAlert?.classList.add('hidden');
+      }
+    });
+
+    // Toggle password visibility
+    togglePwdBtn?.addEventListener('click', () => {
+      if (!passwordInput || !pwdIcon) return;
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      pwdIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
+    });
+
+    // Form submission
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!emailInput || !passwordInput || !submitBtn) return;
+
+      const email = emailInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
+
+      // Disable button & show spinner
+      submitBtn.disabled = true;
+      if (btnText) btnText.textContent = 'Memverifikasi...';
+
+      setTimeout(() => {
+        // Validation check (allow demo credentials or admin)
+        const isValid =
+          (email === 'admin@goparkir.ac.id' || email === 'admin') &&
+          (password === 'admin123' || password === 'admin');
+
+        if (isValid) {
+          // Save authentication in localStorage
+          localStorage.setItem('goparkir_admin_auth', 'true');
+          localStorage.setItem('goparkir_admin_email', email);
+          localStorage.setItem('goparkir_login_time', new Date().toISOString());
+
+          if (btnText) btnText.textContent = 'Berhasil! Mengalihkan...';
+          submitBtn.classList.remove('bg-primary');
+          submitBtn.classList.add('bg-slot-available');
+
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 600);
+        } else {
+          // Show error
+          submitBtn.disabled = false;
+          if (btnText) btnText.textContent = 'Masuk ke Dashboard';
+          if (errorAlert && errorMsg) {
+            errorMsg.textContent = 'Email atau kata sandi tidak valid. Gunakan akun demo di atas.';
+            errorAlert.classList.remove('hidden');
+          }
+        }
+      }, 500);
+    });
+  }
+
+  setupLogin();
+  document.addEventListener('astro:page-load', setupLogin);
+</script>
