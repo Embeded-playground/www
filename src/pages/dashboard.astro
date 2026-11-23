@@ -1,0 +1,599 @@
+---
+import Layout from '../layouts/Layout.astro';
+import DashboardShell from '../components/dashboard/DashboardShell.astro';
+
+// Main Hall sector data (15 slots total: 5 front, 5 middle, 5 back)
+const mainHallSectorData = [
+  { code: 'Baris Depan', name: 'Slot 01 - 05 (Akses Pintu Masuk)', occupied: 3, total: 5, status: 'Tersedia 2', variant: 'success', percent: 60 },
+  { code: 'Baris Tengah', name: 'Slot 06 - 10 (Sektor Utama)', occupied: 4, total: 5, status: 'Tersedia 1', variant: 'warning', percent: 80 },
+  { code: 'Baris Belakang', name: 'Slot 11 - 15 (Sektor Sayap)', occupied: 4, total: 5, status: 'Tersedia 1', variant: 'warning', percent: 80 },
+];
+
+// Telemetry log rows for Main Hall 15 slots
+const parkingLogs = [
+  { plate: 'B 1409 UMN', bay: 'Slot 01', zone: 'Main Hall (Depan)', time: '3 mnt lalu', status: 'Masuk', icon: 'login' },
+  { plate: 'B 2291 VKA', bay: 'Slot 03', zone: 'Main Hall (Depan)', time: '14 mnt lalu', status: 'Parkir', icon: 'directions_car' },
+  { plate: 'D 8802 XYZ', bay: 'Slot 07', zone: 'Main Hall (Tengah)', time: '28 mnt lalu', status: 'Parkir', icon: 'directions_car' },
+  { plate: 'B 9910 KAS', bay: 'Slot 02', zone: 'Main Hall (Depan)', time: '45 mnt lalu', status: 'Keluar', icon: 'logout' },
+  { plate: 'D 1042 AB', bay: 'Slot 12', zone: 'Main Hall (Belakang)', time: '1 jam lalu', status: 'Parkir', icon: 'directions_car' },
+];
+
+// Hourly curve bars for 15 slots capacity at Main Hall
+const hourlyTrafficBars = [
+  { time: '07:00', height: '33%', count: '5 Mobil', isPeak: false },
+  { time: '08:00', height: '60%', count: '9 Mobil', isPeak: false },
+  { time: '09:00', height: '87%', count: '13 Mobil', isPeak: false },
+  { time: '10:00', height: '93%', count: '14 Mobil', isPeak: true },
+  { time: '11:00', height: '80%', count: '12 Mobil', isPeak: false },
+  { time: '12:00', height: '53%', count: '8 Mobil', isPeak: false },
+  { time: '13:00', height: '73%', count: '11 Mobil', isPeak: false },
+  { time: '14:00', height: '67%', count: '10 Mobil', isPeak: false },
+  { time: '15:00', height: '47%', count: '7 Mobil', isPeak: false },
+  { time: '16:00', height: '27%', count: '4 Mobil', isPeak: false },
+];
+---
+
+<Layout title="Dashboard Ops · GoParkir Campus CV Monitoring">
+  <DashboardShell activeNavId="overview">
+    
+    <!-- Top Greeting Header (Saku Style) -->
+    <header class="mb-6 md:mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex-1 min-w-0 pr-4">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-slot-available animate-pulse"></span>
+            <span class="text-xs font-mono text-primary font-bold uppercase tracking-wider">
+              Lokasi: Main Hall Kampus (15 Slot)
+            </span>
+          </div>
+          <h2 class="font-headline text-2xl sm:text-3xl md:text-4xl font-medium text-on-surface tracking-tight">
+            Selamat Datang, pavelc4
+          </h2>
+          <p class="font-body text-on-surface-variant mt-1 text-xs sm:text-sm md:text-base">
+            Ringkasan operasional telemetri sensor dan analisis kapasitas 15 bay Main Hall real-time.
+          </p>
+        </div>
+
+        <!-- Action Button: Buka Live Bays -->
+        <div class="flex items-center gap-2.5 shrink-0 flex-nowrap self-start sm:self-auto">
+          <a
+            href="/dashboard/live-slots"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-on-primary font-body font-semibold text-xs md:text-sm hover:bg-primary-container transition-all shadow-xs cursor-pointer active:scale-95 whitespace-nowrap min-h-[42px]"
+          >
+            <span class="material-symbols-outlined text-base">local_parking</span>
+            <span>Buka Live Bays (15 Slot)</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Filter Controls: Segmented Period Pills & Custom Dropdowns (Consistent Toolbar) -->
+      <div class="mt-6 pt-6 border-t border-outline-variant/10 flex flex-wrap items-center justify-between gap-4">
+        <!-- Period Filter Pills -->
+        <div class="inline-flex items-center p-1.5 rounded-full bg-surface-container-low border border-outline-variant/15 text-xs font-mono" id="dashboard-period-group">
+          <button
+            type="button"
+            class="dashboard-period-pill px-4 py-1.5 rounded-full bg-surface-container-highest text-primary font-bold shadow-xs cursor-pointer transition-all"
+            data-period="today"
+          >
+            Hari Ini
+          </button>
+          <button
+            type="button"
+            class="dashboard-period-pill px-4 py-1.5 rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-highest/50 transition-all cursor-pointer"
+            data-period="week"
+          >
+            Minggu Ini
+          </button>
+          <button
+            type="button"
+            class="dashboard-period-pill px-4 py-1.5 rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-highest/50 transition-all cursor-pointer"
+            data-period="month"
+          >
+            Bulan Ini
+          </button>
+        </div>
+
+        <!-- Custom Dropdown: Filter Baris Main Hall -->
+        <div class="relative custom-dropdown" id="dropdown-dashboard-sector" data-active-value="all">
+          <button
+            type="button"
+            class="custom-dropdown-btn flex items-center justify-between gap-3 px-4 py-2 min-h-[40px] rounded-full bg-surface-container-low border border-outline-variant/20 hover:border-primary/40 text-xs font-mono text-on-surface cursor-pointer transition-all shadow-xs"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            <span class="custom-dropdown-label truncate">Semua Baris (1-15)</span>
+            <span class="material-symbols-outlined text-base text-on-surface-variant transition-transform custom-dropdown-chevron">
+              expand_more
+            </span>
+          </button>
+          <div class="custom-dropdown-panel hidden absolute right-0 top-full mt-2 w-60 bg-surface-container-lowest rounded-2xl shadow-[0_16px_40px_rgba(27,28,24,0.14)] border border-outline-variant/20 p-1.5 z-40">
+            <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-primary font-bold bg-surface-container-highest hover:bg-surface-container-high transition-colors text-left cursor-pointer" data-sector="all">
+              <span>Semua Baris (1-15)</span>
+              <span class="material-symbols-outlined text-sm">check</span>
+            </button>
+            <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-sector="Baris Depan">
+              <span>Baris Depan (Slot 01 - 05)</span>
+            </button>
+            <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-sector="Baris Tengah">
+              <span>Baris Tengah (Slot 06 - 10)</span>
+            </button>
+            <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-sector="Baris Belakang">
+              <span>Baris Belakang (Slot 11 - 15)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Saku 3-Column Responsive Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+      
+      <!-- ========================================== -->
+      <!-- LEFT COLUMN (2 Cols): Insights, Metrics, Chart, Log -->
+      <!-- ========================================== -->
+      <div class="lg:col-span-2 space-y-6 md:space-y-8">
+        
+        <!-- 1. AI Land Advisor Insight Card (Saku InsightCard.vue Style) -->
+        <section class="bg-surface-container-lowest rounded-xl p-6 sm:p-8 relative overflow-hidden group shadow-[0_4px_16px_rgba(27,28,24,0.02)]">
+          <div class="absolute -right-20 -top-20 w-64 h-64 bg-[radial-gradient(circle,rgba(154,64,33,0.12)_0%,transparent_70%)] rounded-full blur-2xl pointer-events-none"></div>
+          
+          <div class="flex items-start gap-4 relative z-10">
+            <div class="h-12 w-12 rounded-full bg-secondary-container flex items-center justify-center shrink-0 shadow-xs">
+              <span class="material-symbols-outlined text-primary text-2xl">auto_awesome</span>
+            </div>
+            
+            <div class="flex-1">
+              <h3 class="font-headline text-2xl font-medium text-on-surface mb-2">
+                Rekomendasi Beban Main Hall (AI Advisor)
+              </h3>
+              <p class="font-body text-on-surface-variant leading-relaxed mb-6 text-sm sm:text-base" id="dash-ai-text">
+                Kapasitas area Main Hall saat ini mencapai <strong class="text-on-surface">60.0% (9 dari 15 slot terisi)</strong>. Terdata <strong>1 slot booth bazar BEM</strong> dan <strong>1 bay perbaikan sensor</strong>. Sistem AI mendeteksi 4 slot kosong yang siap digunakan (Slot 02, 05, 09, 14). Pengemudi baru yang tiba disarankan langsung diarahkan ke <strong class="text-on-surface">Slot 02 (Baris Depan)</strong> atau <strong class="text-on-surface">Slot 05</strong> guna menjaga kelancaran sirkulasi.
+              </p>
+              
+              <div class="flex flex-wrap gap-3">
+                <a
+                  href="/dashboard/live-slots"
+                  class="px-6 py-2.5 bg-primary text-on-primary rounded-full font-body font-medium text-sm hover:bg-primary-container transition-colors cursor-pointer shadow-xs min-h-[44px] inline-flex items-center gap-2"
+                >
+                  <span class="material-symbols-outlined text-lg">local_parking</span>
+                  <span>Buka Visual 15 Bay</span>
+                </a>
+                <button
+                  type="button"
+                  id="btn-dismiss-ai-card"
+                  class="px-6 py-2.5 bg-surface-container-highest text-on-surface rounded-full font-body font-medium text-sm hover:bg-surface-container-high transition-colors cursor-pointer min-h-[44px]"
+                >
+                  Tandai Dibaca
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Saku 2x2 Metric Cards Grid (Saku MetricCard.vue Style) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+          
+          <!-- Metric 1: Total Kapasitas -->
+          <div class="bg-surface-container-low rounded-lg p-6 hover:bg-surface-container transition-colors shadow-xs">
+            <div class="flex justify-between items-start mb-4">
+              <h4 class="font-body text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                Total Kapasitas Lahan
+              </h4>
+              <span class="material-symbols-outlined text-primary text-2xl">local_parking</span>
+            </div>
+            <div class="font-headline text-4xl text-on-surface mb-2 font-bold" id="dash-total-slots">15 <span class="text-lg font-normal text-on-surface-variant">Slot</span></div>
+            <div class="font-body text-xs flex items-center gap-1 text-primary font-medium">
+              <span class="material-symbols-outlined text-[16px]">videocam</span>
+              Area Kamera Utama Main Hall
+            </div>
+          </div>
+
+          <!-- Metric 2: Slot Terisi -->
+          <div class="bg-surface-container-low rounded-lg p-6 hover:bg-surface-container transition-colors shadow-xs">
+            <div class="flex justify-between items-start mb-4">
+              <h4 class="font-body text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                Slot Terisi Saat Ini
+              </h4>
+              <span class="material-symbols-outlined text-slot-occupied text-2xl">directions_car</span>
+            </div>
+            <div class="font-headline text-4xl text-on-surface mb-2 font-bold" id="dash-occupied-count">9 <span class="text-lg font-normal text-on-surface-variant">/ 15</span></div>
+            <div class="font-body text-xs flex items-center gap-1 text-slot-occupied font-medium" id="dash-occupied-subtext">
+              <span class="material-symbols-outlined text-[16px]">trending_up</span>
+              60.0% Terisi (1 Booth, 1 Servis)
+            </div>
+          </div>
+
+          <!-- Metric 3: Slot Kosong -->
+          <div class="bg-surface-container-low rounded-lg p-6 hover:bg-surface-container transition-colors shadow-xs">
+            <div class="flex justify-between items-start mb-4">
+              <h4 class="font-body text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                Slot Kosong Tersedia
+              </h4>
+              <span class="material-symbols-outlined text-slot-available text-2xl">check_circle</span>
+            </div>
+            <div class="font-headline text-4xl text-on-surface mb-2 font-bold" id="dash-available-count">4 <span class="text-lg font-normal text-on-surface-variant">Slot Kosong</span></div>
+            <div class="font-body text-xs flex items-center gap-1 text-slot-available font-medium" id="dash-available-subtext">
+              <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              Slot 02, 05, 09, 14 Siap Pakai
+            </div>
+          </div>
+
+          <!-- Metric 4: Volume Kendaraan -->
+          <div class="bg-surface-container-low rounded-lg p-6 hover:bg-surface-container transition-colors shadow-xs">
+            <div class="flex justify-between items-start mb-4">
+              <h4 class="font-body text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                Volume Terlayani Hari Ini
+              </h4>
+              <span class="material-symbols-outlined text-tertiary text-2xl">traffic</span>
+            </div>
+            <div class="font-headline text-4xl text-on-surface mb-2 font-bold">68 <span class="text-lg font-normal text-on-surface-variant">Mobil</span></div>
+            <div class="font-body text-xs flex items-center gap-1 text-tertiary font-medium">
+              <span class="material-symbols-outlined text-[16px]">sync</span>
+              Rotasi 4.5x Kapasitas Lahan
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 3. Traffic Peak Hours Chart (Saku RevenueChart.vue Style) -->
+        <section class="bg-surface-container-lowest rounded-xl p-6 sm:p-8 shadow-[0_4px_16px_rgba(27,28,24,0.02)]">
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+            <div>
+              <h3 class="font-headline text-2xl font-medium text-on-surface">
+                Kurva Kepadatan Jam Kuliah
+              </h3>
+              <p class="font-body text-sm text-on-surface-variant mt-1">
+                Distribusi kendaraan per jam di area parkir Main Hall
+              </p>
+            </div>
+            <div class="text-left sm:text-right">
+              <span class="font-headline text-2xl text-primary font-bold">14 Mobil</span>
+              <span class="block text-xs font-mono text-on-surface-variant">Puncak Jam 10:00 AM (93%)</span>
+            </div>
+          </div>
+
+          <!-- CSS Bar Chart (Saku Style) -->
+          <div class="h-48 flex items-end justify-between gap-2 md:gap-3 pt-6 border-b border-surface-container-highest pb-3">
+            {hourlyTrafficBars.map((bar) => (
+              <div class="w-full flex flex-col items-center h-full justify-end group relative">
+                <!-- Tooltip hover -->
+                <div class="absolute -top-9 left-1/2 -translate-x-1/2 bg-near-black text-white text-[10px] font-mono py-1 px-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
+                  {bar.time}: {bar.count}
+                </div>
+                <!-- Bar -->
+                <div
+                  class={`w-full rounded-t-sm transition-all duration-300 ${
+                    bar.isPeak
+                      ? 'bg-primary group-hover:bg-primary-container'
+                      : 'bg-surface-container-highest hover:bg-primary/40'
+                  }`}
+                  style={`height: ${bar.height}; min-height: 8px;`}
+                ></div>
+                <!-- Label X -->
+                <span class="text-[10px] font-mono text-on-surface-variant mt-2">
+                  {bar.time}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div class="mt-4 flex flex-wrap items-center justify-between text-xs font-mono text-on-surface-variant">
+            <span>&bull; Data diperbarui setiap 10 detik dari Edge Gateway</span>
+            <span class="font-semibold text-primary">Status Alur: Lancar Terkendali</span>
+          </div>
+        </section>
+
+        <!-- 4. Recent Telemetry Logs (Saku RecentTransactionsWidget.vue Style) -->
+        <section class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_16px_rgba(27,28,24,0.02)]">
+          <div class="flex justify-between items-center mb-6">
+            <div>
+              <h3 class="font-headline text-xl text-on-surface font-medium">
+                Log Telemetri Kendaraan Terbaru
+              </h3>
+              <p class="text-xs text-on-surface-variant font-body mt-0.5">
+                Pencatatan pelat nomor dan okupansi bay parkir otomatis
+              </p>
+            </div>
+            <a href="/dashboard/live-slots" class="text-xs sm:text-sm font-medium text-primary hover:underline flex items-center gap-1 cursor-pointer">
+              <span>Buka Live Telemetri</span>
+              <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </a>
+          </div>
+
+          <div class="space-y-3">
+            {parkingLogs.map((log) => (
+              <div class="flex items-center justify-between p-3.5 rounded-xl hover:bg-surface-container-low transition-colors group">
+                <div class="flex items-center gap-3.5">
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-highest text-on-surface-variant group-hover:text-primary transition-colors shrink-0">
+                    <span class="material-symbols-outlined text-lg">{log.icon}</span>
+                  </div>
+                  <div>
+                    <p class="font-headline font-bold text-on-surface text-sm">{log.plate}</p>
+                    <p class="text-xs text-on-surface-variant font-mono mt-0.5">{log.bay} &bull; {log.zone}</p>
+                  </div>
+                </div>
+
+                <div class="text-right">
+                  <p class="font-mono text-xs text-on-surface-variant">{log.time}</p>
+                  <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold mt-0.5 ${
+                    log.status === 'Masuk'
+                      ? 'bg-slot-available/10 text-slot-available'
+                      : log.status === 'Parkir'
+                      ? 'bg-primary/10 text-primary'
+                      : 'bg-surface-container-highest text-on-surface-variant'
+                  }`}>
+                    {log.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ========================================== -->
+      <!-- RIGHT COLUMN (1 Col): Zone Capacity & Actions -->
+      <!-- ========================================== -->
+      <div class="space-y-6 md:space-y-8">
+        
+        <!-- 1. Utilisasi Baris Main Hall (Saku LowStockWidget Style) -->
+        <section class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_16px_rgba(27,28,24,0.02)] space-y-5">
+          <div class="flex items-center justify-between border-b border-outline-variant/10 pb-4">
+            <h3 class="font-headline text-lg font-medium text-on-surface">
+              Kapasitas Baris Main Hall
+            </h3>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full">
+              15 SLOT TOTAL
+            </span>
+          </div>
+
+          <div class="space-y-4">
+            {mainHallSectorData.map((z) => (
+              <div class="space-y-1.5 p-3 rounded-xl bg-surface-container-low/60 hover:bg-surface-container-low transition-colors">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-headline font-bold text-on-surface">{z.code}</span>
+                  <span class="font-mono text-on-surface-variant font-semibold">
+                    {z.occupied} / {z.total} Slot ({z.percent}%)
+                  </span>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+                  <div
+                    class={`h-full rounded-full transition-all duration-500 ${
+                      z.percent >= 90
+                        ? 'bg-slot-occupied'
+                        : z.percent >= 80
+                        ? 'bg-amber-600'
+                        : 'bg-slot-available'
+                    }`}
+                    style={`width: ${z.percent}%;`}
+                  ></div>
+                </div>
+
+                <div class="flex items-center justify-between text-[11px] text-on-surface-variant pt-0.5">
+                  <span class="truncate">{z.name}</span>
+                  <span class={`font-mono font-bold text-[10px] ${
+                    z.variant === 'danger' ? 'text-slot-occupied' : z.variant === 'warning' ? 'text-amber-700' : 'text-slot-available'
+                  }`}>
+                    {z.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- 2. Pintasan Aksi Lapangan (Saku QuickActionWidget Style) -->
+        <section class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_16px_rgba(27,28,24,0.02)] space-y-4">
+          <div class="flex items-center justify-between border-b border-outline-variant/10 pb-3">
+            <h3 class="font-headline text-lg font-medium text-on-surface">
+              Aksi Cepat
+            </h3>
+            <span class="material-symbols-outlined text-primary text-xl">bolt</span>
+          </div>
+
+          <div class="space-y-2.5">
+            <button
+              type="button"
+              onclick="alert('Kamera Cam-03 berhasil disinkronkan!')"
+              class="w-full flex items-center justify-between p-3.5 rounded-full bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body text-xs font-semibold transition-colors cursor-pointer min-h-[44px]"
+            >
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary text-lg">center_focus_strong</span>
+                <span>Rekalibrasi Kamera 03</span>
+              </div>
+              <span class="material-symbols-outlined text-on-surface-variant text-base">chevron_right</span>
+            </button>
+
+            <button
+              type="button"
+              onclick="alert('Rambu VMS dialihkan ke Sayap Barat!')"
+              class="w-full flex items-center justify-between p-3.5 rounded-full bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body text-xs font-semibold transition-colors cursor-pointer min-h-[44px]"
+            >
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-tertiary text-lg">campaign</span>
+                <span>Aktifkan Rambu VMS</span>
+              </div>
+              <span class="material-symbols-outlined text-on-surface-variant text-base">chevron_right</span>
+            </button>
+
+            <a
+              href="/dashboard/analytics"
+              class="w-full flex items-center justify-between p-3.5 rounded-full bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body text-xs font-semibold transition-colors cursor-pointer min-h-[44px]"
+            >
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary text-lg">assessment</span>
+                <span>Laporan AI &amp; Ekspor PDF</span>
+              </div>
+              <span class="material-symbols-outlined text-on-surface-variant text-base">chevron_right</span>
+            </a>
+
+            <a
+              href="/dashboard/settings"
+              class="w-full flex items-center justify-between p-3.5 rounded-full bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body text-xs font-semibold transition-colors cursor-pointer min-h-[44px]"
+            >
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-secondary text-lg">person_add</span>
+                <span>Tambah Admin / Operator</span>
+              </div>
+              <span class="material-symbols-outlined text-on-surface-variant text-base">chevron_right</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- 3. Node Telemetry Status (Saku Info Style) -->
+        <section class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_16px_rgba(27,28,24,0.02)] space-y-3">
+          <h3 class="font-headline text-sm font-semibold uppercase tracking-wider text-on-surface-variant">
+            Status Microservice Edge
+          </h3>
+          <div class="space-y-2 text-xs font-mono">
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low">
+              <span>Python CarVision:</span>
+              <span class="text-slot-available font-bold">ONLINE (Port 8000)</span>
+            </div>
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low">
+              <span>Golang API Gateway:</span>
+              <span class="text-slot-available font-bold">ONLINE (Port 8080)</span>
+            </div>
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low">
+              <span>Model Komputasi:</span>
+              <span class="text-primary font-bold">YOLO26m &bull; CUDA</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+
+    <div class="h-8 md:h-12"></div>
+  </DashboardShell>
+</Layout>
+
+<script>
+  function setupDashboardPage() {
+    // 1. Period filter pills
+    const periodPills = document.querySelectorAll('.dashboard-period-pill');
+    periodPills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        periodPills.forEach((p) => {
+          p.classList.remove('bg-surface-container-highest', 'text-primary', 'font-bold', 'shadow-xs');
+          p.classList.add('text-secondary');
+        });
+        pill.classList.remove('text-secondary');
+        pill.classList.add('bg-surface-container-highest', 'text-primary', 'font-bold', 'shadow-xs');
+      });
+    });
+
+    // 2. Custom Dropdown for Sector Filter
+    const dropdown = document.getElementById('dropdown-dashboard-sector');
+    if (dropdown) {
+      const btn = dropdown.querySelector('.custom-dropdown-btn') as HTMLElement;
+      const panel = dropdown.querySelector('.custom-dropdown-panel') as HTMLElement;
+      const chevron = dropdown.querySelector('.custom-dropdown-chevron') as HTMLElement;
+      const label = dropdown.querySelector('.custom-dropdown-label') as HTMLElement;
+      const items = dropdown.querySelectorAll('.custom-dropdown-item');
+
+      function toggleDropdown() {
+        const isHidden = panel.classList.contains('hidden');
+        if (isHidden) {
+          panel.classList.remove('hidden');
+          btn.setAttribute('aria-expanded', 'true');
+          if (chevron) chevron.style.transform = 'rotate(180deg)';
+        } else {
+          panel.classList.add('hidden');
+          btn.setAttribute('aria-expanded', 'false');
+          if (chevron) chevron.style.transform = 'rotate(0deg)';
+        }
+      }
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleDropdown();
+      });
+
+      items.forEach((item) => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const text = item.querySelector('span')?.textContent || '';
+          if (label) label.textContent = text;
+
+          items.forEach((i) => {
+            i.classList.remove('bg-surface-container-highest', 'text-primary', 'font-bold');
+            i.classList.add('text-on-surface');
+            const check = i.querySelector('.material-symbols-outlined');
+            if (check) check.remove();
+          });
+          item.classList.add('bg-surface-container-highest', 'text-primary', 'font-bold');
+          item.classList.remove('text-on-surface');
+          const checkIcon = document.createElement('span');
+          checkIcon.className = 'material-symbols-outlined text-sm';
+          checkIcon.textContent = 'check';
+          item.appendChild(checkIcon);
+
+          panel.classList.add('hidden');
+          btn.setAttribute('aria-expanded', 'false');
+          if (chevron) chevron.style.transform = 'rotate(0deg)';
+        });
+      });
+
+      document.addEventListener('click', () => {
+        panel.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+      });
+    }
+
+    // 3. Dismiss AI card button
+    const btnDismissAi = document.getElementById('btn-dismiss-ai-card');
+    btnDismissAi?.addEventListener('click', () => {
+      const card = btnDismissAi.closest('section');
+      if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.98)';
+        card.style.transition = 'all 0.3s ease-out';
+        setTimeout(() => {
+          card.style.display = 'none';
+        }, 300);
+      }
+    });
+
+    // 4. Live sync from localStorage (goparkir_live_slots_data_v3)
+    try {
+      const stored = localStorage.getItem('goparkir_live_slots_data_v3');
+      if (stored) {
+        const slots = JSON.parse(stored);
+        const total = slots.length;
+        const occupied = slots.filter((s: any) => s.status === 'occupied').length;
+        const available = slots.filter((s: any) => s.status === 'available').length;
+        const reserved = slots.filter((s: any) => s.status === 'reserved').length;
+        const maintenance = slots.filter((s: any) => s.status === 'maintenance').length;
+        const pct = total > 0 ? ((occupied / total) * 100).toFixed(1) : '0.0';
+
+        const occEl = document.getElementById('dash-occupied-count');
+        const occSub = document.getElementById('dash-occupied-subtext');
+        const availEl = document.getElementById('dash-available-count');
+        const availSub = document.getElementById('dash-available-subtext');
+        const aiText = document.getElementById('dash-ai-text');
+
+        if (occEl) occEl.innerHTML = `${occupied} <span class="text-lg font-normal text-on-surface-variant">/ ${total}</span>`;
+        if (occSub) occSub.innerHTML = `<span class="material-symbols-outlined text-[16px]">trending_up</span> ${pct}% Terisi (${reserved} Booth, ${maintenance} Servis)`;
+        if (availEl) availEl.innerHTML = `${available} <span class="text-lg font-normal text-on-surface-variant">Slot Kosong</span>`;
+        
+        const availNums = slots.filter((s: any) => s.status === 'available').map((s: any) => s.name.replace('Slot ', '')).join(', ');
+        if (availSub) availSub.innerHTML = `<span class="material-symbols-outlined text-[16px]">arrow_forward</span> Slot ${availNums} Siap Pakai`;
+
+        if (aiText) {
+          aiText.innerHTML = `Kapasitas area Main Hall saat ini mencapai <strong class="text-on-surface">${pct}% (${occupied} dari ${total} slot terisi)</strong>. Terdata <strong>${reserved} slot booth</strong> dan <strong>${maintenance} bay perbaikan</strong>. Sistem AI mendeteksi ${available} slot kosong siap pakai (${availNums ? 'Slot ' + availNums : 'Semua Terisi'}). Pengemudi baru disarankan diarahkan langsung ke slot kosong terdekat guna menjaga kelancaran sirkulasi.`;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  setupDashboardPage();
+  document.addEventListener('astro:page-load', setupDashboardPage);
+</script>

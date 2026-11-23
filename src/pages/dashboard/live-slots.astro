@@ -1,0 +1,1124 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import DashboardShell from '../../components/dashboard/DashboardShell.astro';
+
+// Baseline 15 Parking Slots at Main Hall Campus
+const defaultSlots = [
+  { id: 'Slot_1', name: 'Slot 01', sector: 'Baris Depan', status: 'occupied', notes: '', confidence: '0.94', groundPoint: '[642, 810]', stateLocked: true },
+  { id: 'Slot_2', name: 'Slot 02', sector: 'Baris Depan', status: 'available', notes: '', confidence: '0.00', groundPoint: 'N/A', stateLocked: true },
+  { id: 'Slot_3', name: 'Slot 03', sector: 'Baris Depan', status: 'reserved', notes: 'Booth Bazar Dies Natalis BEM', confidence: 'N/A', groundPoint: '[1458, 483]', stateLocked: true },
+  { id: 'Slot_4', name: 'Slot 04', sector: 'Baris Depan', status: 'occupied', notes: '', confidence: '0.88', groundPoint: '[890, 720]', stateLocked: true },
+  { id: 'Slot_5', name: 'Slot 05', sector: 'Baris Depan', status: 'available', notes: '', confidence: '0.00', groundPoint: 'N/A', stateLocked: true },
+  { id: 'Slot_6', name: 'Slot 06', sector: 'Baris Tengah', status: 'occupied', notes: '', confidence: '0.95', groundPoint: '[712, 640]', stateLocked: true },
+  { id: 'Slot_7', name: 'Slot 07', sector: 'Baris Tengah', status: 'occupied', notes: '', confidence: '0.93', groundPoint: '[980, 615]', stateLocked: true },
+  { id: 'Slot_8', name: 'Slot 08', sector: 'Baris Tengah', status: 'occupied', notes: '', confidence: '0.87', groundPoint: '[1120, 590]', stateLocked: true },
+  { id: 'Slot_9', name: 'Slot 09', sector: 'Baris Tengah', status: 'available', notes: '', confidence: '0.00', groundPoint: 'N/A', stateLocked: true },
+  { id: 'Slot_10', name: 'Slot 10', sector: 'Baris Tengah', status: 'maintenance', notes: 'Perbaikan Sensor Kontak Roda', confidence: 'N/A', groundPoint: '[1340, 540]', stateLocked: true },
+  { id: 'Slot_11', name: 'Slot 11', sector: 'Baris Belakang', status: 'occupied', notes: '', confidence: '0.90', groundPoint: '[610, 480]', stateLocked: true },
+  { id: 'Slot_12', name: 'Slot 12', sector: 'Baris Belakang', status: 'occupied', notes: '', confidence: '0.96', groundPoint: '[780, 460]', stateLocked: true },
+  { id: 'Slot_13', name: 'Slot 13', sector: 'Baris Belakang', status: 'occupied', notes: '', confidence: '0.89', groundPoint: '[950, 440]', stateLocked: true },
+  { id: 'Slot_14', name: 'Slot 14', sector: 'Baris Belakang', status: 'available', notes: '', confidence: '0.00', groundPoint: 'N/A', stateLocked: true },
+  { id: 'Slot_15', name: 'Slot 15', sector: 'Baris Belakang', status: 'occupied', notes: '', confidence: '0.93', groundPoint: '[1210, 410]', stateLocked: true },
+];
+
+const totalSlots = defaultSlots.length; // 15
+const occupiedSlots = defaultSlots.filter(s => s.status === 'occupied').length; // 9
+const availableSlots = defaultSlots.filter(s => s.status === 'available').length; // 4
+const reservedSlots = defaultSlots.filter(s => s.status === 'reserved').length; // 1
+const maintenanceSlots = defaultSlots.filter(s => s.status === 'maintenance').length; // 1
+const occupancyRate = ((occupiedSlots / totalSlots) * 100).toFixed(1); // 60.0%
+---
+
+<Layout title="Live Parking Slots &amp; Bay Management · GoParkir Campus CV Monitoring">
+  <DashboardShell activeNavId="live-slots">
+    
+    <!-- Top Action Header (Saku Style: Balanced, Never Stacking) -->
+    <header class="mb-6 md:mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex-1 min-w-0 pr-4">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-slot-available animate-pulse"></span>
+            <span class="text-xs font-mono text-primary font-bold uppercase tracking-wider">
+              Lokasi: Main Hall Kampus (15 Slot)
+            </span>
+          </div>
+          <h2 class="font-headline text-2xl sm:text-3xl md:text-4xl font-medium text-on-surface tracking-tight">
+            Live Parking Bays &amp; Telemetry
+          </h2>
+          <p class="font-body text-on-surface-variant mt-1 text-xs sm:text-sm md:text-base">
+            Status inferensi YOLO26m, manajemen slot reservasi booth acara, dan perbaikan sensor Main Hall.
+          </p>
+        </div>
+
+        <!-- Action Buttons: Side-by-side, Never Stacking -->
+        <div class="flex items-center gap-2.5 shrink-0 flex-nowrap self-start sm:self-auto">
+          <!-- Button Tambah Slot Baru -->
+          <button
+            type="button"
+            id="btn-open-add-slot"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-on-primary font-body font-semibold text-xs md:text-sm hover:bg-primary-container transition-all shadow-xs cursor-pointer active:scale-95 whitespace-nowrap min-h-[42px]"
+          >
+            <span class="material-symbols-outlined text-base">add</span>
+            <span>Tambah Slot</span>
+          </button>
+
+          <!-- Button Reset Default -->
+          <button
+            type="button"
+            id="btn-reset-default-slots"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-container-highest hover:bg-surface-container-high text-on-surface font-body font-semibold text-xs md:text-sm transition-all border border-outline-variant/20 shadow-xs cursor-pointer active:scale-95 whitespace-nowrap min-h-[42px]"
+            title="Kembalikan data slot ke default 15 bay kampus"
+          >
+            <span class="material-symbols-outlined text-base text-secondary">restart_alt</span>
+            <span>Reset Default</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Controls: Segmented Status Pills & Custom Dropdowns -->
+      <div class="mt-6 pt-6 border-t border-outline-variant/10 flex flex-wrap items-center justify-between gap-4">
+        
+        <!-- Unified Status Filter Pills -->
+        <div class="inline-flex items-center p-1 rounded-full bg-surface-container-low border border-outline-variant/15 text-xs font-mono" id="status-pill-group">
+          <button
+            type="button"
+            class="status-filter-pill px-4 py-1.5 rounded-full bg-surface-container-highest text-primary font-bold shadow-xs cursor-pointer transition-all"
+            data-status="all"
+          >
+            Semua (<span id="count-all">{totalSlots}</span>)
+          </button>
+          <button
+            type="button"
+            class="status-filter-pill px-4 py-1.5 rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-highest/50 transition-all cursor-pointer"
+            data-status="available"
+          >
+            Tersedia (<span id="count-available">{availableSlots}</span>)
+          </button>
+          <button
+            type="button"
+            class="status-filter-pill px-4 py-1.5 rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-highest/50 transition-all cursor-pointer"
+            data-status="occupied"
+          >
+            Terisi (<span id="count-occupied">{occupiedSlots}</span>)
+          </button>
+          <button
+            type="button"
+            class="status-filter-pill px-4 py-1.5 rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-highest/50 transition-all cursor-pointer"
+            data-status="reserved"
+          >
+            Booth (<span id="count-reserved">{reservedSlots}</span>)
+          </button>
+          <button
+            type="button"
+            class="status-filter-pill px-4 py-1.5 rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-highest/50 transition-all cursor-pointer"
+            data-status="maintenance"
+          >
+            Perbaikan (<span id="count-maintenance">{maintenanceSlots}</span>)
+          </button>
+        </div>
+
+        <!-- Custom Dropdown: Filter Baris Main Hall -->
+        <div class="relative custom-dropdown" id="dropdown-slot-sector" data-active-value="all">
+          <button
+            type="button"
+            class="custom-dropdown-btn flex items-center justify-between gap-3 px-4 py-2 min-h-[40px] rounded-full bg-surface-container-low border border-outline-variant/20 hover:border-primary/40 text-xs font-mono text-on-surface cursor-pointer transition-all shadow-xs"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            <span class="custom-dropdown-label truncate">Semua Baris (1-15)</span>
+            <span class="material-symbols-outlined text-base text-on-surface-variant transition-transform custom-dropdown-chevron">
+              expand_more
+            </span>
+          </button>
+          <div class="custom-dropdown-panel hidden absolute right-0 top-full mt-2 w-60 bg-surface-container-lowest rounded-2xl shadow-[0_16px_40px_rgba(27,28,24,0.14)] border border-outline-variant/20 p-1.5 z-40">
+            <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-primary font-bold bg-surface-container-highest hover:bg-surface-container-high transition-colors text-left cursor-pointer" data-sector="all">
+              <span>Semua Baris (1-15)</span>
+              <span class="material-symbols-outlined text-sm">check</span>
+            </button>
+            <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-sector="Baris Depan">
+              <span>Baris Depan (Slot 01 - 05)</span>
+            </button>
+            <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-sector="Baris Tengah">
+              <span>Baris Tengah (Slot 06 - 10)</span>
+            </button>
+            <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-sector="Baris Belakang">
+              <span>Baris Belakang (Slot 11 - 15)</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <div class="space-y-6 md:space-y-8">
+      
+      <!-- Quick Edge KPIs (Saku MetricCard Style) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div class="bg-surface-container-low rounded-xl p-5 hover:bg-surface-container transition-colors shadow-xs">
+          <span class="text-[10px] font-mono uppercase text-on-surface-variant block mb-1">Kapasitas Main Hall</span>
+          <p class="font-headline text-xl sm:text-2xl font-bold text-on-surface truncate" id="kpi-total-slots">
+            {totalSlots} Slot Terpasang
+          </p>
+          <span class="text-xs text-primary font-medium mt-1 block">Kamera Depan 01</span>
+        </div>
+
+        <div class="bg-surface-container-low rounded-xl p-5 hover:bg-surface-container transition-colors shadow-xs">
+          <span class="text-[10px] font-mono uppercase text-on-surface-variant block mb-1">Status Okupansi</span>
+          <p class="font-headline text-xl sm:text-2xl font-bold text-on-surface mt-0.5" id="kpi-occupancy-count">
+            {occupiedSlots} Terisi <span class="text-sm font-normal text-on-surface-variant">/ {totalSlots}</span>
+          </p>
+          <span class="text-xs text-slot-occupied font-mono font-bold mt-1 block" id="kpi-occupancy-pct">{occupancyRate}% Terisi</span>
+        </div>
+
+        <div class="bg-surface-container-low rounded-xl p-5 hover:bg-surface-container transition-colors shadow-xs">
+          <span class="text-[10px] font-mono uppercase text-on-surface-variant block mb-1">Slot Kosong Siap Pakai</span>
+          <p class="font-headline text-xl sm:text-2xl font-bold text-slot-available mt-0.5" id="kpi-available-count">
+            {availableSlots} Slot Tersedia
+          </p>
+          <span class="text-xs text-on-surface-variant font-mono mt-1 block truncate" id="kpi-available-list">Slot 02, 05, 09, 14</span>
+        </div>
+
+        <div class="bg-surface-container-low rounded-xl p-5 hover:bg-surface-container transition-colors shadow-xs">
+          <span class="text-[10px] font-mono uppercase text-on-surface-variant block mb-1">Status Khusus / Override</span>
+          <p class="font-headline text-lg sm:text-xl font-bold text-on-surface mt-0.5" id="kpi-special-status">
+            {reservedSlots} Booth &bull; {maintenanceSlots} Perbaikan
+          </p>
+          <span class="text-xs text-primary font-mono font-bold mt-1 block">Tercatat di Sistem</span>
+        </div>
+      </div>
+
+      <!-- Visualisasi Bay Kampus Grid & Telemetry -->
+      <section class="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-[0_4px_16px_rgba(27,28,24,0.02)] space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/10 pb-4">
+          <div>
+            <h3 class="font-headline font-bold text-xl text-on-surface">
+              Visualisasi 15 Bay Parkir Main Hall
+            </h3>
+            <p class="text-xs text-on-surface-variant font-body mt-0.5">
+              Evaluasi ground contact point roda kendaraan, status reservasi booth, dan bay maintenance
+            </p>
+          </div>
+          <div class="flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+            <span class="w-2 h-2 rounded-full bg-slot-available animate-pulse"></span>
+            <span>Stream: 30 FPS Live (Kamera Main Hall)</span>
+          </div>
+        </div>
+
+        <!-- Telemetry Bay Cards Grid (Rendered with SSR Fallback, hydrated by JS) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5" id="bay-cards-grid">
+          {defaultSlots.map((slot) => {
+            const isOcc = slot.status === 'occupied';
+            const isAvail = slot.status === 'available';
+            const isRes = slot.status === 'reserved';
+            const isMaint = slot.status === 'maintenance';
+
+            let bgBorder = 'bg-[#f6fcf8] border-slot-available/25';
+            let badgeClass = 'bg-slot-available/10 text-slot-available';
+            let statusLabel = 'TERSEDIA';
+            let statusText = 'Siap Digunakan';
+            let subDetail = 'Ground ROI Terbuka';
+
+            if (isOcc) {
+              bgBorder = 'bg-[#fdf8f7] border-slot-occupied/25';
+              badgeClass = 'bg-slot-occupied/10 text-slot-occupied';
+              statusLabel = 'TERISI';
+              statusText = 'Kendaraan Terparkir';
+              subDetail = `Conf: ${slot.confidence} • ${slot.groundPoint}`;
+            } else if (isRes) {
+              bgBorder = 'bg-surface-container-low border-primary/20';
+              badgeClass = 'bg-primary/10 text-primary';
+              statusLabel = 'BOOTH';
+              statusText = slot.notes || 'Bazar Kampus BEM';
+              subDetail = 'Proteksi VMS Aktif';
+            } else if (isMaint) {
+              bgBorder = 'bg-surface-container-low border-amber-600/20';
+              badgeClass = 'bg-amber-600/10 text-amber-700 dark:text-amber-400';
+              statusLabel = 'PERBAIKAN';
+              statusText = slot.notes || 'Kalibrasi Sensor Kontak';
+              subDetail = 'Bay Non-Aktif';
+            }
+
+            return (
+              <div
+                class={`bay-telemetry-card h-[185px] p-4 rounded-2xl border transition-all flex flex-col justify-between shadow-xs ${bgBorder}`}
+                data-bay-card
+                data-bay-id={slot.id}
+                data-bay-status={slot.status}
+                data-bay-sector={slot.sector}
+              >
+                <div>
+                  <div class="flex items-center justify-between text-xs font-semibold mb-2">
+                    <span class="font-headline font-bold text-on-surface text-sm">{slot.name}</span>
+                    <span class={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${badgeClass}`}>
+                      {statusLabel}
+                    </span>
+                  </div>
+
+                  <div class="h-16 flex flex-col justify-center px-3 py-1.5 rounded-xl bg-surface-container-lowest/80 border border-outline-variant/15 text-xs">
+                    <span class="font-semibold text-on-surface text-xs truncate">{statusText}</span>
+                    <span class="text-[11px] text-on-surface-variant font-mono mt-0.5">{slot.sector}</span>
+                    <span class="text-[10px] text-on-surface-variant/80 font-mono truncate">{subDetail}</span>
+                  </div>
+                </div>
+
+                <div class="pt-2 border-t border-outline-variant/10 flex items-center justify-between text-xs font-mono">
+                  <span class="text-[10px] text-on-surface-variant">Main Hall</span>
+                  <button
+                    type="button"
+                    class="btn-manage-slot px-3 py-1 rounded-full text-xs font-mono font-medium text-secondary hover:text-on-surface hover:bg-surface-container-highest transition-colors flex items-center gap-1 border border-outline-variant/15 cursor-pointer shadow-xs active:scale-95"
+                    data-slot-id={slot.id}
+                  >
+                    <span class="material-symbols-outlined text-sm">edit</span>
+                    <span>Kelola</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <!-- CarVision Live REST API Snapshot Inspector -->
+      <section class="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-[0_4px_16px_rgba(27,28,24,0.02)] space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/10 pb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-primary text-2xl">data_object</span>
+            <div>
+              <h3 class="font-headline font-bold text-lg text-on-surface">
+                CarVision REST API Snapshot (GET /api/v1/slots/status)
+              </h3>
+              <p class="text-xs text-on-surface-variant font-body">
+                Payload JSON 15 bay Main Hall untuk Golang Gateway, reservasi booth, &amp; webhook dispatcher
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              id="btn-copy-json"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-full bg-surface-container-high hover:bg-surface-container-highest text-xs font-mono text-on-surface transition-colors cursor-pointer"
+            >
+              <span class="material-symbols-outlined text-sm">content_copy</span>
+              <span id="btn-copy-json-text">Salin JSON</span>
+            </button>
+            <button
+              type="button"
+              id="btn-refresh-api-snapshot"
+              class="inline-flex items-center gap-1.5 px-4 py-2 min-h-[38px] rounded-full bg-surface-container-high hover:bg-surface-container-highest text-xs font-mono text-on-surface transition-colors cursor-pointer"
+            >
+              <span class="material-symbols-outlined text-sm">refresh</span>
+              <span>Sync Snapshot</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Formatted JSON Code Viewer -->
+        <div class="bg-surface-container-low rounded-xl p-4 border border-outline-variant/15 font-mono text-xs overflow-x-auto max-h-[220px]">
+          <pre id="api-json-preview" class="text-on-surface leading-relaxed">{JSON.stringify({
+  campus_zone: 'Main Hall (15 Bay)',
+  total_slots: 15,
+  occupied: 9,
+  available: 4,
+  reserved_booth: 1,
+  maintenance: 1,
+  slots: defaultSlots.map(s => ({ id: s.id, name: s.name, sector: s.sector, status: s.status, notes: s.notes || undefined }))
+}, null, 2)}</pre>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="h-8 md:h-12"></div>
+  </DashboardShell>
+</Layout>
+
+<!-- ======================================================== -->
+<!-- MODAL CRUD KELOLA / TAMBAH SLOT PARKIR (SAKU NATIVE UI)  -->
+<!-- ======================================================== -->
+<div
+  id="modal-slot-crud"
+  class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300 backdrop-blur-xs"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-crud-title"
+>
+  <div
+    id="modal-slot-box"
+    class="bg-surface-container-lowest rounded-3xl max-w-lg w-full flex flex-col shadow-[0_24px_60px_rgba(27,28,24,0.18)] border border-outline-variant/20 scale-95 transition-transform duration-300 overflow-hidden"
+  >
+    <!-- Modal Header -->
+    <div class="px-7 pt-7 pb-4 flex items-start justify-between border-b border-outline-variant/10 shrink-0">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="px-2.5 py-0.5 rounded-full bg-primary/10 text-[10px] font-mono font-bold text-primary" id="modal-slot-badge">
+            Slot 01 &bull; Baris Depan
+          </span>
+        </div>
+        <h3 class="font-headline font-bold text-2xl text-on-surface" id="modal-crud-title">
+          Kelola Bay Parkir
+        </h3>
+        <p class="text-xs text-on-surface-variant font-body mt-0.5" id="modal-crud-subtitle">
+          Update status operasional atau alokasi khusus slot Main Hall
+        </p>
+      </div>
+
+      <button
+        type="button"
+        id="btn-close-crud-modal"
+        class="text-on-surface-variant hover:bg-surface-container-highest p-2 rounded-full transition-colors flex items-center justify-center cursor-pointer"
+        aria-label="Tutup Dialog"
+      >
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+
+    <!-- Modal Form Body -->
+    <form id="form-slot-crud" class="p-7 space-y-6 overflow-y-auto max-h-[75vh]">
+      <input type="hidden" id="input-slot-mode" value="edit" />
+      <input type="hidden" id="input-slot-id" value="" />
+
+      <!-- 1. Sleek 4-Grid Status Selector (Clean & Elegant) -->
+      <div>
+        <label class="block text-xs font-mono font-bold uppercase tracking-wider text-on-surface-variant mb-2.5">
+          Pilih Status Operasional Bay
+        </label>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="crud-status-segmented-group">
+          <!-- Tersedia -->
+          <button
+            type="button"
+            class="crud-status-tab p-3 rounded-2xl border transition-all cursor-pointer text-left flex flex-col justify-between h-20 bg-surface-container-low border-outline-variant/20"
+            data-status-val="available"
+          >
+            <span class="material-symbols-outlined text-slot-available text-xl">check_circle</span>
+            <div>
+              <div class="font-body font-bold text-xs text-on-surface">Tersedia</div>
+              <div class="text-[10px] text-on-surface-variant">Siap Pakai</div>
+            </div>
+          </button>
+
+          <!-- Terisi -->
+          <button
+            type="button"
+            class="crud-status-tab p-3 rounded-2xl border transition-all cursor-pointer text-left flex flex-col justify-between h-20 bg-surface-container-low border-outline-variant/20"
+            data-status-val="occupied"
+          >
+            <span class="material-symbols-outlined text-slot-occupied text-xl">directions_car</span>
+            <div>
+              <div class="font-body font-bold text-xs text-on-surface">Terisi</div>
+              <div class="text-[10px] text-on-surface-variant">Mobil Ada</div>
+            </div>
+          </button>
+
+          <!-- Booth Acara -->
+          <button
+            type="button"
+            class="crud-status-tab p-3 rounded-2xl border transition-all cursor-pointer text-left flex flex-col justify-between h-20 bg-surface-container-low border-outline-variant/20"
+            data-status-val="reserved"
+          >
+            <span class="material-symbols-outlined text-primary text-xl">storefront</span>
+            <div>
+              <div class="font-body font-bold text-xs text-on-surface">Booth</div>
+              <div class="text-[10px] text-on-surface-variant">Acara Kampus</div>
+            </div>
+          </button>
+
+          <!-- Perbaikan -->
+          <button
+            type="button"
+            class="crud-status-tab p-3 rounded-2xl border transition-all cursor-pointer text-left flex flex-col justify-between h-20 bg-surface-container-low border-outline-variant/20"
+            data-status-val="maintenance"
+          >
+            <span class="material-symbols-outlined text-amber-600 text-xl">handyman</span>
+            <div>
+              <div class="font-body font-bold text-xs text-on-surface">Perbaikan</div>
+              <div class="text-[10px] text-on-surface-variant">Servis Bay</div>
+            </div>
+          </button>
+        </div>
+        <input type="hidden" id="selected-status-value" value="available" />
+      </div>
+
+      <!-- 2. Dynamic Context Note Banner (Active for Booth or Maintenance) -->
+      <div id="container-booth-notes" class="hidden p-4 rounded-2xl bg-surface-container-low border border-primary/20 space-y-2">
+        <label class="block text-xs font-mono font-bold uppercase tracking-wider text-primary mb-1">
+          Keterangan Acara / Stan Booth
+        </label>
+        <input
+          type="text"
+          id="input-booth-note"
+          class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/20 text-xs font-body text-on-surface focus:outline-none focus:border-primary shadow-xs"
+          placeholder="e.g. Bazar Dies Natalis BEM / Booth Sponsor"
+        />
+        <p class="text-[11px] font-body text-on-surface-variant">
+          Slot ini akan diproteksi agar display VMS gerbang tidak mengarahkan pengemudi umum ke sini.
+        </p>
+      </div>
+
+      <div id="container-service-notes" class="hidden p-4 rounded-2xl bg-surface-container-low border border-amber-600/20 space-y-2">
+        <label class="block text-xs font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-1">
+          Alasan Pemeliharaan / Servis
+        </label>
+        <input
+          type="text"
+          id="input-service-note"
+          class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/20 text-xs font-body text-on-surface focus:outline-none focus:border-amber-600 shadow-xs"
+          placeholder="e.g. Kalibrasi sensor kontak roda / Pengecatan marka"
+        />
+        <p class="text-[11px] font-body text-on-surface-variant">
+          Status perbaikan akan tercatat dalam log audit sarana prasarana.
+        </p>
+      </div>
+
+      <!-- 3. Slot Identity & Sector -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-mono font-bold uppercase tracking-wider text-on-surface-variant mb-1.5" for="input-slot-name">
+            Label Nama Bay
+          </label>
+          <input
+            type="text"
+            id="input-slot-name"
+            required
+            class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/25 text-sm font-headline text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-xs"
+            placeholder="e.g. Slot 01"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono font-bold uppercase tracking-wider text-on-surface-variant mb-1.5" for="select-slot-sector">
+            Sektor Baris
+          </label>
+          <select
+            id="select-slot-sector"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/25 text-xs font-mono text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-xs cursor-pointer"
+          >
+            <option value="Baris Depan">Baris Depan (Slot 01 - 05)</option>
+            <option value="Baris Tengah">Baris Tengah (Slot 06 - 10)</option>
+            <option value="Baris Belakang">Baris Belakang (Slot 11 - 15)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Modal Action Buttons (Saku Design) -->
+      <div class="pt-4 border-t border-outline-variant/15 flex items-center justify-between gap-3">
+        <!-- Delete Button -->
+        <button
+          type="button"
+          id="btn-delete-slot"
+          class="text-xs font-body font-semibold text-error hover:underline transition-all cursor-pointer flex items-center gap-1.5"
+        >
+          <span class="material-symbols-outlined text-base">delete</span>
+          <span>Hapus Slot</span>
+        </button>
+
+        <div class="flex items-center gap-2.5 ml-auto">
+          <button
+            type="button"
+            id="btn-cancel-crud"
+            class="px-4 py-2.5 rounded-full text-xs font-body font-medium text-secondary hover:text-on-surface hover:bg-surface-container-highest transition-colors cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            type="submit"
+            id="btn-save-slot"
+            class="px-5 py-2.5 rounded-full bg-primary text-on-primary font-body font-semibold text-xs hover:bg-primary-container transition-all shadow-xs cursor-pointer active:scale-95 flex items-center gap-1.5 min-h-[40px]"
+          >
+            <span class="material-symbols-outlined text-base">check</span>
+            <span>Simpan Perubahan</span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  interface ParkingSlot {
+    id: string;
+    name: string;
+    sector: string;
+    status: 'available' | 'occupied' | 'reserved' | 'maintenance';
+    notes: string;
+    confidence: string;
+    groundPoint: string;
+    stateLocked: boolean;
+  }
+
+  const STORAGE_KEY = 'goparkir_live_slots_data_v3';
+
+  const defaultSlotsData: ParkingSlot[] = [
+    { id: 'Slot_1', name: 'Slot 01', sector: 'Baris Depan', status: 'occupied', notes: '', confidence: '0.94', groundPoint: '[642, 810]', stateLocked: true },
+    { id: 'Slot_2', name: 'Slot 02', sector: 'Baris Depan', status: 'available', notes: '', confidence: '0.00', groundPoint: 'N/A', stateLocked: true },
+    { id: 'Slot_3', name: 'Slot 03', sector: 'Baris Depan', status: 'reserved', notes: 'Booth Bazar Dies Natalis BEM', confidence: 'N/A', groundPoint: '[1458, 483]', stateLocked: true },
+    { id: 'Slot_4', name: 'Slot 04', sector: 'Baris Depan', status: 'occupied', notes: '', confidence: '0.88', groundPoint: '[890, 720]', stateLocked: true },
+    { id: 'Slot_5', name: 'Slot 05', sector: 'Baris Depan', status: 'available', notes: '', confidence: '0.00', groundPoint: 'N/A', stateLocked: true },
+    { id: 'Slot_6', name: 'Slot 06', sector: 'Baris Tengah', status: 'occupied', notes: '', confidence: '0.95', groundPoint: '[712, 640]', stateLocked: true },
+    { id: 'Slot_7', name: 'Slot 07', sector: 'Baris Tengah', status: 'occupied', notes: '', confidence: '0.93', groundPoint: '[980, 615]', stateLocked: true },
+    { id: 'Slot_8', name: 'Slot 08', sector: 'Baris Tengah', status: 'occupied', notes: '', confidence: '0.87', groundPoint: '[1120, 590]', stateLocked: true },
+    { id: 'Slot_9', name: 'Slot 09', sector: 'Baris Tengah', status: 'available', notes: '', confidence: '0.00', groundPoint: 'N/A', stateLocked: true },
+    { id: 'Slot_10', name: 'Slot 10', sector: 'Baris Tengah', status: 'maintenance', notes: 'Perbaikan Sensor Kontak Roda', confidence: 'N/A', groundPoint: '[1340, 540]', stateLocked: true },
+    { id: 'Slot_11', name: 'Slot 11', sector: 'Baris Belakang', status: 'occupied', notes: '', confidence: '0.90', groundPoint: '[610, 480]', stateLocked: true },
+    { id: 'Slot_12', name: 'Slot 12', sector: 'Baris Belakang', status: 'occupied', notes: '', confidence: '0.96', groundPoint: '[780, 460]', stateLocked: true },
+    { id: 'Slot_13', name: 'Slot 13', sector: 'Baris Belakang', status: 'occupied', notes: '', confidence: '0.89', groundPoint: '[950, 440]', stateLocked: true },
+    { id: 'Slot_14', name: 'Slot 14', sector: 'Baris Belakang', status: 'available', notes: '', confidence: '0.00', groundPoint: 'N/A', stateLocked: true },
+    { id: 'Slot_15', name: 'Slot 15', sector: 'Baris Belakang', status: 'occupied', notes: '', confidence: '0.93', groundPoint: '[1210, 410]', stateLocked: true },
+  ];
+
+  function getSlots(): ParkingSlot[] {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // fallback
+    }
+    return [...defaultSlotsData];
+  }
+
+  function saveSlots(slots: ParkingSlot[]) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(slots));
+    } catch {
+      // fallback
+    }
+  }
+
+  function setupLiveSlotsPage() {
+    let slots = getSlots();
+    let currentStatusFilter = 'all';
+    let currentSectorFilter = 'all';
+
+    // DOM References
+    const gridContainer = document.getElementById('bay-cards-grid');
+    const apiJsonPreview = document.getElementById('api-json-preview');
+    const btnOpenAddSlot = document.getElementById('btn-open-add-slot');
+    const btnResetDefault = document.getElementById('btn-reset-default-slots');
+
+    // KPI Elements
+    const kpiTotalSlots = document.getElementById('kpi-total-slots');
+    const kpiOccupancyCount = document.getElementById('kpi-occupancy-count');
+    const kpiOccupancyPct = document.getElementById('kpi-occupancy-pct');
+    const kpiAvailableCount = document.getElementById('kpi-available-count');
+    const kpiAvailableList = document.getElementById('kpi-available-list');
+    const kpiSpecialStatus = document.getElementById('kpi-special-status');
+
+    // Counts in Filter Pills
+    const countAll = document.getElementById('count-all');
+    const countAvailable = document.getElementById('count-available');
+    const countOccupied = document.getElementById('count-occupied');
+    const countReserved = document.getElementById('count-reserved');
+    const countMaintenance = document.getElementById('count-maintenance');
+
+    // Modal Elements
+    const modalCrud = document.getElementById('modal-slot-crud');
+    const modalBox = document.getElementById('modal-slot-box');
+    const formCrud = document.getElementById('form-slot-crud') as HTMLFormElement;
+    const modalTitle = document.getElementById('modal-crud-title');
+    const modalSubtitle = document.getElementById('modal-crud-subtitle');
+    const modalBadge = document.getElementById('modal-slot-badge');
+    const inputMode = document.getElementById('input-slot-mode') as HTMLInputElement;
+    const inputId = document.getElementById('input-slot-id') as HTMLInputElement;
+    const inputName = document.getElementById('input-slot-name') as HTMLInputElement;
+    const selectSector = document.getElementById('select-slot-sector') as HTMLSelectElement;
+    
+    // Status Selector Tabs
+    const statusTabs = document.querySelectorAll('.crud-status-tab');
+    const selectedStatusInput = document.getElementById('selected-status-value') as HTMLInputElement;
+    const containerBoothNotes = document.getElementById('container-booth-notes');
+    const containerServiceNotes = document.getElementById('container-service-notes');
+    const inputBoothNote = document.getElementById('input-booth-note') as HTMLInputElement;
+    const inputServiceNote = document.getElementById('input-service-note') as HTMLInputElement;
+
+    const btnCloseModal = document.getElementById('btn-close-crud-modal');
+    const btnCancelModal = document.getElementById('btn-cancel-crud');
+    const btnDeleteSlot = document.getElementById('btn-delete-slot');
+
+    function updateKPIs() {
+      const total = slots.length;
+      const occupied = slots.filter(s => s.status === 'occupied').length;
+      const available = slots.filter(s => s.status === 'available').length;
+      const reserved = slots.filter(s => s.status === 'reserved').length;
+      const maintenance = slots.filter(s => s.status === 'maintenance').length;
+      const pct = total > 0 ? ((occupied / total) * 100).toFixed(1) : '0.0';
+
+      if (kpiTotalSlots) kpiTotalSlots.textContent = `${total} Slot Terpasang`;
+      if (kpiOccupancyCount) kpiOccupancyCount.innerHTML = `${occupied} Terisi <span class="text-sm font-normal text-on-surface-variant">/ ${total}</span>`;
+      if (kpiOccupancyPct) kpiOccupancyPct.textContent = `${pct}% Terisi`;
+      if (kpiAvailableCount) kpiAvailableCount.textContent = `${available} Slot Tersedia`;
+
+      const availableNums = slots.filter(s => s.status === 'available').map(s => s.name.replace('Slot ', '')).join(', ');
+      if (kpiAvailableList) kpiAvailableList.textContent = availableNums ? `Slot ${availableNums}` : 'Tidak ada slot kosong';
+
+      if (kpiSpecialStatus) kpiSpecialStatus.innerHTML = `${reserved} Booth &bull; ${maintenance} Perbaikan`;
+
+      if (countAll) countAll.textContent = String(total);
+      if (countAvailable) countAvailable.textContent = String(available);
+      if (countOccupied) countOccupied.textContent = String(occupied);
+      if (countReserved) countReserved.textContent = String(reserved);
+      if (countMaintenance) countMaintenance.textContent = String(maintenance);
+    }
+
+    function setModalStatus(statusVal: string) {
+      if (selectedStatusInput) selectedStatusInput.value = statusVal;
+
+      statusTabs.forEach(tab => {
+        const val = tab.getAttribute('data-status-val');
+        const isSelected = val === statusVal;
+
+        tab.classList.remove('ring-2', 'ring-primary', 'bg-surface-container-highest', 'border-primary', 'border-outline-variant/20');
+
+        if (isSelected) {
+          tab.classList.add('ring-2', 'ring-primary', 'bg-surface-container-highest', 'border-primary');
+        } else {
+          tab.classList.add('bg-surface-container-low', 'border-outline-variant/20');
+        }
+      });
+
+      if (containerBoothNotes) {
+        if (statusVal === 'reserved') {
+          containerBoothNotes.classList.remove('hidden');
+        } else {
+          containerBoothNotes.classList.add('hidden');
+        }
+      }
+
+      if (containerServiceNotes) {
+        if (statusVal === 'maintenance') {
+          containerServiceNotes.classList.remove('hidden');
+        } else {
+          containerServiceNotes.classList.add('hidden');
+        }
+      }
+    }
+
+    statusTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const val = tab.getAttribute('data-status-val') || 'available';
+        setModalStatus(val);
+      });
+    });
+
+    function renderCards() {
+      if (!gridContainer) return;
+      gridContainer.innerHTML = '';
+
+      slots.forEach((slot) => {
+        const isOcc = slot.status === 'occupied';
+        const isAvail = slot.status === 'available';
+        const isRes = slot.status === 'reserved';
+        const isMaint = slot.status === 'maintenance';
+
+        let bgBorderClass = 'bg-[#f6fcf8] border-slot-available/25';
+        let badgeClass = 'bg-slot-available/10 text-slot-available';
+        let statusLabel = 'TERSEDIA';
+        let statusText = 'Siap Digunakan';
+        let subDetail = 'Ground ROI Terbuka';
+
+        if (isOcc) {
+          bgBorderClass = 'bg-[#fdf8f7] border-slot-occupied/25';
+          badgeClass = 'bg-slot-occupied/10 text-slot-occupied';
+          statusLabel = 'TERISI';
+          statusText = 'Kendaraan Terparkir';
+          subDetail = `Conf: ${slot.confidence || '0.92'} • ${slot.groundPoint || '[800, 600]'}`;
+        } else if (isRes) {
+          bgBorderClass = 'bg-surface-container-low border-primary/20';
+          badgeClass = 'bg-primary/10 text-primary';
+          statusLabel = 'BOOTH';
+          statusText = slot.notes || 'Bazar Kampus BEM';
+          subDetail = 'Proteksi VMS Aktif';
+        } else if (isMaint) {
+          bgBorderClass = 'bg-surface-container-low border-amber-600/20';
+          badgeClass = 'bg-amber-600/10 text-amber-700 dark:text-amber-400';
+          statusLabel = 'PERBAIKAN';
+          statusText = slot.notes || 'Kalibrasi Sensor Kontak';
+          subDetail = 'Bay Non-Aktif';
+        }
+
+        const card = document.createElement('div');
+        card.setAttribute('data-bay-card', '');
+        card.setAttribute('data-bay-id', slot.id);
+        card.setAttribute('data-bay-status', slot.status);
+        card.setAttribute('data-bay-sector', slot.sector);
+        card.className = `bay-telemetry-card h-[185px] p-4 rounded-2xl border transition-all flex flex-col justify-between shadow-xs ${bgBorderClass}`;
+        
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between text-xs font-semibold mb-2">
+              <span class="font-headline font-bold text-on-surface text-sm">${escapeHtml(slot.name)}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${badgeClass}">
+                ${statusLabel}
+              </span>
+            </div>
+
+            <div class="h-16 flex flex-col justify-center px-3 py-1.5 rounded-xl bg-surface-container-lowest/80 border border-outline-variant/15 text-xs">
+              <span class="font-semibold text-on-surface text-xs truncate">${escapeHtml(statusText)}</span>
+              <span class="text-[11px] text-on-surface-variant font-mono mt-0.5">${escapeHtml(slot.sector)}</span>
+              <span class="text-[10px] text-on-surface-variant/80 font-mono truncate">${escapeHtml(subDetail)}</span>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-outline-variant/10 flex items-center justify-between text-xs font-mono">
+            <span class="text-[10px] text-on-surface-variant">Main Hall</span>
+            <button
+              type="button"
+              class="btn-manage-slot px-3 py-1 rounded-full text-xs font-mono font-medium text-secondary hover:text-on-surface hover:bg-surface-container-highest transition-colors flex items-center gap-1 border border-outline-variant/15 cursor-pointer shadow-xs active:scale-95"
+              data-slot-id="${escapeHtml(slot.id)}"
+            >
+              <span class="material-symbols-outlined text-sm">edit</span>
+              <span>Kelola</span>
+            </button>
+          </div>
+        `;
+
+        gridContainer.appendChild(card);
+      });
+
+      // Bind manage buttons
+      const manageBtns = gridContainer.querySelectorAll('.btn-manage-slot');
+      manageBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const slotId = btn.getAttribute('data-slot-id');
+          if (slotId) openEditModal(slotId);
+        });
+      });
+
+      applyFilters();
+      renderApiSnapshot();
+    }
+
+    function renderApiSnapshot() {
+      if (!apiJsonPreview) return;
+      const payload = {
+        campus_zone: 'Main Hall (15 Bay)',
+        total_slots: slots.length,
+        occupied: slots.filter(s => s.status === 'occupied').length,
+        available: slots.filter(s => s.status === 'available').length,
+        reserved_booth: slots.filter(s => s.status === 'reserved').length,
+        maintenance: slots.filter(s => s.status === 'maintenance').length,
+        timestamp: new Date().toISOString(),
+        slots: slots.map(s => ({
+          id: s.id,
+          name: s.name,
+          sector: s.sector,
+          status: s.status,
+          notes: s.notes || undefined,
+        }))
+      };
+      apiJsonPreview.textContent = JSON.stringify(payload, null, 2);
+    }
+
+    function applyFilters() {
+      const bayCards = document.querySelectorAll('[data-bay-card]');
+      bayCards.forEach((card) => {
+        const status = card.getAttribute('data-bay-status');
+        const sector = card.getAttribute('data-bay-sector');
+
+        const matchStatus = currentStatusFilter === 'all' || status === currentStatusFilter;
+        const matchSector = currentSectorFilter === 'all' || sector === currentSectorFilter;
+
+        if (matchStatus && matchSector) {
+          (card as HTMLElement).style.display = 'flex';
+        } else {
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+    }
+
+    // Modal Openers
+    function openEditModal(slotId: string) {
+      const slot = slots.find(s => s.id === slotId);
+      if (!slot || !modalCrud || !modalBox) return;
+
+      inputMode.value = 'edit';
+      inputId.value = slot.id;
+      inputName.value = slot.name;
+      selectSector.value = slot.sector;
+      
+      if (slot.status === 'reserved') {
+        if (inputBoothNote) inputBoothNote.value = slot.notes || '';
+      } else if (slot.status === 'maintenance') {
+        if (inputServiceNote) inputServiceNote.value = slot.notes || '';
+      } else {
+        if (inputBoothNote) inputBoothNote.value = '';
+        if (inputServiceNote) inputServiceNote.value = '';
+      }
+
+      setModalStatus(slot.status);
+
+      if (modalBadge) modalBadge.textContent = `${slot.name} • ${slot.sector}`;
+      if (modalTitle) modalTitle.textContent = `Kelola ${slot.name}`;
+      if (modalSubtitle) modalSubtitle.textContent = `Update status operasional atau alokasi khusus slot Main Hall`;
+      if (btnDeleteSlot) btnDeleteSlot.style.display = 'inline-flex';
+
+      modalCrud.classList.remove('opacity-0', 'pointer-events-none');
+      modalBox.classList.remove('scale-95');
+      modalBox.classList.add('scale-100');
+    }
+
+    function openAddModal() {
+      if (!modalCrud || !modalBox) return;
+
+      const newIndex = slots.length + 1;
+      const newName = `Slot ${newIndex < 10 ? '0' + newIndex : newIndex}`;
+      const newId = `Slot_${newIndex}`;
+
+      inputMode.value = 'add';
+      inputId.value = newId;
+      inputName.value = newName;
+      selectSector.value = 'Baris Depan';
+      
+      if (inputBoothNote) inputBoothNote.value = '';
+      if (inputServiceNote) inputServiceNote.value = '';
+
+      setModalStatus('available');
+
+      if (modalBadge) modalBadge.textContent = `Bay Tambahan Baru`;
+      if (modalTitle) modalTitle.textContent = 'Tambah Slot Parkir Baru';
+      if (modalSubtitle) modalSubtitle.textContent = 'Daftarkan bay tambahan di area Main Hall';
+      if (btnDeleteSlot) btnDeleteSlot.style.display = 'none';
+
+      modalCrud.classList.remove('opacity-0', 'pointer-events-none');
+      modalBox.classList.remove('scale-95');
+      modalBox.classList.add('scale-100');
+    }
+
+    function closeModal() {
+      if (!modalCrud || !modalBox) return;
+      modalBox.classList.remove('scale-100');
+      modalBox.classList.add('scale-95');
+      modalCrud.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    // Modal Events
+    btnOpenAddSlot?.addEventListener('click', openAddModal);
+    btnCloseModal?.addEventListener('click', closeModal);
+    btnCancelModal?.addEventListener('click', closeModal);
+
+    modalCrud?.addEventListener('click', (e) => {
+      if (e.target === modalCrud) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalCrud && !modalCrud.classList.contains('pointer-events-none')) {
+        closeModal();
+      }
+    });
+
+    // Form Save
+    formCrud?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const mode = inputMode.value;
+      const id = inputId.value.trim();
+      const name = inputName.value.trim();
+      const sector = selectSector.value;
+      const status = (selectedStatusInput?.value || 'available') as ParkingSlot['status'];
+      
+      let notes = '';
+      if (status === 'reserved') {
+        notes = inputBoothNote?.value.trim() || 'Direservasi Booth Acara';
+      } else if (status === 'maintenance') {
+        notes = inputServiceNote?.value.trim() || 'Perbaikan Teknis Bay';
+      }
+
+      if (mode === 'add') {
+        const newSlot: ParkingSlot = {
+          id: id || `Slot_${Date.now()}`,
+          name,
+          sector,
+          status,
+          notes,
+          confidence: status === 'available' ? '0.00' : '0.92',
+          groundPoint: status === 'available' ? 'N/A' : '[800, 600]',
+          stateLocked: true,
+        };
+        slots.push(newSlot);
+      } else {
+        const index = slots.findIndex(s => s.id === id);
+        if (index !== -1) {
+          slots[index] = {
+            ...slots[index],
+            name,
+            sector,
+            status,
+            notes,
+            confidence: status === 'available' ? '0.00' : (slots[index].confidence || '0.92'),
+            groundPoint: status === 'available' ? 'N/A' : (slots[index].groundPoint || '[800, 600]'),
+          };
+        }
+      }
+
+      saveSlots(slots);
+      updateKPIs();
+      renderCards();
+      closeModal();
+    });
+
+    // Delete Slot
+    btnDeleteSlot?.addEventListener('click', () => {
+      const id = inputId.value;
+      if (!id) return;
+      if (confirm(`Yakin ingin menghapus slot ${id}?`)) {
+        slots = slots.filter(s => s.id !== id);
+        saveSlots(slots);
+        updateKPIs();
+        renderCards();
+        closeModal();
+      }
+    });
+
+    // Reset Default
+    btnResetDefault?.addEventListener('click', () => {
+      if (confirm('Kembalikan 15 slot Main Hall ke pengaturan default (termasuk contoh booth dan maintenance)?')) {
+        slots = [...defaultSlotsData];
+        saveSlots(slots);
+        updateKPIs();
+        renderCards();
+      }
+    });
+
+    // Status Filter Pills
+    const statusPills = document.querySelectorAll('.status-filter-pill');
+    statusPills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        statusPills.forEach((p) => {
+          p.classList.remove('bg-surface-container-highest', 'text-primary', 'font-bold', 'shadow-xs');
+          p.classList.add('text-secondary');
+        });
+        pill.classList.remove('text-secondary');
+        pill.classList.add('bg-surface-container-highest', 'text-primary', 'font-bold', 'shadow-xs');
+
+        currentStatusFilter = pill.getAttribute('data-status') || 'all';
+        applyFilters();
+      });
+    });
+
+    // Sector Filter Dropdown
+    const dropdown = document.getElementById('dropdown-slot-sector');
+    if (dropdown) {
+      const btn = dropdown.querySelector('.custom-dropdown-btn') as HTMLElement;
+      const panel = dropdown.querySelector('.custom-dropdown-panel') as HTMLElement;
+      const chevron = dropdown.querySelector('.custom-dropdown-chevron') as HTMLElement;
+      const label = dropdown.querySelector('.custom-dropdown-label') as HTMLElement;
+      const items = dropdown.querySelectorAll('.custom-dropdown-item');
+
+      function toggleDropdown() {
+        const isHidden = panel.classList.contains('hidden');
+        if (isHidden) {
+          panel.classList.remove('hidden');
+          btn.setAttribute('aria-expanded', 'true');
+          if (chevron) chevron.style.transform = 'rotate(180deg)';
+        } else {
+          panel.classList.add('hidden');
+          btn.setAttribute('aria-expanded', 'false');
+          if (chevron) chevron.style.transform = 'rotate(0deg)';
+        }
+      }
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleDropdown();
+      });
+
+      items.forEach((item) => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          currentSectorFilter = item.getAttribute('data-sector') || 'all';
+          const text = item.querySelector('span')?.textContent || '';
+          if (label) label.textContent = text;
+
+          items.forEach((i) => {
+            i.classList.remove('bg-surface-container-highest', 'text-primary', 'font-bold');
+            i.classList.add('text-on-surface');
+            const check = i.querySelector('.material-symbols-outlined');
+            if (check) check.remove();
+          });
+          item.classList.add('bg-surface-container-highest', 'text-primary', 'font-bold');
+          item.classList.remove('text-on-surface');
+          const checkIcon = document.createElement('span');
+          checkIcon.className = 'material-symbols-outlined text-sm';
+          checkIcon.textContent = 'check';
+          item.appendChild(checkIcon);
+
+          applyFilters();
+
+          panel.classList.add('hidden');
+          btn.setAttribute('aria-expanded', 'false');
+          if (chevron) chevron.style.transform = 'rotate(0deg)';
+        });
+      });
+
+      document.addEventListener('click', () => {
+        panel.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+      });
+    }
+
+    // Copy JSON Snapshot
+    const btnCopyJson = document.getElementById('btn-copy-json');
+    const btnCopyText = document.getElementById('btn-copy-json-text');
+    btnCopyJson?.addEventListener('click', async () => {
+      const payload = {
+        campus_zone: 'Main Hall (15 Bay)',
+        total_slots: slots.length,
+        occupied: slots.filter(s => s.status === 'occupied').length,
+        available: slots.filter(s => s.status === 'available').length,
+        reserved_booth: slots.filter(s => s.status === 'reserved').length,
+        maintenance: slots.filter(s => s.status === 'maintenance').length,
+        timestamp: new Date().toISOString(),
+        slots: slots.map(s => ({
+          id: s.id,
+          name: s.name,
+          sector: s.sector,
+          status: s.status,
+          notes: s.notes || undefined,
+        }))
+      };
+
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+        if (btnCopyText) btnCopyText.textContent = 'Tersalin!';
+        setTimeout(() => {
+          if (btnCopyText) btnCopyText.textContent = 'Salin JSON';
+        }, 2000);
+      } catch {
+        // fallback
+      }
+    });
+
+    // Refresh API snapshot
+    const btnRefresh = document.getElementById('btn-refresh-api-snapshot');
+    btnRefresh?.addEventListener('click', () => {
+      const icon = btnRefresh.querySelector('.material-symbols-outlined');
+      if (icon) icon.classList.add('animate-spin');
+      setTimeout(() => {
+        slots = getSlots();
+        updateKPIs();
+        renderCards();
+        if (icon) icon.classList.remove('animate-spin');
+      }, 500);
+    });
+
+    // Initial render
+    updateKPIs();
+    renderCards();
+  }
+
+  function escapeHtml(str: string): string {
+    if (!str) return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  setupLiveSlotsPage();
+  document.addEventListener('astro:page-load', setupLiveSlotsPage);
+</script>

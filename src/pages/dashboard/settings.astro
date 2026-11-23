@@ -1,0 +1,854 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import DashboardShell from '../../components/dashboard/DashboardShell.astro';
+---
+
+<Layout title="User Settings &amp; Admin Management · GoParkir">
+  <DashboardShell activeNavId="settings">
+    
+    <div class="max-w-4xl mx-auto space-y-8 md:space-y-12">
+      
+      <!-- Top Title Header (Saku SettingsView Style) -->
+      <div>
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-headline font-medium text-on-surface mb-2">
+          User Settings &amp; Admin Management
+        </h2>
+        <p class="text-secondary font-body text-sm md:text-base">
+          Kelola profil administrator Anda, hak akses operator kampus, dan konfigurasi microservice.
+        </p>
+      </div>
+
+      <!-- Top Action Toast Notification -->
+      <div
+        id="settings-toast"
+        class="hidden p-4 rounded-xl bg-surface-container-highest border border-outline-variant/30 text-on-surface flex items-center justify-between gap-3 shadow-xs transition-all duration-300"
+        role="status"
+      >
+        <div class="flex items-center gap-2.5">
+          <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+          <span id="toast-message" class="font-headline font-semibold text-xs sm:text-sm">
+            Perubahan berhasil disimpan!
+          </span>
+        </div>
+        <button
+          type="button"
+          id="btn-close-toast"
+          class="text-on-surface-variant hover:text-on-surface p-1 min-h-[36px] min-w-[36px] flex items-center justify-center cursor-pointer rounded-full"
+          aria-label="Tutup Notifikasi"
+        >
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+
+      <!-- 1. PROFILE DETAILS (Saku SettingsView Section 1) -->
+      <section class="bg-surface-container-lowest rounded-xl p-6 sm:p-8 shadow-[0_8px_48px_rgba(27,28,24,0.04)]">
+        <h3 class="text-xl md:text-2xl font-headline font-medium text-on-surface mb-6 md:mb-8">
+          Profile Details
+        </h3>
+        
+        <div class="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
+          <!-- Avatar Preview -->
+          <div class="relative group cursor-pointer shrink-0">
+            <div class="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary text-on-primary flex items-center justify-center font-mono font-bold text-2xl md:text-3xl shadow-[0_8px_32px_rgba(27,28,24,0.08)]">
+              p4
+            </div>
+            <div class="absolute inset-0 bg-on-surface/25 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs">
+              <span class="material-symbols-outlined text-white text-2xl">photo_camera</span>
+            </div>
+          </div>
+
+          <!-- Profile Info Fields -->
+          <div class="flex-1 space-y-4 w-full">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="block text-xs font-mono font-medium text-on-surface-variant" for="input-my-name">
+                  Nama Lengkap
+                </label>
+                <input
+                  id="input-my-name"
+                  type="text"
+                  value="pavelc4"
+                  class="w-full bg-surface border border-surface-container-highest focus:border-primary focus:bg-surface-container-lowest text-on-surface rounded-xl py-2.5 px-3.5 transition-colors font-body text-sm focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block text-xs font-mono font-medium text-on-surface-variant" for="input-my-email">
+                  Email Administrator
+                </label>
+                <input
+                  id="input-my-email"
+                  type="email"
+                  value="admin@widyatama.ac.id"
+                  class="w-full bg-surface border border-surface-container-highest focus:border-primary focus:bg-surface-container-lowest text-on-surface rounded-xl py-2.5 px-3.5 transition-colors font-body text-sm focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 pt-2">
+              <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-primary/10 text-primary border border-primary/20">
+                Super Administrator
+              </span>
+              <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-slot-available/10 text-slot-available border border-slot-available/20">
+                Status: Aktif
+              </span>
+              <span class="text-xs font-mono text-on-surface-variant ml-auto">
+                Level 1 Access
+              </span>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+              <button
+                type="button"
+                id="btn-save-profile"
+                class="bg-primary text-on-primary font-body font-medium px-6 py-2.5 rounded-full hover:bg-primary-container shadow-xs transition-all cursor-pointer text-sm min-h-[44px]"
+              >
+                Simpan Perubahan Profil
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. ADMINISTRATOR & OPERATOR MANAGEMENT (CRUD ADD ADMIN) -->
+      <section class="bg-surface-container-lowest rounded-xl p-6 sm:p-8 shadow-[0_8px_48px_rgba(27,28,24,0.04)] space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/10 pb-6">
+          <div>
+            <h3 class="text-xl md:text-2xl font-headline font-medium text-on-surface mb-1">
+              Administrator &amp; Operator Kampus
+            </h3>
+            <p class="text-secondary font-body text-xs sm:text-sm">
+              Kelola daftar akun yang berwenang mengakses dashboard dan mengontrol sensor lapangan.
+            </p>
+          </div>
+
+          <!-- Primary Add Admin Button (Saku rounded-full Style) -->
+          <button
+            type="button"
+            id="btn-open-add-admin"
+            class="bg-primary text-on-primary font-body font-medium px-5 py-2.5 rounded-full hover:bg-primary-container shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer text-sm shrink-0 min-h-[44px]"
+          >
+            <span class="material-symbols-outlined text-lg">person_add</span>
+            <span>Tambah Admin Baru</span>
+          </button>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-base pointer-events-none">
+              search
+            </span>
+            <input
+              type="text"
+              id="search-admin-input"
+              placeholder="Cari nama atau email..."
+              class="w-full pl-10 pr-4 py-2 min-h-[44px] rounded-full bg-surface border border-surface-container-highest focus:border-primary text-xs sm:text-sm font-body text-on-surface focus:outline-hidden"
+            />
+          </div>
+
+          <!-- Custom Dropdown: Filter Role Admin (Saku Style) -->
+          <div class="relative custom-dropdown" id="dropdown-admin-role">
+            <input type="hidden" id="filter-admin-role" value="all" />
+            <button
+              type="button"
+              class="custom-dropdown-btn flex items-center justify-between gap-3 px-4 py-2 min-h-[44px] rounded-full bg-surface border border-surface-container-highest hover:border-primary text-xs font-mono text-on-surface cursor-pointer transition-all shadow-xs"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              <span class="custom-dropdown-label truncate">Semua Role</span>
+              <span class="material-symbols-outlined text-base text-on-surface-variant transition-transform custom-dropdown-chevron">
+                expand_more
+              </span>
+            </button>
+            <div class="custom-dropdown-panel hidden absolute right-0 top-full mt-2 w-56 bg-surface-container-lowest rounded-2xl shadow-[0_16px_40px_rgba(27,28,24,0.14)] border border-outline-variant/20 p-1.5 z-40">
+              <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-primary font-bold bg-surface-container-highest hover:bg-surface-container-high transition-colors text-left cursor-pointer" data-value="all">
+                <span>Semua Role</span>
+                <span class="material-symbols-outlined text-sm">check</span>
+              </button>
+              <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-value="Super Administrator">
+                <span>Super Administrator</span>
+              </button>
+              <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-value="Operator Lapangan">
+                <span>Operator Lapangan</span>
+              </button>
+              <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-value="Auditor Sarpras">
+                <span>Auditor Sarpras</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table of Admins -->
+        <div class="overflow-x-auto rounded-xl border border-outline-variant/15">
+          <table class="w-full text-left text-xs font-body border-collapse">
+            <thead>
+              <tr class="bg-surface-container-low border-b border-outline-variant/15 text-on-surface-variant font-mono text-[11px] uppercase tracking-wider">
+                <th class="py-3 px-4 font-semibold">Administrator</th>
+                <th class="py-3 px-4 font-semibold">Email Kampus</th>
+                <th class="py-3 px-4 font-semibold">Role</th>
+                <th class="py-3 px-4 font-semibold">Status</th>
+                <th class="py-3 px-4 font-semibold">Terakhir Aktif</th>
+                <th class="py-3 px-4 font-semibold text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="admin-table-body" class="divide-y divide-outline-variant/10 text-on-surface">
+              <!-- Dynamically populated via script -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="admin-empty-state" class="hidden text-center py-10 px-4 space-y-2">
+          <span class="material-symbols-outlined text-4xl text-on-surface-variant/40">person_search</span>
+          <p class="font-headline font-semibold text-sm text-on-surface">Tidak ada akun admin yang cocok</p>
+        </div>
+
+        <div class="flex items-center justify-between text-xs font-mono text-on-surface-variant pt-2">
+          <span id="admin-count-label">Menampilkan 4 administrator</span>
+          <span>Penyimpanan tersinkronkan lokal</span>
+        </div>
+      </section>
+
+      <!-- 3. BACKEND MICROSERVICES SETTINGS -->
+      <section class="bg-surface-container-lowest rounded-xl p-6 sm:p-8 shadow-[0_8px_48px_rgba(27,28,24,0.04)] space-y-6">
+        <h3 class="text-xl md:text-2xl font-headline font-medium text-on-surface mb-2">
+          Microservice &amp; Gateway API
+        </h3>
+        <p class="text-secondary font-body text-xs sm:text-sm">
+          Konfigurasi endpoint FastAPI CarVision Python dan Golang API Gateway.
+        </p>
+
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-mono font-medium text-on-surface-variant" for="carvision-endpoint">
+                CarVision Base URL (FastAPI)
+              </label>
+              <input
+                id="carvision-endpoint"
+                type="text"
+                value="http://localhost:8000/api/v1"
+                class="w-full bg-surface border border-surface-container-highest focus:border-primary text-on-surface rounded-xl py-2.5 px-3.5 font-mono text-xs focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-mono font-medium text-on-surface-variant" for="golang-endpoint">
+                Golang Gateway Base URL
+              </label>
+              <input
+                id="golang-endpoint"
+                type="text"
+                value="http://localhost:8080/api/v1"
+                class="w-full bg-surface border border-surface-container-highest focus:border-primary text-on-surface rounded-xl py-2.5 px-3.5 font-mono text-xs focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-mono font-medium text-on-surface-variant" for="ai-model">
+                Bobot Model YOLO
+              </label>
+              <select
+                id="ai-model"
+                class="w-full bg-surface border border-surface-container-highest focus:border-primary text-on-surface rounded-xl py-2.5 px-3 font-body text-xs focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="yolo26m.pt" selected>yolo26m.pt (RTX GPU 4GB)</option>
+                <option value="yolo26n.pt">yolo26n.pt (Nano CPU)</option>
+                <option value="yolo26s.pt">yolo26s.pt (Small)</option>
+              </select>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-mono font-medium text-on-surface-variant" for="hardware-device">
+                Akselerasi Komputasi
+              </label>
+              <select
+                id="hardware-device"
+                class="w-full bg-surface border border-surface-container-highest focus:border-primary text-on-surface rounded-xl py-2.5 px-3 font-body text-xs focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="cuda" selected>NVIDIA CUDA (torch.no_grad)</option>
+                <option value="cpu">CPU Multithreaded</option>
+              </select>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-mono font-medium text-on-surface-variant" for="temporal-buffer">
+                Temporal Buffer (Frames)
+              </label>
+              <input
+                id="temporal-buffer"
+                type="number"
+                value="5"
+                min="1"
+                max="20"
+                class="w-full bg-surface border border-surface-container-highest focus:border-primary text-on-surface rounded-xl py-2.5 px-3.5 font-mono text-xs"
+              />
+            </div>
+          </div>
+
+          <div class="pt-3 flex justify-end">
+            <button
+              type="button"
+              id="btn-save-services"
+              class="bg-primary text-on-primary font-body font-medium px-6 py-2.5 rounded-full hover:bg-primary-container shadow-xs transition-all cursor-pointer text-sm min-h-[44px]"
+            >
+              Simpan Konfigurasi Backend
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. SECURITY (Saku SettingsView Section 3) -->
+      <section class="bg-surface-container-lowest rounded-xl p-6 sm:p-8 shadow-[0_8px_48px_rgba(27,28,24,0.04)]">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="material-symbols-outlined text-primary text-2xl">lock</span>
+          <h3 class="text-xl md:text-2xl font-headline font-medium text-on-surface">Security &amp; Password</h3>
+        </div>
+
+        <form id="form-password-change" class="space-y-4 max-w-lg">
+          <div class="space-y-1.5">
+            <label class="block text-xs font-mono font-medium text-on-surface-variant" for="current-pass">
+              Password Saat Ini
+            </label>
+            <input
+              id="current-pass"
+              type="password"
+              placeholder="••••••••"
+              class="w-full bg-surface border border-surface-container-highest focus:border-primary text-on-surface rounded-xl py-2.5 px-3.5 font-mono text-xs focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs font-mono font-medium text-on-surface-variant" for="new-pass">
+              Password Baru
+            </label>
+            <input
+              id="new-pass"
+              type="password"
+              placeholder="Minimal 6 karakter"
+              class="w-full bg-surface border border-surface-container-highest focus:border-primary text-on-surface rounded-xl py-2.5 px-3.5 font-mono text-xs focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+
+          <div class="pt-2">
+            <button
+              type="submit"
+              class="bg-surface-container-highest text-on-surface font-body font-medium px-6 py-2.5 rounded-full hover:bg-surface-container-high transition-colors cursor-pointer text-sm min-h-[44px]"
+            >
+              Update Password
+            </button>
+          </div>
+        </form>
+      </section>
+
+    </div>
+
+    <!-- MODAL POPUP: TAMBAH / EDIT ADMIN -->
+    <div
+      id="modal-admin"
+      class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div id="modal-admin-box" class="bg-surface-container-lowest rounded-3xl border border-outline-variant/20 shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-200">
+        <div class="px-6 py-5 bg-surface-container-low flex justify-between items-center border-b border-outline-variant/10">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+              <span class="material-symbols-outlined text-lg">person</span>
+            </div>
+            <h3 id="modal-admin-title" class="font-headline font-medium text-lg text-on-surface">
+              Tambah Administrator Baru
+            </h3>
+          </div>
+          <button
+            type="button"
+            id="btn-close-admin-modal"
+            class="text-on-surface-variant hover:bg-surface-container-highest p-1.5 rounded-full transition-colors cursor-pointer"
+            aria-label="Tutup"
+          >
+            <span class="material-symbols-outlined text-lg">close</span>
+          </button>
+        </div>
+
+        <form id="form-admin" class="p-6 space-y-4">
+          <input type="hidden" id="form-admin-id" value="" />
+
+          <div class="space-y-1.5">
+            <label for="form-admin-name" class="block text-xs font-mono font-medium text-on-surface-variant">
+              Nama Lengkap
+            </label>
+            <input
+              type="text"
+              id="form-admin-name"
+              required
+              placeholder="Contoh: Budi Santoso"
+              class="w-full bg-surface border border-surface-container-highest focus:border-primary text-on-surface rounded-xl py-2.5 px-3.5 text-sm font-body focus:outline-hidden"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="form-admin-email" class="block text-xs font-mono font-medium text-on-surface-variant">
+              Email Kampus Resmi
+            </label>
+            <input
+              type="email"
+              id="form-admin-email"
+              required
+              placeholder="Contoh: budi.santoso@widyatama.ac.id"
+              class="w-full bg-surface border border-surface-container-highest focus:border-primary text-on-surface rounded-xl py-2.5 px-3.5 text-sm font-mono focus:outline-hidden"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label for="form-admin-role" class="block text-xs font-mono font-medium text-on-surface-variant">
+                Role / Hak Akses
+              </label>
+              <select
+                id="form-admin-role"
+                class="w-full bg-surface border border-surface-container-highest focus:border-primary text-on-surface rounded-xl py-2.5 px-3.5 text-xs font-body cursor-pointer"
+              >
+                <option value="Operator Lapangan">Operator Lapangan</option>
+                <option value="Super Administrator">Super Administrator</option>
+                <option value="Auditor Sarpras">Auditor Sarpras</option>
+              </select>
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="form-admin-status" class="block text-xs font-mono font-medium text-on-surface-variant">
+                Status Akun
+              </label>
+              <select
+                id="form-admin-status"
+                class="w-full bg-surface border border-surface-container-highest focus:border-primary text-on-surface rounded-xl py-2.5 px-3.5 text-xs font-body cursor-pointer"
+              >
+                <option value="active">Aktif (Bisa Login)</option>
+                <option value="inactive">Nonaktif</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="form-admin-password" class="block text-xs font-mono font-medium text-on-surface-variant">
+              Password Akses
+            </label>
+            <input
+              type="password"
+              id="form-admin-password"
+              placeholder="Minimal 6 karakter"
+              class="w-full bg-surface border border-surface-container-highest focus:border-primary text-on-surface rounded-xl py-2.5 px-3.5 text-xs font-mono focus:outline-hidden"
+            />
+          </div>
+
+          <div class="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/10">
+            <button
+              type="button"
+              id="btn-cancel-admin-modal"
+              class="px-5 py-2.5 rounded-full border border-outline-variant/30 text-xs font-body font-medium text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer min-h-[44px]"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              class="px-6 py-2.5 rounded-full bg-primary hover:bg-primary-container text-on-primary font-body text-xs font-medium transition-all shadow-xs cursor-pointer min-h-[44px]"
+            >
+              Simpan Akun
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="h-12"></div>
+  </DashboardShell>
+</Layout>
+
+<!-- Client-side Interactive Logic -->
+<script is:inline>
+  const STORAGE_KEY_ADMINS = 'goparkir_admin_accounts_v3';
+
+  const defaultAdminSeed = [
+    {
+      id: 'admin-1',
+      name: 'pavelc4',
+      email: 'admin@widyatama.ac.id',
+      role: 'Super Administrator',
+      status: 'active',
+      lastActive: 'Aktif saat ini',
+    },
+    {
+      id: 'admin-2',
+      name: 'Budi Santoso',
+      email: 'budi.operator@widyatama.ac.id',
+      role: 'Operator Lapangan',
+      status: 'active',
+      lastActive: '2 jam lalu',
+    },
+    {
+      id: 'admin-3',
+      name: 'Siti Rahma',
+      email: 'siti.sarpras@widyatama.ac.id',
+      role: 'Auditor Sarpras',
+      status: 'active',
+      lastActive: 'Kemarin',
+    },
+    {
+      id: 'admin-4',
+      name: 'Hendra Wijaya',
+      email: 'hendra.gate@widyatama.ac.id',
+      role: 'Operator Lapangan',
+      status: 'inactive',
+      lastActive: '5 hari lalu',
+    },
+  ];
+
+  function getAdmins() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY_ADMINS);
+      if (data) return JSON.parse(data);
+    } catch (e) {}
+    localStorage.setItem(STORAGE_KEY_ADMINS, JSON.stringify(defaultAdminSeed));
+    return defaultAdminSeed;
+  }
+
+  function saveAdmins(admins) {
+    localStorage.setItem(STORAGE_KEY_ADMINS, JSON.stringify(admins));
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('settings-toast');
+    const msgEl = document.getElementById('toast-message');
+    if (!toast || !msgEl) return;
+    msgEl.textContent = msg;
+    toast.classList.remove('hidden');
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 3500);
+  }
+
+  function getInitials(name) {
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return (name.slice(0, 2) || 'AD').toUpperCase();
+  }
+
+  function renderAdminTable() {
+    const tableBody = document.getElementById('admin-table-body');
+    const emptyState = document.getElementById('admin-empty-state');
+    const countLabel = document.getElementById('admin-count-label');
+    const searchVal = (document.getElementById('search-admin-input')?.value || '').toLowerCase().trim();
+    const roleVal = document.getElementById('filter-admin-role')?.value || 'all';
+
+    if (!tableBody) return;
+
+    let admins = getAdmins();
+
+    if (searchVal) {
+      admins = admins.filter(a => a.name.toLowerCase().includes(searchVal) || a.email.toLowerCase().includes(searchVal));
+    }
+
+    if (roleVal !== 'all') {
+      admins = admins.filter(a => a.role === roleVal);
+    }
+
+    if (countLabel) {
+      countLabel.textContent = `Menampilkan ${admins.length} administrator`;
+    }
+
+    if (admins.length === 0) {
+      tableBody.innerHTML = '';
+      emptyState?.classList.remove('hidden');
+      return;
+    }
+
+    emptyState?.classList.add('hidden');
+
+    tableBody.innerHTML = admins.map(a => {
+      const isSuper = a.role === 'Super Administrator';
+      const isAct = a.status === 'active';
+      const initials = getInitials(a.name);
+
+      return `
+        <tr class="hover:bg-surface-container-low/50 transition-colors">
+          <td class="py-3.5 px-4">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-surface-container-high text-primary font-headline font-bold text-xs flex items-center justify-center shrink-0">
+                ${initials}
+              </div>
+              <span class="font-headline font-bold text-on-surface block">${a.name}</span>
+            </div>
+          </td>
+          <td class="py-3.5 px-4 font-mono text-xs text-on-surface-variant">
+            ${a.email}
+          </td>
+          <td class="py-3.5 px-4">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+              isSuper
+                ? 'bg-primary/10 text-primary border border-primary/20'
+                : 'bg-surface-container-high text-on-surface-variant'
+            }">
+              ${a.role}
+            </span>
+          </td>
+          <td class="py-3.5 px-4">
+            <button
+              type="button"
+              onclick="toggleAdminStatus('${a.id}')"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold cursor-pointer transition-colors ${
+                isAct
+                  ? 'bg-slot-available/10 text-slot-available border border-slot-available/20'
+                  : 'bg-surface-container-high text-on-surface-variant'
+              }"
+            >
+              <span class="w-1.5 h-1.5 rounded-full ${isAct ? 'bg-slot-available' : 'bg-on-surface-variant'}"></span>
+              <span>${isAct ? 'Aktif' : 'Nonaktif'}</span>
+            </button>
+          </td>
+          <td class="py-3.5 px-4 text-xs font-mono text-on-surface-variant">
+            ${a.lastActive || 'N/A'}
+          </td>
+          <td class="py-3.5 px-4 text-right">
+            <div class="inline-flex items-center gap-1">
+              <button
+                type="button"
+                onclick="openEditAdminModal('${a.id}')"
+                class="p-1.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                title="Edit Akun"
+              >
+                <span class="material-symbols-outlined text-base">edit</span>
+              </button>
+              <button
+                type="button"
+                onclick="deleteAdmin('${a.id}')"
+                ${isSuper ? 'disabled title="Super Admin tidak boleh dihapus"' : 'title="Hapus Akun"'}
+                class="p-1.5 rounded-full text-on-surface-variant hover:text-error hover:bg-error/10 transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <span class="material-symbols-outlined text-base">delete</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  window.openEditAdminModal = function(id) {
+    const admins = getAdmins();
+    const target = admins.find(a => a.id === id);
+    if (!target) return;
+
+    const modal = document.getElementById('modal-admin');
+    const modalBox = document.getElementById('modal-admin-box');
+    const titleEl = document.getElementById('modal-admin-title');
+    const idInput = document.getElementById('form-admin-id');
+    const nameInput = document.getElementById('form-admin-name');
+    const emailInput = document.getElementById('form-admin-email');
+    const roleInput = document.getElementById('form-admin-role');
+    const statusInput = document.getElementById('form-admin-status');
+
+    if (titleEl) titleEl.textContent = 'Edit Akun Administrator';
+    if (idInput) idInput.value = target.id;
+    if (nameInput) nameInput.value = target.name;
+    if (emailInput) emailInput.value = target.email;
+    if (roleInput) roleInput.value = target.role;
+    if (statusInput) statusInput.value = target.status;
+
+    modal?.classList.remove('opacity-0', 'pointer-events-none');
+    modalBox?.classList.remove('scale-95');
+    modalBox?.classList.add('scale-100');
+  };
+
+  window.toggleAdminStatus = function(id) {
+    const admins = getAdmins();
+    const target = admins.find(a => a.id === id);
+    if (!target) return;
+    target.status = target.status === 'active' ? 'inactive' : 'active';
+    saveAdmins(admins);
+    renderAdminTable();
+    showToast(`Status admin "${target.name}" diubah.`);
+  };
+
+  window.deleteAdmin = function(id) {
+    const admins = getAdmins();
+    const target = admins.find(a => a.id === id);
+    if (!target) return;
+    if (target.role === 'Super Administrator') {
+      alert('Super Administrator utama tidak dapat dihapus.');
+      return;
+    }
+    if (confirm(`Hapus akun admin "${target.name}"?`)) {
+      const updated = admins.filter(a => a.id !== id);
+      saveAdmins(updated);
+      renderAdminTable();
+      showToast(`Akun admin "${target.name}" dihapus.`);
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderAdminTable();
+
+    document.getElementById('btn-close-toast')?.addEventListener('click', () => {
+      document.getElementById('settings-toast')?.classList.add('hidden');
+    });
+
+    document.getElementById('search-admin-input')?.addEventListener('input', renderAdminTable);
+    document.getElementById('filter-admin-role')?.addEventListener('change', renderAdminTable);
+
+    // Setup Custom Dropdowns
+    const dropdowns = document.querySelectorAll('.custom-dropdown');
+    dropdowns.forEach((dd) => {
+      const btn = dd.querySelector('.custom-dropdown-btn') as HTMLElement;
+      const panel = dd.querySelector('.custom-dropdown-panel') as HTMLElement;
+      const chevron = dd.querySelector('.custom-dropdown-chevron') as HTMLElement;
+      const label = dd.querySelector('.custom-dropdown-label') as HTMLElement;
+      const hiddenInput = dd.querySelector('input[type="hidden"]') as HTMLInputElement;
+      const items = dd.querySelectorAll('.custom-dropdown-item');
+
+      if (!btn || !panel) return;
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = panel.classList.contains('hidden');
+        document.querySelectorAll('.custom-dropdown-panel').forEach((p) => p.classList.add('hidden'));
+        document.querySelectorAll('.custom-dropdown-chevron').forEach((c) => (c as HTMLElement).style.transform = 'rotate(0deg)');
+        if (isHidden) {
+          panel.classList.remove('hidden');
+          btn.setAttribute('aria-expanded', 'true');
+          if (chevron) chevron.style.transform = 'rotate(180deg)';
+        }
+      });
+
+      items.forEach((item) => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const val = item.getAttribute('data-value') || '';
+          const text = item.querySelector('span')?.textContent || '';
+          if (label) label.textContent = text;
+          if (hiddenInput) {
+            hiddenInput.value = val;
+            hiddenInput.dispatchEvent(new Event('change'));
+          }
+
+          items.forEach((i) => {
+            i.classList.remove('bg-surface-container-highest', 'text-primary', 'font-bold');
+            i.classList.add('text-on-surface');
+            const check = i.querySelector('.material-symbols-outlined');
+            if (check) check.remove();
+          });
+          item.classList.add('bg-surface-container-highest', 'text-primary', 'font-bold');
+          item.classList.remove('text-on-surface');
+          const checkIcon = document.createElement('span');
+          checkIcon.className = 'material-symbols-outlined text-sm';
+          checkIcon.textContent = 'check';
+          item.appendChild(checkIcon);
+
+          panel.classList.add('hidden');
+          btn.setAttribute('aria-expanded', 'false');
+          if (chevron) chevron.style.transform = 'rotate(0deg)';
+        });
+      });
+    });
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.custom-dropdown-panel').forEach((p) => p.classList.add('hidden'));
+      document.querySelectorAll('.custom-dropdown-chevron').forEach((c) => (c as HTMLElement).style.transform = 'rotate(0deg)');
+    });
+
+    const modal = document.getElementById('modal-admin');
+    const modalBox = document.getElementById('modal-admin-box');
+    const btnOpenAdd = document.getElementById('btn-open-add-admin');
+    const btnCloseModal = document.getElementById('btn-close-admin-modal');
+    const btnCancelModal = document.getElementById('btn-cancel-admin-modal');
+    const adminForm = document.getElementById('form-admin');
+
+    function closeModal() {
+      modalBox?.classList.remove('scale-100');
+      modalBox?.classList.add('scale-95');
+      modal?.classList.add('opacity-0', 'pointer-events-none');
+      adminForm?.reset();
+    }
+
+    function openAddModal() {
+      const titleEl = document.getElementById('modal-admin-title');
+      const idInput = document.getElementById('form-admin-id');
+      adminForm?.reset();
+      if (titleEl) titleEl.textContent = 'Tambah Administrator Baru';
+      if (idInput) idInput.value = '';
+      modal?.classList.remove('opacity-0', 'pointer-events-none');
+      modalBox?.classList.remove('scale-95');
+      modalBox?.classList.add('scale-100');
+    }
+
+    btnOpenAdd?.addEventListener('click', openAddModal);
+    btnCloseModal?.addEventListener('click', closeModal);
+    btnCancelModal?.addEventListener('click', closeModal);
+
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    adminForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const idInput = document.getElementById('form-admin-id');
+      const nameInput = document.getElementById('form-admin-name');
+      const emailInput = document.getElementById('form-admin-email');
+      const roleInput = document.getElementById('form-admin-role');
+      const statusInput = document.getElementById('form-admin-status');
+
+      const id = idInput?.value;
+      const name = nameInput?.value?.trim();
+      const email = emailInput?.value?.trim();
+      const role = roleInput?.value;
+      const status = statusInput?.value;
+
+      if (!name || !email) return;
+
+      const admins = getAdmins();
+
+      if (id) {
+        const target = admins.find(a => a.id === id);
+        if (target) {
+          target.name = name;
+          target.email = email;
+          target.role = role;
+          target.status = status;
+          saveAdmins(admins);
+          showToast(`Data admin "${name}" diperbarui.`);
+        }
+      } else {
+        admins.push({
+          id: 'admin-' + Date.now(),
+          name,
+          email,
+          role,
+          status,
+          lastActive: 'Baru dibuat',
+        });
+        saveAdmins(admins);
+        showToast(`Administrator "${name}" berhasil ditambahkan.`);
+      }
+
+      closeModal();
+      renderAdminTable();
+    });
+
+    document.getElementById('btn-save-profile')?.addEventListener('click', () => {
+      showToast('Profil administrator berhasil disimpan!');
+    });
+
+    document.getElementById('btn-save-services')?.addEventListener('click', () => {
+      showToast('Konfigurasi backend berhasil disimpan!');
+    });
+
+    document.getElementById('form-password-change')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      showToast('Password administrator berhasil diubah!');
+      (e.target).reset();
+    });
+  });
+</script>

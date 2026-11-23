@@ -1,0 +1,1205 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import DashboardShell from '../../components/dashboard/DashboardShell.astro';
+
+// Baseline campus telemetry metrics for 15 slots at Main Hall
+const summaryMetrics = {
+  totalServed: '165 Mobil',
+  peakOccupancy: '93.3%',
+  avgDuration: '1 Jam 25 Mnt',
+  turnoverRatio: '5.5x',
+};
+
+// Hourly curve bars for 15 slots capacity at Main Hall
+const hourlyTrafficBars = [
+  { time: '07:00', height: '33%', count: '5 Mobil', pct: '33%', isPeak: false },
+  { time: '08:00', height: '60%', count: '9 Mobil', pct: '60%', isPeak: false },
+  { time: '09:00', height: '87%', count: '13 Mobil', pct: '87%', isPeak: false },
+  { time: '10:00', height: '93%', count: '14 Mobil', pct: '93%', isPeak: true },
+  { time: '11:00', height: '80%', count: '12 Mobil', pct: '80%', isPeak: false },
+  { time: '12:00', height: '53%', count: '8 Mobil', pct: '53%', isPeak: false },
+  { time: '13:00', height: '73%', count: '11 Mobil', pct: '73%', isPeak: false },
+  { time: '14:00', height: '67%', count: '10 Mobil', pct: '67%', isPeak: false },
+  { time: '15:00', height: '47%', count: '7 Mobil', pct: '47%', isPeak: false },
+  { time: '16:00', height: '27%', count: '4 Mobil', pct: '27%', isPeak: false },
+  { time: '17:00', height: '13%', count: '2 Mobil', pct: '13%', isPeak: false },
+];
+
+// Inflow vs Outflow traffic data
+const hourlyFlowData = [
+  { time: '07:00', inHeight: '38%', outHeight: '8%', inCount: 5, outCount: 1, net: '+4' },
+  { time: '08:00', inHeight: '62%', outHeight: '23%', inCount: 8, outCount: 3, net: '+5' },
+  { time: '09:00', inHeight: '77%', outHeight: '31%', inCount: 10, outCount: 4, net: '+6' },
+  { time: '10:00', inHeight: '69%', outHeight: '62%', inCount: 9, outCount: 8, net: '+1', isPeak: true },
+  { time: '11:00', inHeight: '38%', outHeight: '69%', inCount: 5, outCount: 9, net: '-4' },
+  { time: '12:00', inHeight: '31%', outHeight: '85%', inCount: 4, outCount: 11, net: '-7' },
+  { time: '13:00', inHeight: '85%', outHeight: '38%', inCount: 11, outCount: 5, net: '+6' },
+  { time: '14:00', inHeight: '46%', outHeight: '54%', inCount: 6, outCount: 7, net: '-1' },
+  { time: '15:00', inHeight: '23%', outHeight: '62%', inCount: 3, outCount: 8, net: '-5' },
+  { time: '16:00', inHeight: '15%', outHeight: '46%', inCount: 2, outCount: 6, net: '-4' },
+  { time: '17:00', inHeight: '8%', outHeight: '23%', inCount: 1, outCount: 3, net: '-2' },
+];
+
+// Average Wait Time to find bay (in minutes)
+const waitTimeData = [
+  { time: '07:00', mins: '0.8 mnt', fill: '18%' },
+  { time: '08:00', mins: '2.1 mnt', fill: '45%' },
+  { time: '09:00', mins: '3.6 mnt', fill: '78%' },
+  { time: '10:00', mins: '4.6 mnt', fill: '100%', isPeak: true },
+  { time: '11:00', mins: '2.4 mnt', fill: '52%' },
+  { time: '12:00', mins: '1.4 mnt', fill: '30%' },
+  { time: '13:00', mins: '3.1 mnt', fill: '67%' },
+  { time: '14:00', mins: '1.9 mnt', fill: '41%' },
+  { time: '15:00', mins: '1.1 mnt', fill: '24%' },
+  { time: '16:00', mins: '0.5 mnt', fill: '11%' },
+];
+
+// Weekly traffic trends across academic days
+const weeklyTrends = [
+  { day: 'Senin', count: '172 Mobil', pct: 95, note: 'Kuliah Umum & Registrasi Awal Pekan' },
+  { day: 'Selasa', count: '165 Mobil', pct: 91, isToday: true, note: 'Hari Ini (Beban Terkendali)' },
+  { day: 'Rabu', count: '180 Mobil', pct: 100, isPeak: true, note: 'Puncak Praktikum & Sidang Jurusan' },
+  { day: 'Kamis', count: '155 Mobil', pct: 86, note: 'Sesi Kuliah Reguler S1' },
+  { day: 'Jumat', count: '118 Mobil', pct: 65, note: 'Sesi Kuliah Pendek & Keagamaan' },
+];
+
+// Main Hall Sector Utilization
+const sectorBreakdown = [
+  { name: 'Baris Depan (Slot 01 - 05)', occupied: 3, total: 5, pct: 60, turnover: '6.2x', desc: 'Akses terdekat ke pintu masuk Main Hall' },
+  { name: 'Baris Tengah (Slot 06 - 10)', occupied: 4, total: 5, pct: 80, turnover: '5.4x', desc: 'Sektor parkir reguler mahasiswa & dosen' },
+  { name: 'Baris Belakang (Slot 11 - 15)', occupied: 4, total: 5, pct: 80, turnover: '4.8x', desc: 'Sektor durasi parkir lebih dari 2 jam' },
+];
+
+// Duration distribution
+const durationBrackets = [
+  { label: '< 30 Menit (Drop-off & Kurir)', pct: 28, count: '46 Mobil', color: 'bg-slot-available' },
+  { label: '1 - 2 Jam (Sesi Kuliah Reguler)', pct: 44, count: '73 Mobil', color: 'bg-primary' },
+  { label: '2 - 4 Jam (Dosen & Laboratorium)', pct: 20, count: '33 Mobil', color: 'bg-amber-600' },
+  { label: '> 4 Jam (Staf & Acara Kampus)', pct: 8, count: '13 Mobil', color: 'bg-slot-occupied' },
+];
+
+// Telemetry logs for 15 bays at Main Hall
+const initialTelemetryRows = [
+  { time: '07:30 WIB', location: 'Main Hall (Baris Depan)', occupancy: '40% (2/5)', status: 'Lancar', statusClass: 'bg-slot-available/10 text-slot-available', recommendation: 'Akses gerbang pintu masuk utama lancar.' },
+  { time: '08:45 WIB', location: 'Main Hall (Baris Depan)', occupancy: '80% (4/5)', status: 'Mendekati Puncak', statusClass: 'bg-primary/10 text-primary', recommendation: 'Sisa 1 slot kosong (Slot 02).' },
+  { time: '09:30 WIB', location: 'Main Hall (Total 15 Slot)', occupancy: '93.3% (14/15)', status: 'Puncak', statusClass: 'bg-slot-occupied/10 text-slot-occupied', recommendation: 'VMS aktif: arahkan ke Slot 05 & 09.' },
+  { time: '10:15 WIB', location: 'Main Hall (Baris Tengah)', occupancy: '80% (4/5)', status: 'Terkendali', statusClass: 'bg-slot-available/10 text-slot-available', recommendation: 'Slot 09 siap ditempati kendaraan baru.' },
+  { time: '11:45 WIB', location: 'Main Hall (Baris Belakang)', occupancy: '80% (4/5)', status: 'Optimal', statusClass: 'bg-slot-available/10 text-slot-available', recommendation: 'Slot 14 siap ditempati pengajar.' },
+  { time: '13:30 WIB', location: 'Main Hall (Total 15 Slot)', occupancy: '73.3% (11/15)', status: 'Normal', statusClass: 'bg-slot-available/10 text-slot-available', recommendation: 'Rotasi perkuliahan sesi siang berjalan lancar.' },
+];
+---
+
+<Layout title="Analisis Trafik &amp; Alokasi Lahan · GoParkir Campus CV Monitoring">
+  <DashboardShell activeNavId="analytics">
+    
+    <!-- Top Action Header (Saku Style: Balanced & Never Wrapping) -->
+    <header class="mb-6 md:mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex-1 min-w-0 pr-4">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-slot-available animate-pulse"></span>
+            <span class="text-xs font-mono text-primary font-bold uppercase tracking-wider">
+              Lokasi: Main Hall Kampus (15 Slot)
+            </span>
+          </div>
+          <h2 class="font-headline text-2xl sm:text-3xl md:text-4xl font-medium text-on-surface tracking-tight">
+            Analisis Trafik &amp; Alokasi Lahan Kampus
+          </h2>
+          <p class="font-body text-on-surface-variant mt-1 text-xs sm:text-sm md:text-base">
+            Audit telemetri YOLO26m, kurva arus masuk/keluar, dan kapasitas 15 bay Main Hall.
+          </p>
+        </div>
+
+        <!-- Action Buttons: Side-by-side, Never Stacking -->
+        <div class="flex items-center gap-2.5 shrink-0 flex-nowrap self-start sm:self-auto">
+          <!-- Generate AI Button -->
+          <button
+            type="button"
+            id="btn-generate-ai"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-on-primary font-body font-semibold text-xs md:text-sm hover:bg-primary-container transition-all shadow-xs cursor-pointer active:scale-95 whitespace-nowrap group min-h-[42px]"
+          >
+            <span class="material-symbols-outlined text-base group-hover:rotate-45 transition-transform" style="font-variation-settings: 'FILL' 1;">
+              auto_awesome
+            </span>
+            <span id="btn-generate-ai-text">Generate AI</span>
+          </button>
+
+          <!-- Export PDF Button -->
+          <button
+            type="button"
+            id="btn-open-pdf-modal"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-container-highest hover:bg-surface-container-high text-on-surface font-body font-semibold text-xs md:text-sm transition-all border border-outline-variant/20 shadow-xs cursor-pointer active:scale-95 whitespace-nowrap min-h-[42px]"
+          >
+            <span class="material-symbols-outlined text-base text-primary">
+              picture_as_pdf
+            </span>
+            <span>Export PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Controls: Segmented Pills & Custom Dropdowns -->
+      <div class="mt-6 pt-6 border-t border-outline-variant/10 flex flex-wrap items-center justify-between gap-4">
+        
+        <!-- Segmented Period Pills -->
+        <div class="inline-flex items-center p-1.5 rounded-full bg-surface-container-low border border-outline-variant/15 text-xs font-mono">
+          <button
+            type="button"
+            class="period-filter-pill px-4 py-1.5 rounded-full bg-surface-container-highest text-primary font-bold shadow-xs cursor-pointer transition-all"
+            data-period="today"
+          >
+            Hari Ini
+          </button>
+          <button
+            type="button"
+            class="period-filter-pill px-4 py-1.5 rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-highest/50 transition-all cursor-pointer"
+            data-period="week"
+          >
+            Minggu Ini
+          </button>
+          <button
+            type="button"
+            class="period-filter-pill px-4 py-1.5 rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-highest/50 transition-all cursor-pointer"
+            data-period="month"
+          >
+            Bulan Ini
+          </button>
+        </div>
+
+        <!-- Custom Dropdown Filters -->
+        <div class="flex flex-wrap items-center gap-3">
+          
+          <!-- Custom Dropdown: Baris Main Hall -->
+          <div class="relative custom-dropdown" id="dropdown-sector" data-active-value="all">
+            <button
+              type="button"
+              class="custom-dropdown-btn flex items-center justify-between gap-3 px-4 py-2 min-h-[40px] rounded-full bg-surface-container-low border border-outline-variant/20 hover:border-primary/40 text-xs font-mono text-on-surface cursor-pointer transition-all shadow-xs"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              <span class="custom-dropdown-label truncate">Semua Baris Main Hall (1-15)</span>
+              <span class="material-symbols-outlined text-base text-on-surface-variant transition-transform custom-dropdown-chevron">
+                expand_more
+              </span>
+            </button>
+            <div class="custom-dropdown-panel hidden absolute right-0 top-full mt-2 w-60 bg-surface-container-lowest rounded-2xl shadow-[0_16px_40px_rgba(27,28,24,0.14)] border border-outline-variant/20 p-1.5 z-40">
+              <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-primary font-bold bg-surface-container-highest hover:bg-surface-container-high transition-colors text-left cursor-pointer" data-value="all">
+                <span>Semua Baris Main Hall (1-15)</span>
+                <span class="material-symbols-outlined text-sm">check</span>
+              </button>
+              <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-value="baris-depan">
+                <span>Baris Depan (Slot 01 - 05)</span>
+              </button>
+              <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-value="baris-tengah">
+                <span>Baris Tengah (Slot 06 - 10)</span>
+              </button>
+              <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-value="baris-belakang">
+                <span>Baris Belakang (Slot 11 - 15)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Custom Dropdown: Fokus Laporan -->
+          <div class="relative custom-dropdown" id="dropdown-focus" data-active-value="jam-sibuk">
+            <button
+              type="button"
+              class="custom-dropdown-btn flex items-center justify-between gap-3 px-4 py-2 min-h-[40px] rounded-full bg-surface-container-low border border-outline-variant/20 hover:border-primary/40 text-xs font-mono text-on-surface cursor-pointer transition-all shadow-xs"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              <span class="custom-dropdown-label truncate">Fokus: Jam Sibuk Kuliah</span>
+              <span class="material-symbols-outlined text-base text-on-surface-variant transition-transform custom-dropdown-chevron">
+                expand_more
+              </span>
+            </button>
+            <div class="custom-dropdown-panel hidden absolute right-0 top-full mt-2 w-64 bg-surface-container-lowest rounded-2xl shadow-[0_16px_40px_rgba(27,28,24,0.14)] border border-outline-variant/20 p-1.5 z-40">
+              <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-primary font-bold bg-surface-container-highest hover:bg-surface-container-high transition-colors text-left cursor-pointer" data-value="jam-sibuk">
+                <span>Fokus: Jam Sibuk Kuliah</span>
+                <span class="material-symbols-outlined text-sm">check</span>
+              </button>
+              <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-value="rotasi-lahan">
+                <span>Fokus: Rotasi &amp; Kapasitas</span>
+              </button>
+              <button type="button" class="custom-dropdown-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-on-surface hover:bg-surface-container-highest transition-colors text-left cursor-pointer" data-value="efisiensi-emisi">
+                <span>Fokus: Emisi &amp; Karbon</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    <!-- AI Generation Progress Indicator -->
+    <div id="ai-progress-container" class="hidden mb-6 bg-surface-container-lowest rounded-2xl p-6 border border-primary/20 shadow-lg animate-in">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+          <span class="material-symbols-outlined text-xl animate-spin">sync</span>
+        </div>
+        <div class="flex-1">
+          <h4 class="font-headline font-semibold text-sm text-on-surface" id="ai-progress-title">
+            Gemini Campus Engine sedang menganalisis telemetri...
+          </h4>
+          <p class="text-xs text-on-surface-variant font-mono mt-0.5" id="ai-progress-status">
+            Membaca ground contact points pada 15 bay Main Hall...
+          </p>
+          <div class="w-full bg-surface-container-highest h-1.5 rounded-full mt-2.5 overflow-hidden">
+            <div id="ai-progress-bar" class="h-full bg-primary transition-all duration-300 rounded-full" style="width: 25%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- COMPACT AI ADVISOR BANNER (SAKU INSIGHTCARD STYLE: TOP)  -->
+    <!-- ======================================================== -->
+    <section class="bg-surface-container-lowest rounded-2xl p-6 sm:p-7 relative overflow-hidden group shadow-[0_4px_16px_rgba(27,28,24,0.02)] border border-outline-variant/15 mb-6">
+      <div class="absolute -right-20 -top-20 w-64 h-64 bg-[radial-gradient(circle,rgba(154,64,33,0.12)_0%,transparent_70%)] rounded-full blur-2xl pointer-events-none"></div>
+      
+      <div class="flex items-start gap-4 relative z-10">
+        <div class="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">
+            auto_awesome
+          </span>
+        </div>
+        
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+            <h3 class="font-headline text-xl sm:text-2xl font-medium text-on-surface">
+              Executive AI Synthesis &amp; Alokasi Lahan
+            </h3>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-primary/10 text-primary">
+                Akurasi 99.4%
+              </span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-surface-container-high text-secondary">
+                Real-Time 30 FPS
+              </span>
+            </div>
+          </div>
+
+          <div id="ai-narrative-content" class="font-body text-sm text-on-surface-variant leading-relaxed space-y-2">
+            <p>
+              Tingkat okupansi Main Hall mencapai <strong class="text-on-surface">73.3%</strong> dengan lonjakan puncak <strong class="text-on-surface">93.3% (14/15 mobil)</strong> pada jam sibuk 10:00 WIB. Sistem VMS memprioritaskan pengalihan pengemudi baru ke <strong class="text-on-surface">Slot 02</strong> dan <strong class="text-on-surface">Slot 05</strong>, mereduksi waktu tunggu dari 4.6 menit ke 1.1 menit.
+            </p>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-outline-variant/10 flex flex-wrap items-center gap-4 text-xs font-mono">
+            <span class="text-on-surface-variant flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-slot-available"></span>
+              <span>1 Booth Bazar BEM Terisolasi Aman</span>
+            </span>
+            <span class="text-on-surface-variant flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+              <span>Slot 10 Pemeliharaan Sensor</span>
+            </span>
+            <span class="text-primary font-bold ml-auto flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">energy_savings_leaf</span>
+              <span>Hemat ~14.2L BBM/Hari</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 Key Analytics KPI Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+      <div class="bg-surface-container-low rounded-xl p-5 hover:bg-surface-container transition-colors shadow-xs">
+        <span class="text-[10px] font-mono uppercase text-on-surface-variant block mb-1">Total Kendaraan Terlayani</span>
+        <p class="font-headline text-2xl sm:text-3xl font-bold text-primary" id="kpi-total-served">
+          {summaryMetrics.totalServed}
+        </p>
+        <span class="text-xs text-on-surface-variant font-mono mt-1 block">Rotasi 15 Slot Main Hall</span>
+      </div>
+
+      <div class="bg-surface-container-low rounded-xl p-5 hover:bg-surface-container transition-colors shadow-xs">
+        <span class="text-[10px] font-mono uppercase text-on-surface-variant block mb-1">Puncak Okupansi Lahan</span>
+        <p class="font-headline text-2xl sm:text-3xl font-bold text-slot-occupied mt-0.5" id="kpi-peak-occupancy">
+          {summaryMetrics.peakOccupancy}
+        </p>
+        <span class="text-xs text-on-surface-variant font-mono mt-1 block">14 / 15 Slot (10:00 WIB)</span>
+      </div>
+
+      <div class="bg-surface-container-low rounded-xl p-5 hover:bg-surface-container transition-colors shadow-xs">
+        <span class="text-[10px] font-mono uppercase text-on-surface-variant block mb-1">Rata-rata Durasi Parkir</span>
+        <p class="font-headline text-2xl sm:text-3xl font-bold text-on-surface mt-0.5">
+          {summaryMetrics.avgDuration}
+        </p>
+        <span class="text-xs text-slot-available font-mono font-bold mt-1 block">Optimal Sesi Kuliah</span>
+      </div>
+
+      <div class="bg-surface-container-low rounded-xl p-5 hover:bg-surface-container transition-colors shadow-xs">
+        <span class="text-[10px] font-mono uppercase text-on-surface-variant block mb-1">Turnover Ratio Per Bay</span>
+        <p class="font-headline text-2xl sm:text-3xl font-bold text-tertiary mt-0.5">
+          {summaryMetrics.turnoverRatio}
+        </p>
+        <span class="text-xs text-on-surface-variant font-mono mt-1 block">Per Hari Kerja Kampus</span>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- DETAILED TRAFFIC CHARTS (PROMINENT & VISIBLE FRONT-CENTER)-->
+    <!-- ======================================================== -->
+    <div class="space-y-8 mb-10">
+      
+      <!-- GRAPH 1: Kurva Kepadatan Jam Puncak (Bar Chart Saku Style) -->
+      <section class="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-[0_4px_16px_rgba(27,28,24,0.02)] border border-outline-variant/10">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="material-symbols-outlined text-primary text-xl">bar_chart</span>
+              <h3 class="font-headline text-xl sm:text-2xl font-medium text-on-surface">
+                1. Kurva Kepadatan &amp; Okupansi Main Hall per Jam
+              </h3>
+            </div>
+            <p class="font-body text-xs sm:text-sm text-on-surface-variant">
+              Tingkat okupansi dan jumlah kendaraan aktif di 15 slot Main Hall sepanjang jam operasional (07:00 - 17:00 WIB)
+            </p>
+          </div>
+          <div class="text-left sm:text-right">
+            <span class="font-headline text-2xl text-primary font-bold">14 / 15 Mobil</span>
+            <span class="block text-xs font-mono text-on-surface-variant">Puncak Beban Jam 10:00 (93.3%)</span>
+          </div>
+        </div>
+
+        <!-- CSS Bar Chart with Interactive Tooltips & Capacity Line -->
+        <div class="relative h-60 flex items-end justify-between gap-2 md:gap-3 pt-8 border-b border-surface-container-highest pb-4">
+          <!-- 100% Capacity Threshold Line -->
+          <div class="absolute top-8 left-0 right-0 border-b border-dashed border-slot-occupied/40 pointer-events-none z-10 flex items-center justify-between text-[10px] font-mono text-slot-occupied px-2">
+            <span>Batas Kapasitas Penuh (15 Slot)</span>
+            <span>100%</span>
+          </div>
+
+          {hourlyTrafficBars.map((bar) => (
+            <div class="w-full flex flex-col items-center h-full justify-end group relative cursor-pointer">
+              <!-- Tooltip on hover -->
+              <div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-near-black text-white text-[11px] font-mono py-1.5 px-2.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none shadow-md">
+                <span class="font-bold text-amber-300">{bar.time}</span>: {bar.count} ({bar.pct} Okupansi)
+              </div>
+              
+              <!-- Bar Column -->
+              <div
+                class={`w-full rounded-t-md transition-all duration-300 ${
+                  bar.isPeak
+                    ? 'bg-primary group-hover:bg-primary-container shadow-xs'
+                    : 'bg-surface-container-highest hover:bg-primary/50'
+                }`}
+                style={`height: ${bar.height}; min-height: 12px;`}
+              ></div>
+              
+              <!-- X-Axis Label -->
+              <span class={`text-[10px] font-mono mt-2.5 ${bar.isPeak ? 'font-bold text-primary' : 'text-on-surface-variant'}`}>
+                {bar.time}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center justify-between text-xs font-mono text-on-surface-variant pt-2">
+          <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-xs bg-primary"></span>
+              <span>Jam Puncak Kuliah (Peak)</span>
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-xs bg-surface-container-highest"></span>
+              <span>Jam Normal</span>
+            </span>
+          </div>
+          <span>&bull; Data dihitung otomatis dari YOLO26m ground contact inference</span>
+        </div>
+      </section>
+
+      <!-- GRAPH 2: Arus Trafik Kendaraan Masuk (Inflow) vs Keluar (Outflow) -->
+      <section class="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-[0_4px_16px_rgba(27,28,24,0.02)] border border-outline-variant/10 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="material-symbols-outlined text-primary text-xl">sync_alt</span>
+              <h3 class="font-headline text-xl sm:text-2xl font-medium text-on-surface">
+                2. Dinamika Arus Masuk (Inflow) vs Arus Keluar (Outflow)
+              </h3>
+            </div>
+            <p class="font-body text-xs sm:text-sm text-on-surface-variant">
+              Perbandingan kendaraan yang memasuki area Main Hall versus kendaraan yang meninggalkan bay per interval jam
+            </p>
+          </div>
+          <div class="flex items-center gap-4 text-xs font-mono">
+            <span class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-xs bg-primary"></span>
+              <span class="text-on-surface font-semibold">Masuk (Inflow)</span>
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-xs bg-surface-container-highest border border-outline-variant/30"></span>
+              <span class="text-on-surface font-semibold">Keluar (Outflow)</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Comparative Double Bars -->
+        <div class="h-56 flex items-end justify-between gap-2 md:gap-4 pt-6 border-b border-surface-container-highest pb-4">
+          {hourlyFlowData.map((f) => (
+            <div class="w-full flex flex-col items-center h-full justify-end group relative cursor-pointer">
+              <!-- Tooltip on hover -->
+              <div class="absolute -top-14 left-1/2 -translate-x-1/2 bg-near-black text-white text-[11px] font-mono py-1.5 px-2.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none shadow-md">
+                <span class="font-bold text-amber-300">{f.time}</span> | In: +{f.inCount} | Out: -{f.outCount} | Net: {f.net}
+              </div>
+
+              <!-- Dual Bar Container -->
+              <div class="w-full flex items-end justify-center gap-1 h-full">
+                <!-- Inflow Bar -->
+                <div
+                  class="w-1/2 bg-primary rounded-t-sm transition-all duration-300 group-hover:opacity-90"
+                  style={`height: ${f.inHeight}; min-height: 8px;`}
+                ></div>
+                <!-- Outflow Bar -->
+                <div
+                  class="w-1/2 bg-surface-container-highest border-t border-x border-outline-variant/30 rounded-t-sm transition-all duration-300 group-hover:bg-amber-600/60"
+                  style={`height: ${f.outHeight}; min-height: 8px;`}
+                ></div>
+              </div>
+
+              <!-- Net Badge and Time -->
+              <span class="text-[9px] font-mono font-bold mt-1 text-primary">
+                {f.net}
+              </span>
+              <span class="text-[10px] font-mono text-on-surface-variant">
+                {f.time}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between text-xs font-mono text-on-surface-variant pt-1">
+          <span>&bull; Net (+): Pertambahan beban parkir di bay</span>
+          <span>&bull; Net (-): Waktu pergantian sesi kelas (slot mulai kosong)</span>
+        </div>
+      </section>
+
+      <!-- GRAPH 3 & 4: Dua Kolom Visual (Waktu Tunggu Cari Bay & Tren Mingguan) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        
+        <!-- GRAPH 3: Rata-rata Waktu Tunggu Mencari Slot Kosong -->
+        <section class="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-[0_4px_16px_rgba(27,28,24,0.02)] border border-outline-variant/10 space-y-5">
+          <div class="flex items-center justify-between border-b border-outline-variant/10 pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-xl">timer</span>
+                <h3 class="font-headline text-lg sm:text-xl font-medium text-on-surface">
+                  3. Waktu Tunggu Pencarian Slot Kosong
+                </h3>
+              </div>
+              <p class="text-xs text-on-surface-variant font-body mt-0.5">
+                Estimasi durasi berputar mencari bay kosong sebelum diarahkan sistem
+              </p>
+            </div>
+            <span class="text-xs font-mono font-bold text-slot-occupied bg-slot-occupied/10 px-2.5 py-1 rounded-full">
+              Puncak: 4.6 Mnt
+            </span>
+          </div>
+
+          <div class="space-y-3 pt-1">
+            {waitTimeData.map((w) => (
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-xs font-mono">
+                  <span class={`font-medium ${w.isPeak ? 'font-bold text-slot-occupied' : 'text-on-surface'}`}>
+                    {w.time} {w.isPeak ? '(Jam Puncak Kelas)' : ''}
+                  </span>
+                  <span class="font-bold text-on-surface">{w.mins}</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+                  <div
+                    class={`h-full rounded-full transition-all duration-300 ${
+                      w.isPeak ? 'bg-slot-occupied' : 'bg-primary'
+                    }`}
+                    style={`width: ${w.fill};`}
+                  ></div>
+                </div>
+              </div>
+            ))}
+
+            <div class="pt-3 border-t border-outline-variant/10 text-xs font-body text-on-surface-variant flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-base">insights</span>
+              <span>Integrasi panduan VMS mereduksi rata-rata pencarian dari 4.8 menit menjadi 1.2 menit.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- GRAPH 4: Tren Volume Trafik Harian (Senin - Jumat) -->
+        <section class="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-[0_4px_16px_rgba(27,28,24,0.02)] border border-outline-variant/10 space-y-5">
+          <div class="flex items-center justify-between border-b border-outline-variant/10 pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-xl">calendar_view_week</span>
+                <h3 class="font-headline text-lg sm:text-xl font-medium text-on-surface">
+                  4. Tren Trafik Harian (Senin - Jumat)
+                </h3>
+              </div>
+              <p class="text-xs text-on-surface-variant font-body mt-0.5">
+                Pola komparasi volume kendaraan mingguan pada hari perkuliahan aktif
+              </p>
+            </div>
+            <span class="text-xs font-mono font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+              Minggu Ini
+            </span>
+          </div>
+
+          <div class="space-y-3.5 pt-1">
+            {weeklyTrends.map((t) => (
+              <div class="p-3 rounded-xl bg-surface-container-low/70 space-y-1.5 border border-outline-variant/10">
+                <div class="flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="font-headline font-bold text-on-surface">{t.day}</span>
+                    {t.isToday && (
+                      <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-primary text-on-primary">
+                        HARI INI
+                      </span>
+                    )}
+                    {t.isPeak && (
+                      <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-slot-occupied/15 text-slot-occupied">
+                        PEAK PEKAN
+                      </span>
+                    )}
+                  </div>
+                  <span class="font-mono text-on-surface font-bold">{t.count} ({t.pct}%)</span>
+                </div>
+
+                <div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+                  <div
+                    class={`h-full rounded-full transition-all duration-500 ${
+                      t.isToday ? 'bg-primary' : t.isPeak ? 'bg-slot-occupied' : 'bg-surface-container-highest'
+                    }`}
+                    style={`width: ${t.pct}%;`}
+                  ></div>
+                </div>
+
+                <p class="text-[11px] font-body text-on-surface-variant">
+                  {t.note}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+      </div>
+
+      <!-- GRAPH 5 & 6: Dua Kolom Visual (Utilisasi Sektor Baris & Distribusi Durasi) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        
+        <!-- GRAPH 5: Utilisasi Sektor Baris Main Hall -->
+        <section class="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-[0_4px_16px_rgba(27,28,24,0.02)] border border-outline-variant/10 space-y-5">
+          <div class="flex items-center justify-between border-b border-outline-variant/10 pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-xl">view_column</span>
+                <h3 class="font-headline text-lg sm:text-xl font-medium text-on-surface">
+                  5. Utilisasi Sektor Baris Main Hall
+                </h3>
+              </div>
+              <p class="text-xs text-on-surface-variant font-body mt-0.5">
+                Perbandingan beban dan laju rotasi kendaraan per baris
+              </p>
+            </div>
+            <span class="text-xs font-mono font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+              15 SLOT
+            </span>
+          </div>
+
+          <div class="space-y-4">
+            {sectorBreakdown.map((s) => (
+              <div class="p-4 rounded-xl bg-surface-container-low/60 space-y-2">
+                <div class="flex items-center justify-between text-xs font-semibold">
+                  <span class="font-headline text-on-surface text-sm">{s.name}</span>
+                  <span class="font-mono text-primary font-bold">
+                    {s.occupied}/{s.total} Slot ({s.pct}%) &bull; Turnover {s.turnover}
+                  </span>
+                </div>
+
+                <div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
+                  <div
+                    class={`h-full rounded-full transition-all duration-500 ${
+                      s.pct >= 80 ? 'bg-amber-600' : 'bg-slot-available'
+                    }`}
+                    style={`width: ${s.pct}%;`}
+                  ></div>
+                </div>
+
+                <p class="text-[11px] font-body text-on-surface-variant">
+                  {s.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- GRAPH 6: Distribusi Durasi Parkir -->
+        <section class="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-[0_4px_16px_rgba(27,28,24,0.02)] border border-outline-variant/10 space-y-5">
+          <div class="flex items-center justify-between border-b border-outline-variant/10 pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-xl">schedule</span>
+                <h3 class="font-headline text-lg sm:text-xl font-medium text-on-surface">
+                  6. Distribusi Durasi Waktu Parkir
+                </h3>
+              </div>
+              <p class="text-xs text-on-surface-variant font-body mt-0.5">
+                Pola waktu tinggal kendaraan mahasiswa, dosen, dan logistik kampus
+              </p>
+            </div>
+            <span class="text-xs font-mono font-bold text-secondary bg-surface-container-high px-2.5 py-1 rounded-full">
+              165 SESI
+            </span>
+          </div>
+
+          <div class="space-y-4 pt-1">
+            {durationBrackets.map((b) => (
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-xs font-mono">
+                  <span class="font-medium text-on-surface">{b.label}</span>
+                  <span class="font-bold text-on-surface">{b.count} ({b.pct}%)</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+                  <div class={`h-full rounded-full ${b.color}`} style={`width: ${b.pct}%;`}></div>
+                </div>
+              </div>
+            ))}
+
+            <div class="pt-3 border-t border-outline-variant/10 text-xs font-body text-on-surface-variant flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-base">info</span>
+              <span>44% kendaraan parkir selama 1-2 jam sesuai durasi 1 sesi mata kuliah perkuliahan.</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- TABEL LOG TELEMETRI MAIN HALL -->
+      <section class="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-[0_4px_16px_rgba(27,28,24,0.02)] border border-outline-variant/10 space-y-4">
+        <div class="flex items-center justify-between border-b border-outline-variant/10 pb-4">
+          <div>
+            <h3 class="font-headline font-bold text-lg text-on-surface">
+              Log Telemetri &amp; Performa Bay Main Hall
+            </h3>
+            <p class="text-xs text-on-surface-variant font-body">
+              Catatan historis pergantian status kontak roda dan tindakan rambu pemandu AI
+            </p>
+          </div>
+          <span class="text-xs font-mono text-on-surface-variant">
+            Feed Sinkron: 30 FPS
+          </span>
+        </div>
+
+        <div class="w-full overflow-x-auto">
+          <table class="w-full text-left border-collapse min-w-[640px]">
+            <thead>
+              <tr class="border-b-2 border-outline-variant/15 pb-3 font-mono text-xs uppercase text-on-surface-variant font-bold tracking-wider">
+                <th class="py-3 px-3">Waktu</th>
+                <th class="py-3 px-3">Lokasi / Sektor</th>
+                <th class="py-3 px-3">Kepadatan</th>
+                <th class="py-3 px-3">Status Sensor</th>
+                <th class="py-3 px-3 text-right">Tindakan AI Dispatch</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/10 text-xs sm:text-sm font-body" id="telemetry-table-body">
+              {initialTelemetryRows.map((row) => (
+                <tr class="hover:bg-surface-container-low/50 transition-colors">
+                  <td class="py-3.5 px-3 font-mono font-medium text-on-surface-variant whitespace-nowrap">
+                    {row.time}
+                  </td>
+                  <td class="py-3.5 px-3 font-headline font-semibold text-on-surface">
+                    {row.location}
+                  </td>
+                  <td class="py-3.5 px-3 font-mono font-bold text-on-surface">
+                    {row.occupancy}
+                  </td>
+                  <td class="py-3.5 px-3">
+                    <span class={`font-mono text-[11px] font-bold px-2.5 py-1 rounded-full ${row.statusClass}`}>
+                      {row.status}
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-3 text-right text-xs text-on-surface-variant font-body">
+                    {row.recommendation}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="h-8 md:h-12"></div>
+  </DashboardShell>
+</Layout>
+
+<!-- ======================================================== -->
+<!-- MODAL PREVIEW & EXPORT PDF LAPORAN (SAKU A4 TEMPLATE)    -->
+<!-- ======================================================== -->
+<div
+  id="modal-pdf-preview"
+  class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300 backdrop-blur-xs"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-pdf-title"
+>
+  <div
+    id="modal-pdf-box"
+    class="bg-surface-container-low rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-outline-variant/20 scale-95 transition-transform duration-300 overflow-hidden"
+  >
+    <!-- Modal Header Action Bar -->
+    <div class="px-6 py-4 bg-surface-container-lowest flex items-center justify-between border-b border-outline-variant/15 shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-primary text-2xl">picture_as_pdf</span>
+        <div>
+          <h3 class="font-headline font-bold text-base text-on-surface" id="modal-pdf-title">
+            Preview Laporan Eksekutif PDF (Saku Format)
+          </h3>
+          <p class="text-xs font-mono text-on-surface-variant">Dokumen A4 &bull; Siap dicetak atau diunduh langsung</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Direct Download PDF Button -->
+        <button
+          type="button"
+          id="btn-download-pdf"
+          class="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-full font-body font-semibold text-xs hover:bg-primary-container transition-all cursor-pointer shadow-xs min-h-[40px]"
+        >
+          <span class="material-symbols-outlined text-base">download</span>
+          <span id="btn-download-pdf-text">Unduh File PDF</span>
+        </button>
+
+        <!-- Print Button -->
+        <button
+          type="button"
+          id="btn-print-pdf"
+          class="flex items-center gap-2 px-4 py-2 bg-surface-container-highest hover:bg-surface-container-high text-on-surface rounded-full font-body font-semibold text-xs transition-all cursor-pointer min-h-[40px]"
+        >
+          <span class="material-symbols-outlined text-base">print</span>
+          <span>Cetak</span>
+        </button>
+
+        <!-- Close Button -->
+        <button
+          type="button"
+          id="btn-close-pdf-modal"
+          class="p-2 rounded-full hover:bg-surface-container-highest text-on-surface-variant transition-colors cursor-pointer"
+          aria-label="Tutup Preview PDF"
+        >
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable A4 Document Preview Body -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-8 flex justify-center bg-surface-container">
+      
+      <!-- The A4 Report Document -->
+      <article
+        id="report-document"
+        class="bg-surface-container-lowest w-full max-w-[210mm] min-h-[297mm] rounded-xl shadow-xl p-8 sm:p-12 flex flex-col relative overflow-hidden text-on-surface font-body border border-outline-variant/20 mx-auto"
+      >
+        <!-- Watermark / Decorative Blur -->
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- 1. Document Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 pb-6 border-b border-outline-variant/20 gap-6">
+          <div class="flex flex-col gap-1.5">
+            <div class="text-4xl font-headline font-medium text-primary italic tracking-tighter mb-1">
+              GoParkir
+            </div>
+            <h1 class="text-xl font-headline font-bold text-on-surface uppercase tracking-tight">
+              Campus Traffic &amp; Space Performance Review
+            </h1>
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-on-surface-variant font-mono text-xs mt-1">
+              <span class="font-medium" id="report-period-text">Periode: Semester Ganjil 2026/2027</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+              <span class="font-medium italic" id="report-generated-date">Generated: 23 Nov 2026, 16:35 WIB</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+              <span class="text-primary font-bold">Lokasi: Main Hall (15 Slot)</span>
+            </div>
+          </div>
+          
+          <div class="text-left md:text-right flex flex-col md:items-end">
+            <span class="material-symbols-outlined text-4xl text-primary/80 mb-1" style="font-variation-settings: 'FILL' 1;">
+              auto_awesome
+            </span>
+            <span class="font-headline text-base italic text-on-surface-variant">
+              The Smart Campus Concierge
+            </span>
+            <span class="text-[10px] font-mono text-on-surface-variant/80">
+              Bagian Sarana &amp; Prasarana Kampus
+            </span>
+          </div>
+        </header>
+
+        <!-- 2. Executive Summary -->
+        <section class="mb-10">
+          <h2 class="text-base font-headline font-medium text-on-surface mb-4 flex items-center gap-3">
+            <span>Ringkasan Eksekutif</span>
+            <span class="h-[1px] flex-1 bg-outline-variant/30"></span>
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-surface-container-low p-5 rounded-lg border border-outline-variant/10">
+              <span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant block mb-1">
+                Total Kendaraan Terlayani
+              </span>
+              <div class="text-3xl font-headline font-bold text-primary">
+                165 <span class="text-xs font-normal text-on-surface-variant">Mobil</span>
+              </div>
+              <div class="mt-3 flex items-center gap-1.5 text-xs text-slot-available font-mono">
+                <span class="material-symbols-outlined text-sm">trending_up</span>
+                <span>Turnover 5.5x per bay</span>
+              </div>
+            </div>
+
+            <div class="bg-surface-container-low p-5 rounded-lg border border-outline-variant/10">
+              <span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant block mb-1">
+                Tingkat Okupansi Puncak
+              </span>
+              <div class="text-3xl font-headline font-bold text-on-surface">
+                93.3%
+              </div>
+              <div class="mt-3 flex items-center gap-1.5 text-xs text-on-surface-variant font-mono">
+                <span class="material-symbols-outlined text-sm">schedule</span>
+                <span>14 / 15 Slot (10:00 WIB)</span>
+              </div>
+            </div>
+
+            <div class="bg-surface-container-low p-5 rounded-lg border border-outline-variant/10">
+              <span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant block mb-1">
+                Rata-rata Durasi Parkir
+              </span>
+              <div class="text-3xl font-headline font-bold text-on-surface">
+                1 Jam 25 <span class="text-xs font-normal text-on-surface-variant">Mnt</span>
+              </div>
+              <div class="mt-3 flex items-center gap-1.5 text-xs text-slot-available font-mono">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                <span>Rotasi optimal per sesi</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Space Allocation Table -->
+        <section class="mb-10">
+          <h2 class="text-base font-headline font-medium text-on-surface mb-4 flex items-center gap-3">
+            <span>Alokasi 15 Bay Main Hall</span>
+            <span class="h-[1px] flex-1 bg-outline-variant/30"></span>
+          </h2>
+          <div class="border border-outline-variant/20 rounded-lg overflow-hidden">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-surface-container font-mono uppercase text-on-surface-variant">
+                <tr>
+                  <th class="p-3 border-b border-outline-variant/20">Sektor / Baris</th>
+                  <th class="p-3 border-b border-outline-variant/20">Kapasitas</th>
+                  <th class="p-3 border-b border-outline-variant/20">Terisi</th>
+                  <th class="p-3 border-b border-outline-variant/20">Tingkat Okupansi</th>
+                  <th class="p-3 border-b border-outline-variant/20 text-right">Turnover</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/10 font-mono">
+                <tr>
+                  <td class="p-3 font-headline font-semibold text-on-surface">Baris Depan (Slot 01 - 05)</td>
+                  <td class="p-3">5 Slot</td>
+                  <td class="p-3">3 Mobil</td>
+                  <td class="p-3 font-semibold text-primary">60%</td>
+                  <td class="p-3 text-right">6.2x / hari</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-headline font-semibold text-on-surface">Baris Tengah (Slot 06 - 10)</td>
+                  <td class="p-3">5 Slot</td>
+                  <td class="p-3">4 Mobil</td>
+                  <td class="p-3 font-semibold text-amber-600">80%</td>
+                  <td class="p-3 text-right">5.4x / hari</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-headline font-semibold text-on-surface">Baris Belakang (Slot 11 - 15)</td>
+                  <td class="p-3">5 Slot</td>
+                  <td class="p-3">4 Mobil</td>
+                  <td class="p-3 font-semibold text-amber-600">80%</td>
+                  <td class="p-3 text-right">4.8x / hari</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 4. Strategic Recommendations -->
+        <section class="mb-10">
+          <h2 class="text-base font-headline font-medium text-on-surface mb-4 flex items-center gap-3">
+            <span>Rekomendasi Strategis AI</span>
+            <span class="h-[1px] flex-1 bg-outline-variant/30"></span>
+          </h2>
+          <div class="space-y-3 text-xs leading-relaxed text-on-surface-variant font-body">
+            <div class="flex items-start gap-2.5">
+              <span class="w-4 h-4 rounded-full bg-primary/10 text-primary font-mono text-[10px] flex items-center justify-center shrink-0 mt-0.5 font-bold">1</span>
+              <p><strong class="text-on-surface">Arahkan Arus Masuk Lebih Awal:</strong> Aktifkan display VMS di gerbang pintu depan saat okupansi menyentuh 80% (12/15) untuk memandu pengemudi langsung ke Slot 02 atau Slot 05.</p>
+            </div>
+            <div class="flex items-start gap-2.5">
+              <span class="w-4 h-4 rounded-full bg-primary/10 text-primary font-mono text-[10px] flex items-center justify-center shrink-0 mt-0.5 font-bold">2</span>
+              <p><strong class="text-on-surface">Optimasi Slot Reservasi:</strong> Slot yang dialokasikan untuk booth bazar acara kampus tetap tercatat di sistem telemetri sehingga tidak memicu false-positive alarm parkir liar.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. Document Signatures Footer -->
+        <footer class="mt-auto pt-8 border-t border-outline-variant/20 flex justify-between items-end text-xs font-mono">
+          <div>
+            <div class="text-[10px] text-on-surface-variant uppercase mb-6">Disiapkan Oleh:</div>
+            <div class="font-bold text-on-surface">pavelc4</div>
+            <div class="text-on-surface-variant text-[11px]">Lead AI Engineer &bull; GoParkir Lab</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] text-on-surface-variant uppercase mb-6">Disetujui Oleh:</div>
+            <div class="font-bold text-on-surface">Bagian Sarana &amp; Prasarana</div>
+            <div class="text-on-surface-variant text-[11px]">Biro Administrasi Umum Kampus</div>
+          </div>
+        </footer>
+      </article>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  function setupAnalyticsPage() {
+    // 1. Period Filter Pills
+    const periodPills = document.querySelectorAll('.period-filter-pill');
+    periodPills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        periodPills.forEach((p) => {
+          p.classList.remove('bg-surface-container-highest', 'text-primary', 'font-bold', 'shadow-xs');
+          p.classList.add('text-secondary');
+        });
+        pill.classList.remove('text-secondary');
+        pill.classList.add('bg-surface-container-highest', 'text-primary', 'font-bold', 'shadow-xs');
+
+        const period = pill.getAttribute('data-period');
+        updatePeriodData(period || 'today');
+      });
+    });
+
+    function updatePeriodData(period: string) {
+      const kpiServed = document.getElementById('kpi-total-served');
+      const kpiPeak = document.getElementById('kpi-peak-occupancy');
+      const docPeriod = document.getElementById('report-period-text');
+
+      if (period === 'today') {
+        if (kpiServed) kpiServed.textContent = '165 Mobil';
+        if (kpiPeak) kpiPeak.textContent = '93.3%';
+        if (docPeriod) docPeriod.textContent = 'Periode: Hari Ini (23 Nov 2026)';
+      } else if (period === 'week') {
+        if (kpiServed) kpiServed.textContent = '790 Mobil';
+        if (kpiPeak) kpiPeak.textContent = '100% (Rabu)';
+        if (docPeriod) docPeriod.textContent = 'Periode: Minggu Aktif (17 - 23 Nov 2026)';
+      } else {
+        if (kpiServed) kpiServed.textContent = '3.420 Mobil';
+        if (kpiPeak) kpiPeak.textContent = '93.3%';
+        if (docPeriod) docPeriod.textContent = 'Periode: Bulan November 2026';
+      }
+    }
+
+    // 2. Custom Dropdowns
+    const dropdowns = document.querySelectorAll('.custom-dropdown');
+    dropdowns.forEach((dd) => {
+      const btn = dd.querySelector('.custom-dropdown-btn') as HTMLElement;
+      const panel = dd.querySelector('.custom-dropdown-panel') as HTMLElement;
+      const chevron = dd.querySelector('.custom-dropdown-chevron') as HTMLElement;
+      const label = dd.querySelector('.custom-dropdown-label') as HTMLElement;
+      const items = dd.querySelectorAll('.custom-dropdown-item');
+
+      if (!btn || !panel) return;
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = panel.classList.contains('hidden');
+        closeAllDropdowns();
+        if (isHidden) {
+          panel.classList.remove('hidden');
+          btn.setAttribute('aria-expanded', 'true');
+          if (chevron) chevron.style.transform = 'rotate(180deg)';
+        }
+      });
+
+      items.forEach((item) => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const val = item.getAttribute('data-value') || '';
+          const text = item.querySelector('span')?.textContent || '';
+          if (label) label.textContent = text;
+          dd.setAttribute('data-active-value', val);
+
+          items.forEach((i) => {
+            i.classList.remove('bg-surface-container-highest', 'text-primary', 'font-bold');
+            i.classList.add('text-on-surface');
+            const check = i.querySelector('.material-symbols-outlined');
+            if (check) check.remove();
+          });
+          item.classList.add('bg-surface-container-highest', 'text-primary', 'font-bold');
+          item.classList.remove('text-on-surface');
+          const checkIcon = document.createElement('span');
+          checkIcon.className = 'material-symbols-outlined text-sm';
+          checkIcon.textContent = 'check';
+          item.appendChild(checkIcon);
+
+          panel.classList.add('hidden');
+          btn.setAttribute('aria-expanded', 'false');
+          if (chevron) chevron.style.transform = 'rotate(0deg)';
+        });
+      });
+    });
+
+    function closeAllDropdowns() {
+      dropdowns.forEach((dd) => {
+        const panel = dd.querySelector('.custom-dropdown-panel') as HTMLElement;
+        const btn = dd.querySelector('.custom-dropdown-btn') as HTMLElement;
+        const chevron = dd.querySelector('.custom-dropdown-chevron') as HTMLElement;
+        if (panel) panel.classList.add('hidden');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+      });
+    }
+
+    document.addEventListener('click', closeAllDropdowns);
+
+    // 3. AI Generation Engine Simulation
+    const btnGenerateAI = document.getElementById('btn-generate-ai');
+    const btnGenerateText = document.getElementById('btn-generate-ai-text');
+    const aiProgress = document.getElementById('ai-progress-container');
+    const aiProgressBar = document.getElementById('ai-progress-bar');
+    const aiProgressStatus = document.getElementById('ai-progress-status');
+    const aiContent = document.getElementById('ai-narrative-content');
+
+    btnGenerateAI?.addEventListener('click', () => {
+      if (!aiProgress || !aiProgressBar || !aiProgressStatus) return;
+
+      if (btnGenerateText) btnGenerateText.textContent = 'Menganalisis...';
+      aiProgress.classList.remove('hidden');
+      aiProgressBar.style.width = '15%';
+      aiProgressStatus.textContent = 'Membaca ground contact points pada 15 bay Main Hall...';
+
+      // Scroll smoothly to AI section
+      aiProgress.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      setTimeout(() => {
+        if (aiProgressBar) aiProgressBar.style.width = '55%';
+        if (aiProgressStatus) aiProgressStatus.textContent = 'Mengevaluasi turnover ratio Baris Depan, Tengah, & Belakang...';
+      }, 500);
+
+      setTimeout(() => {
+        if (aiProgressBar) aiProgressBar.style.width = '85%';
+        if (aiProgressStatus) aiProgressStatus.textContent = 'Menyusun rekomendasi penataan booth & rambu VMS gerbang...';
+      }, 1000);
+
+      setTimeout(() => {
+        if (aiProgressBar) aiProgressBar.style.width = '100%';
+        if (aiProgressStatus) aiProgressStatus.textContent = 'Sintesis selesai!';
+        
+        setTimeout(() => {
+          aiProgress.classList.add('hidden');
+          if (btnGenerateText) btnGenerateText.textContent = 'Generate AI';
+
+          if (aiContent) {
+            aiContent.innerHTML = `
+              <p class="animate-in">
+                <strong>Update Real-Time Analisis Gemini:</strong> Telemetri 15 bay Main Hall menunjukkan tingkat keterisian stabil pada <strong>73.3%</strong>. Baris Depan (Slot 01 - 05) melayani 60% okupansi dengan laju rotasi 6.2x berkat kemudahan akses pintu utama gedung.
+              </p>
+              <p class="animate-in">
+                <strong>Status Slot Khusus:</strong> 1 slot reservasi booth bazar Dies Natalis BEM (Slot 03) terpantau aktif dan tidak mengganggu sirkulasi kendaraan masuk. Slot 10 dalam status pemeliharaan sensor roda dan diproteksi otomatis dari penetapan rute pengemudi.
+              </p>
+              <p class="animate-in">
+                <strong>Rekomendasi VMS Siang:</strong> Alihkan pengemudi baru menuju Slot 02 dan Slot 05 untuk meminimalkan waktu putar mencari parkir, menghemat rata-rata 3.4 menit per pengemudi di sesi perkuliahan siang.
+              </p>
+            `;
+          }
+        }, 400);
+      }, 1500);
+    });
+
+    // 4. Modal PDF Preview & Download
+    const modalPdf = document.getElementById('modal-pdf-preview');
+    const modalBox = document.getElementById('modal-pdf-box');
+    const btnOpenModal = document.getElementById('btn-open-pdf-modal');
+    const btnCloseModal = document.getElementById('btn-close-pdf-modal');
+    const btnDownloadPdf = document.getElementById('btn-download-pdf');
+    const btnDownloadText = document.getElementById('btn-download-pdf-text');
+    const btnPrintPdf = document.getElementById('btn-print-pdf');
+
+    function openPdfModal() {
+      if (!modalPdf || !modalBox) return;
+      modalPdf.classList.remove('opacity-0', 'pointer-events-none');
+      modalBox.classList.remove('scale-95');
+      modalBox.classList.add('scale-100');
+    }
+
+    function closePdfModal() {
+      if (!modalPdf || !modalBox) return;
+      modalBox.classList.remove('scale-100');
+      modalBox.classList.add('scale-95');
+      modalPdf.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    btnOpenModal?.addEventListener('click', openPdfModal);
+    btnCloseModal?.addEventListener('click', closePdfModal);
+
+    modalPdf?.addEventListener('click', (e) => {
+      if (e.target === modalPdf) closePdfModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalPdf && !modalPdf.classList.contains('pointer-events-none')) {
+        closePdfModal();
+      }
+    });
+
+    // Print button
+    btnPrintPdf?.addEventListener('click', () => {
+      window.print();
+    });
+
+    // Download PDF with html2pdf.js dynamically loaded
+    btnDownloadPdf?.addEventListener('click', async () => {
+      const element = document.getElementById('report-document');
+      if (!element) return;
+
+      if (btnDownloadText) btnDownloadText.textContent = 'Menyiapkan PDF...';
+
+      try {
+        if (!(window as any).html2pdf) {
+          await new Promise<void>((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Gagal memuat library html2pdf'));
+            document.head.appendChild(script);
+          });
+        }
+
+        const opt = {
+          margin: [8, 8, 8, 8],
+          filename: `GoParkir_Laporan_MainHall_${new Date().toISOString().slice(0, 10)}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, logging: false },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        await (window as any).html2pdf().set(opt).from(element).save();
+
+        if (btnDownloadText) btnDownloadText.textContent = 'PDF Terunduh!';
+        setTimeout(() => {
+          if (btnDownloadText) btnDownloadText.textContent = 'Unduh File PDF';
+        }, 2500);
+      } catch (err) {
+        console.warn('Fallback to print dialog:', err);
+        window.print();
+        if (btnDownloadText) btnDownloadText.textContent = 'Unduh File PDF';
+      }
+    });
+  }
+
+  setupAnalyticsPage();
+  document.addEventListener('astro:page-load', setupAnalyticsPage);
+</script>
